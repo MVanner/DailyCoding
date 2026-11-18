@@ -1,0 +1,57 @@
+{
+  "id": "iterators-yield",
+  "name": "iterators and yield",
+  "seeds": {
+    "Beginner": {
+      "learningGoal": "Write simple iterator methods with yield return.",
+      "gotchas": [
+        "Code before the first yield doesn't run until enumeration starts",
+        "Returning a List when a lazy sequence was asked for",
+        "yield break vs return"
+      ],
+      "goodSolutionShows": [
+        "yield return for lazy sequences",
+        "Clear termination with yield break",
+        "No unnecessary materialisation"
+      ],
+      "shapeHints": [
+        "generating the next N reminder dates",
+        "reading lines that match a filter"
+      ]
+    },
+    "Intermediate": {
+      "learningGoal": "Combine iterators into pipelines and understand laziness.",
+      "gotchas": [
+        "Argument validation deferred until enumeration",
+        "try/finally in iterators runs on Dispose",
+        "Infinite sequences need Take"
+      ],
+      "goodSolutionShows": [
+        "Eager validation + private iterator",
+        "Composable small iterators",
+        "Correct cleanup when the consumer stops early"
+      ],
+      "shapeHints": [
+        "paging through an API until empty",
+        "a Fibonacci/backoff sequence generator"
+      ]
+    },
+    "Advanced": {
+      "learningGoal": "Write async iterators with IAsyncEnumerable and cancellation.",
+      "gotchas": [
+        "[EnumeratorCancellation] needed for WithCancellation to flow",
+        "Buffering everything defeats streaming",
+        "Exceptions surface on MoveNextAsync, not on call"
+      ],
+      "goodSolutionShows": [
+        "await foreach with cancellation",
+        "Streaming without buffering",
+        "Tests that consume partially"
+      ],
+      "shapeHints": [
+        "streaming feed items page by page",
+        "tailing a log with a stop signal"
+      ]
+    }
+  }
+}

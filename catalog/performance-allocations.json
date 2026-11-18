@@ -1,0 +1,40 @@
+{
+  "id": "performance-allocations",
+  "name": "performance and allocations",
+  "seeds": {
+    "Advanced": {
+      "learningGoal": "Find and remove avoidable allocations in everyday code.",
+      "gotchas": [
+        "LINQ in hot paths allocating enumerators and closures",
+        "Boxing via interfaces or string.Format with value types",
+        "Growing collections without capacity"
+      ],
+      "goodSolutionShows": [
+        "Pre-sized collections",
+        "Loops instead of LINQ where it matters, with a reason",
+        "No boxing in the hot path"
+      ],
+      "shapeHints": [
+        "aggregating analytics events per minute",
+        "building a large JSON-ish string"
+      ]
+    },
+    "Expert": {
+      "learningGoal": "Optimise with structs, pooling and caching while keeping code correct.",
+      "gotchas": [
+        "Large structs copied by value",
+        "Pooling objects that are still referenced",
+        "Caches without bounds"
+      ],
+      "goodSolutionShows": [
+        "in/ref readonly parameters for large structs",
+        "ObjectPool/ArrayPool with clear ownership",
+        "Bounded caches with eviction"
+      ],
+      "shapeHints": [
+        "a hot-path message parser",
+        "a bounded memo cache"
+      ]
+    }
+  }
+}

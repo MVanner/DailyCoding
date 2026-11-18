@@ -1,0 +1,57 @@
+{
+  "id": "strings-formatting",
+  "name": "strings and formatting",
+  "seeds": {
+    "Beginner": {
+      "learningGoal": "Build and format strings correctly: interpolation, StringBuilder, culture-aware formatting.",
+      "gotchas": [
+        "String concatenation in a loop is O(n²)",
+        "ToString() uses the current culture; use invariant for machine formats",
+        "string.Equals with the wrong StringComparison"
+      ],
+      "goodSolutionShows": [
+        "StringBuilder or string.Join for loops",
+        "Explicit CultureInfo / StringComparison",
+        "Readable interpolated strings with format specifiers"
+      ],
+      "shapeHints": [
+        "formatting a receipt",
+        "building a CSV line for an export"
+      ]
+    },
+    "Intermediate": {
+      "learningGoal": "Handle text robustly: normalisation, comparison, splitting and truncation.",
+      "gotchas": [
+        "Truncating in the middle of a surrogate pair or combining character",
+        "ToLower() for comparison instead of OrdinalIgnoreCase",
+        "Split without options leaves empty entries and whitespace"
+      ],
+      "goodSolutionShows": [
+        "StringComparison.Ordinal(IgnoreCase) for identifiers",
+        "StringSplitOptions.TrimEntries | RemoveEmptyEntries",
+        "Unicode-safe truncation (StringInfo / text elements)"
+      ],
+      "shapeHints": [
+        "a notification preview truncated to N characters",
+        "a slug generator for article titles"
+      ]
+    },
+    "Expert": {
+      "learningGoal": "Write allocation-aware formatting with interpolated string handlers and ISpanFormattable.",
+      "gotchas": [
+        "$\"...\" allocates even when the log level is off, unless a handler defers it",
+        "TryFormat must report charsWritten and return false when the buffer is too small",
+        "string.Create vs StringBuilder trade-offs"
+      ],
+      "goodSolutionShows": [
+        "ISpanFormattable/IUtf8SpanFormattable implemented correctly",
+        "A custom interpolated string handler or string.Create",
+        "No intermediate strings"
+      ],
+      "shapeHints": [
+        "a strongly typed ID that formats without allocating",
+        "a conditional log message builder"
+      ]
+    }
+  }
+}

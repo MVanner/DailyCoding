@@ -1,0 +1,57 @@
+{
+  "id": "equality-hashing",
+  "name": "equality and hashing",
+  "seeds": {
+    "Intermediate": {
+      "learningGoal": "Implement Equals and GetHashCode correctly and use IEqualityComparer.",
+      "gotchas": [
+        "Overriding Equals without GetHashCode breaks dictionaries",
+        "Mutable fields in GetHashCode",
+        "== vs Equals for reference types"
+      ],
+      "goodSolutionShows": [
+        "HashCode.Combine over the same fields Equals uses",
+        "IEquatable<T> on value-like types",
+        "A comparer for case-insensitive keys"
+      ],
+      "shapeHints": [
+        "deduplicating contacts by normalised email",
+        "a composite key for (tenant, user)"
+      ]
+    },
+    "Advanced": {
+      "learningGoal": "Design equality for hierarchies and collections, and custom comparers.",
+      "gotchas": [
+        "Equality across subclasses breaks symmetry",
+        "Records include EqualityContract to avoid that",
+        "Sequence equality for collection members"
+      ],
+      "goodSolutionShows": [
+        "Symmetric, transitive equality",
+        "Collection members compared by content where intended",
+        "Comparers passed to Distinct/ToDictionary"
+      ],
+      "shapeHints": [
+        "comparing two versions of a settings object",
+        "a set of permission rules"
+      ]
+    },
+    "Expert": {
+      "learningGoal": "Implement IComparable/IComparer and equality for performance-sensitive structs.",
+      "gotchas": [
+        "Default struct Equals uses reflection and boxing",
+        "Comparison inconsistent with equality",
+        "Hash flooding with poor hash distribution"
+      ],
+      "goodSolutionShows": [
+        "IEquatable<T> on structs",
+        "Consistent CompareTo/Equals",
+        "Benchmark-friendly, allocation-free comparisons"
+      ],
+      "shapeHints": [
+        "a semantic version type with ordering",
+        "a geo-tile key used in a hot dictionary"
+      ]
+    }
+  }
+}

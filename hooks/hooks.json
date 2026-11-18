@@ -1,0 +1,18 @@
+{
+  "description": "Once a day, on the first Claude Code start, show a one-line nudge for today's C# challenge.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "dotnet",
+            "args": ["${CLAUDE_PLUGIN_DATA}/bin/Daily.Cli.dll", "nudge"],
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

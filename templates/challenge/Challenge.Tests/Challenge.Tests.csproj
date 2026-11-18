@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>{{TFM}}</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <IsPackable>false</IsPackable>
+        <IsTestProject>true</IsTestProject>
+        <RootNamespace>Challenge.Tests</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="MSTest" Version="4.0.2" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="../Challenge/Challenge.csproj" />
+    </ItemGroup>
+
+</Project>

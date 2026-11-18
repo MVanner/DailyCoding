@@ -1,0 +1,57 @@
+{
+  "id": "interfaces-default-impl",
+  "name": "interfaces and abstraction",
+  "seeds": {
+    "Beginner": {
+      "learningGoal": "Define and implement interfaces to separate what from how.",
+      "gotchas": [
+        "Interfaces that mirror one class's every method",
+        "Explicit vs implicit implementation",
+        "Programming against the concrete type instead of the interface"
+      ],
+      "goodSolutionShows": [
+        "Small, focused interfaces",
+        "Callers depending on the interface",
+        "Implementations swappable in tests"
+      ],
+      "shapeHints": [
+        "a notification sender with email and push implementations",
+        "a clock abstraction"
+      ]
+    },
+    "Intermediate": {
+      "learningGoal": "Use interface segregation, default interface methods and abstract classes appropriately.",
+      "gotchas": [
+        "Default interface methods aren't visible through the class type",
+        "Abstract class vs interface trade-offs",
+        "Fat interfaces forcing NotSupportedException"
+      ],
+      "goodSolutionShows": [
+        "Segregated interfaces per consumer",
+        "Default methods used to evolve an interface",
+        "Abstract base only for shared state/behaviour"
+      ],
+      "shapeHints": [
+        "a storage abstraction split into read and write",
+        "adding a method to a published interface without breaking implementers"
+      ]
+    },
+    "Advanced": {
+      "learningGoal": "Use static abstract members and generic interfaces to model capabilities.",
+      "gotchas": [
+        "Static abstract members can only be called through a constrained type parameter",
+        "Diamond problems with default implementations",
+        "Over-abstracting simple code"
+      ],
+      "goodSolutionShows": [
+        "Capability interfaces combined via constraints",
+        "Static abstract factory or parse members",
+        "Abstractions that earn their place"
+      ],
+      "shapeHints": [
+        "IParsable<T> for custom ID types",
+        "a plugin registry discovering capabilities"
+      ]
+    }
+  }
+}

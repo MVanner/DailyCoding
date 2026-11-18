@@ -1,0 +1,58 @@
+{
+  "id": "collections",
+  "name": "collections",
+  "seeds": {
+    "Beginner": {
+      "learningGoal": "Choose between List, Dictionary, HashSet and arrays for everyday tasks.",
+      "gotchas": [
+        "Dictionary indexer throws for a missing key; TryGetValue doesn't",
+        "Removing from a List while iterating it with foreach throws",
+        "List.Contains is O(n); HashSet.Contains is O(1)"
+      ],
+      "goodSolutionShows": [
+        "The collection that matches the lookup pattern",
+        "TryGetValue / TryAdd instead of double lookups",
+        "No modification during enumeration"
+      ],
+      "shapeHints": [
+        "counting notification opens per user",
+        "removing inactive devices from a list"
+      ]
+    },
+    "Intermediate": {
+      "learningGoal": "Use specialised collections: Queue, Stack, SortedDictionary, PriorityQueue, LinkedList.",
+      "gotchas": [
+        "PriorityQueue doesn't support updating a priority in place",
+        "SortedDictionary vs SortedList trade-offs",
+        "Capacity hints avoid repeated resizing"
+      ],
+      "goodSolutionShows": [
+        "The right specialised collection with a short justification in code",
+        "Readonly views (IReadOnlyCollection) at the API boundary",
+        "Correct complexity for the hot operations"
+      ],
+      "shapeHints": [
+        "a job scheduler ordered by due time",
+        "an LRU cache",
+        "undo/redo for an editor"
+      ]
+    },
+    "Advanced": {
+      "learningGoal": "Build a custom collection or use frozen/immutable/concurrent collections correctly.",
+      "gotchas": [
+        "FrozenDictionary is fast to read but expensive to create",
+        "ConcurrentDictionary.GetOrAdd may run the factory more than once",
+        "Implementing IEnumerable<T> without versioning lets callers mutate during enumeration"
+      ],
+      "goodSolutionShows": [
+        "Collection choice justified by read/write pattern",
+        "Thread-safe usage without extra locks",
+        "Lazy<T> or similar where the factory must run once"
+      ],
+      "shapeHints": [
+        "a read-mostly feature-flag lookup",
+        "a concurrent per-tenant rate counter"
+      ]
+    }
+  }
+}

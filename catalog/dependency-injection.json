@@ -1,0 +1,40 @@
+{
+  "id": "dependency-injection",
+  "name": "dependency injection",
+  "seeds": {
+    "Intermediate": {
+      "learningGoal": "Design classes for constructor injection and compose them by hand (no container).",
+      "gotchas": [
+        "new-ing dependencies inside the class makes it untestable",
+        "Service-locator style access hides dependencies",
+        "Constructors doing work beyond assigning fields"
+      ],
+      "goodSolutionShows": [
+        "All dependencies visible in the constructor",
+        "Composition in one place (a composition root)",
+        "Interfaces only where a second implementation or a test double is needed"
+      ],
+      "shapeHints": [
+        "a notification service needing a clock, a sender and a template store",
+        "refactoring a class that calls DateTime.Now and new HttpClient()"
+      ]
+    },
+    "Advanced": {
+      "learningGoal": "Understand lifetimes by building a tiny DI container (singleton, scoped, transient).",
+      "gotchas": [
+        "Captive dependency: a singleton holding a scoped/transient service",
+        "Disposing transients the container created",
+        "Circular dependencies must be detected, not stack-overflow"
+      ],
+      "goodSolutionShows": [
+        "Correct lifetime semantics with scopes",
+        "Cycle detection with a clear error",
+        "Disposal of container-owned instances"
+      ],
+      "shapeHints": [
+        "a minimal ServiceCollection/ServiceProvider clone",
+        "a factory registration API"
+      ]
+    }
+  }
+}

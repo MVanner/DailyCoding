@@ -1,0 +1,57 @@
+{
+  "id": "records-immutability",
+  "name": "records and immutability",
+  "seeds": {
+    "Beginner": {
+      "learningGoal": "Model data with records: value equality, with-expressions and positional syntax.",
+      "gotchas": [
+        "Records compare by value, classes by reference",
+        "with creates a shallow copy: a List inside is shared",
+        "Positional records expose public init properties"
+      ],
+      "goodSolutionShows": [
+        "Records for data, classes for behaviour-heavy objects",
+        "with-expressions instead of mutation",
+        "Readable ToString through the record's default"
+      ],
+      "shapeHints": [
+        "a push notification draft that is edited step by step",
+        "a user profile update"
+      ]
+    },
+    "Intermediate": {
+      "learningGoal": "Design immutable domain types with validation and safe collection members.",
+      "gotchas": [
+        "Validation in a positional record needs an explicit constructor or property initialiser",
+        "Exposing List<T> from an immutable type lets callers mutate it",
+        "Equality of records holding arrays compares references"
+      ],
+      "goodSolutionShows": [
+        "Validation that can't be bypassed by with",
+        "IReadOnlyList or ImmutableArray for collection members",
+        "Custom Equals only where needed"
+      ],
+      "shapeHints": [
+        "a Money type with currency",
+        "an immutable feed post with tags"
+      ]
+    },
+    "Advanced": {
+      "learningGoal": "Use record structs, readonly structs and immutable collections with performance in mind.",
+      "gotchas": [
+        "Defensive copies when calling non-readonly members on readonly struct fields",
+        "record struct is mutable unless declared readonly record struct",
+        "ImmutableList is slower for indexing than ImmutableArray"
+      ],
+      "goodSolutionShows": [
+        "readonly record struct for small value types",
+        "The right immutable collection for the access pattern",
+        "No accidental defensive copies"
+      ],
+      "shapeHints": [
+        "a coordinates/geo-point value type",
+        "an immutable settings snapshot shared across threads"
+      ]
+    }
+  }
+}

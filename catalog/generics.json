@@ -1,0 +1,59 @@
+{
+  "id": "generics",
+  "name": "generics",
+  "seeds": {
+    "Intermediate": {
+      "learningGoal": "Write reusable generic types and methods with the right constraints.",
+      "gotchas": [
+        "Using object and casts where a type parameter would keep type safety",
+        "Missing constraint (where T : IComparable<T>) forces runtime checks",
+        "default(T) is null for reference types and zero for value types"
+      ],
+      "goodSolutionShows": [
+        "Constraints that express exactly what the code needs",
+        "No boxing or casting inside the generic code",
+        "Generic methods with type inference at the call site"
+      ],
+      "shapeHints": [
+        "a generic Result<T> or Maybe<T>",
+        "a bounded cache keyed by T",
+        "a min/max tracker over IComparable<T>"
+      ]
+    },
+    "Advanced": {
+      "learningGoal": "Use variance, static abstract interface members and generic math to build flexible APIs.",
+      "gotchas": [
+        "in/out variance only works on interfaces and delegates, not classes",
+        "Covariant IEnumerable<Derived> to IEnumerable<Base> but not List<Derived> to List<Base>",
+        "Generic math needs INumber<T> style constraints, not dynamic"
+      ],
+      "goodSolutionShows": [
+        "Correct variance annotations on interfaces",
+        "Static abstract members or INumber<T> for arithmetic on T",
+        "APIs that are easy to call without explicit type arguments"
+      ],
+      "shapeHints": [
+        "a generic Sum/Average over any INumber<T>",
+        "a read-only repository interface with covariance",
+        "a strongly typed ID struct"
+      ]
+    },
+    "Expert": {
+      "learningGoal": "Reason about generic specialisation, struct constraints and allocation-free generic code.",
+      "gotchas": [
+        "Interface constraints on structs avoid boxing only when called through the type parameter",
+        "Shared generic code for reference types vs specialised code for value types",
+        "Recursive generics (CRTP-style) can become unreadable"
+      ],
+      "goodSolutionShows": [
+        "Struct-constrained generics that avoid boxing",
+        "Static abstract interface members used deliberately",
+        "Clear, documented constraints"
+      ],
+      "shapeHints": [
+        "a zero-allocation generic ring buffer",
+        "a typed ID<TEntity> with parsing via static abstract members"
+      ]
+    }
+  }
+}

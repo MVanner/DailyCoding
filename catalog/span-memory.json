@@ -1,0 +1,40 @@
+{
+  "id": "span-memory",
+  "name": "Span<T> and Memory<T>",
+  "seeds": {
+    "Advanced": {
+      "learningGoal": "Parse and slice data without allocating, using Span<T> and ReadOnlySpan<char>.",
+      "gotchas": [
+        "Span<T> can't be stored in fields of classes or used across await",
+        "Substring allocates; slicing a span doesn't",
+        "stackalloc size must be bounded"
+      ],
+      "goodSolutionShows": [
+        "ReadOnlySpan<char> parsing with no intermediate strings",
+        "int.TryParse/Utf8 parsers over spans",
+        "Clear bounds checks and no index-out-of-range"
+      ],
+      "shapeHints": [
+        "parsing a 'key=value;key=value' header",
+        "splitting a CSV line without Split"
+      ]
+    },
+    "Expert": {
+      "learningGoal": "Combine Memory<T>, ArrayPool and IBufferWriter for allocation-free pipelines.",
+      "gotchas": [
+        "Returning a rented array twice or using it after return",
+        "Memory<T> is needed when the buffer must survive an await",
+        "Rented arrays can be larger than requested"
+      ],
+      "goodSolutionShows": [
+        "ArrayPool rent/return in try/finally",
+        "Memory<T> across async boundaries, Span<T> inside sync methods",
+        "Respecting the actual length, not array.Length"
+      ],
+      "shapeHints": [
+        "a log line formatter writing into IBufferWriter<char>",
+        "a chunked upload reader"
+      ]
+    }
+  }
+}

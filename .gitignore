@@ -1,0 +1,8 @@
+bin/
+obj/
+TestResults/
+.superpowers/
+.idea/
+.vs/
+*.user
+.DS_Store

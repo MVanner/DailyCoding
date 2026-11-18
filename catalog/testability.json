@@ -1,0 +1,40 @@
+{
+  "id": "testability",
+  "name": "testability",
+  "seeds": {
+    "Intermediate": {
+      "learningGoal": "Refactor code so it can be unit tested: seams for time, randomness and I/O.",
+      "gotchas": [
+        "Static calls (DateTime.Now, File.ReadAllText) baked into logic",
+        "Tests that depend on execution order",
+        "Hand-written fakes that re-implement the logic under test"
+      ],
+      "goodSolutionShows": [
+        "Dependencies injected through the constructor",
+        "Small hand-written fakes (no mocking library needed)",
+        "Logic separated from I/O"
+      ],
+      "shapeHints": [
+        "a reminder service that decides who gets a notification today",
+        "a report exporter writing to disk"
+      ]
+    },
+    "Advanced": {
+      "learningGoal": "Design for testability at module level: pure core, thin shell, fakes over mocks.",
+      "gotchas": [
+        "Over-mocking leads to tests that assert implementation details",
+        "Shared mutable state between tests",
+        "Async code tested with real delays"
+      ],
+      "goodSolutionShows": [
+        "Functional core / imperative shell split",
+        "Fakes with observable state instead of interaction assertions",
+        "Deterministic async tests"
+      ],
+      "shapeHints": [
+        "a sync engine deciding which items to upload",
+        "a rate limiter with an injected clock"
+      ]
+    }
+  }
+}

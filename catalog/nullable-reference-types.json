@@ -1,0 +1,57 @@
+{
+  "id": "nullable-reference-types",
+  "name": "nullable reference types",
+  "seeds": {
+    "Beginner": {
+      "learningGoal": "Read and fix nullable warnings: ?, null checks, ?. and ??.",
+      "gotchas": [
+        "The ! operator silences warnings without making anything safe",
+        "string? vs string in method signatures changes what callers must handle",
+        "?? and ??= evaluate the right side only when needed"
+      ],
+      "goodSolutionShows": [
+        "No ! used to hide real nulls",
+        "Signatures that say what can be null",
+        "Early returns or guard clauses for null"
+      ],
+      "shapeHints": [
+        "formatting a display name from optional first/last name",
+        "looking up a user's manager that may not exist"
+      ]
+    },
+    "Intermediate": {
+      "learningGoal": "Use nullable attributes to describe APIs precisely.",
+      "gotchas": [
+        "TryGet pattern needs [NotNullWhen(true)] for callers to get flow analysis",
+        "[MaybeNullWhen(false)] on out parameters of generic types",
+        "Nullable annotations are compile-time only: public APIs still need runtime checks"
+      ],
+      "goodSolutionShows": [
+        "[NotNullWhen], [MemberNotNull] or [return: NotNullIfNotNull] used correctly",
+        "ArgumentNullException.ThrowIfNull for public entry points",
+        "Callers that compile without warnings and without !"
+      ],
+      "shapeHints": [
+        "a TryParse for a tenant code",
+        "a cache with TryGetValue"
+      ]
+    },
+    "Advanced": {
+      "learningGoal": "Migrate a small legacy API to nullable-aware code without breaking callers.",
+      "gotchas": [
+        "Generic T? means different things for unconstrained, class and struct type parameters",
+        "Lazy initialisation patterns confuse flow analysis",
+        "Interfaces and implementations must agree on nullability"
+      ],
+      "goodSolutionShows": [
+        "Consistent annotations across interface and implementation",
+        "Correct use of T? with constraints",
+        "No warnings and no ! in the final code"
+      ],
+      "shapeHints": [
+        "a repository returning optional entities",
+        "a lazily initialised service wrapper"
+      ]
+    }
+  }
+}

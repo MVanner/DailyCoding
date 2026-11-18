@@ -1,0 +1,57 @@
+{
+  "id": "dates-times",
+  "name": "dates, times and time zones",
+  "seeds": {
+    "Beginner": {
+      "learningGoal": "Use DateOnly, TimeOnly, DateTime and TimeSpan for everyday calculations.",
+      "gotchas": [
+        "DateTime.Now in logic makes code untestable",
+        "Adding months to Jan 31",
+        "DateTime.Kind Unspecified surprises"
+      ],
+      "goodSolutionShows": [
+        "DateOnly for calendar dates",
+        "Time passed in (or TimeProvider) instead of DateTime.Now",
+        "TimeSpan for durations"
+      ],
+      "shapeHints": [
+        "calculating a user's next birthday",
+        "how many working days until a deadline"
+      ]
+    },
+    "Intermediate": {
+      "learningGoal": "Store and convert times safely with DateTimeOffset, UTC and TimeZoneInfo.",
+      "gotchas": [
+        "Storing local times without an offset",
+        "Daylight saving gaps and overlaps",
+        "Comparing DateTime values of different Kinds"
+      ],
+      "goodSolutionShows": [
+        "UTC/DateTimeOffset for storage",
+        "TimeZoneInfo conversions at the edges",
+        "Tests that cover a DST change"
+      ],
+      "shapeHints": [
+        "scheduling a push at 09:00 local time for users in different zones",
+        "displaying 'posted 3 hours ago'"
+      ]
+    },
+    "Advanced": {
+      "learningGoal": "Make time-dependent code testable with TimeProvider and handle recurring schedules.",
+      "gotchas": [
+        "Timers and Task.Delay bound to the real clock",
+        "Recurring schedules across DST transitions",
+        "Ambiguous local times"
+      ],
+      "goodSolutionShows": [
+        "TimeProvider injected and FakeTimeProvider-style tests (hand-written fake)",
+        "Schedules computed in local time and converted correctly",
+        "Explicit handling of invalid/ambiguous times"
+      ],
+      "shapeHints": [
+        "a quiet-hours rule for notifications",
+        "a weekly digest scheduler"
+      ]
+    }
+  }
+}

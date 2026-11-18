@@ -1,0 +1,57 @@
+{
+  "id": "exceptions",
+  "name": "exceptions and error handling",
+  "seeds": {
+    "Beginner": {
+      "learningGoal": "Throw and catch exceptions appropriately and validate input.",
+      "gotchas": [
+        "catch (Exception) that swallows everything",
+        "throw ex; resets the stack trace; use throw;",
+        "Using exceptions for normal control flow"
+      ],
+      "goodSolutionShows": [
+        "Specific exception types (ArgumentException, InvalidOperationException)",
+        "Guard clauses with ThrowIfNull / ThrowIfNegative",
+        "Exceptions only for exceptional cases"
+      ],
+      "shapeHints": [
+        "validating a new user's email and age",
+        "parsing a configuration value"
+      ]
+    },
+    "Intermediate": {
+      "learningGoal": "Design error handling for a service: custom exceptions, wrapping and Try-patterns.",
+      "gotchas": [
+        "Losing the inner exception when wrapping",
+        "Exception filters (when) vs catching and rethrowing",
+        "finally runs even on return"
+      ],
+      "goodSolutionShows": [
+        "Custom exception with the inner exception preserved",
+        "Try-pattern for expected failures",
+        "Exception filters for selective handling"
+      ],
+      "shapeHints": [
+        "a payment step that must surface the provider's error",
+        "a parser offering both Parse and TryParse"
+      ]
+    },
+    "Advanced": {
+      "learningGoal": "Choose between exceptions and result types; handle aggregate and async exceptions.",
+      "gotchas": [
+        "AggregateException from Task.WhenAll only surfaces the first on await",
+        "Result types that are ignored silently",
+        "Exceptions crossing thread or async boundaries"
+      ],
+      "goodSolutionShows": [
+        "A small Result<T> used consistently",
+        "All failures from parallel work reported",
+        "Clear rules for what is exceptional"
+      ],
+      "shapeHints": [
+        "validating a batch of imported users and reporting every problem",
+        "a multi-step workflow with compensation"
+      ]
+    }
+  }
+}

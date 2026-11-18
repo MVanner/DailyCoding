@@ -1,0 +1,40 @@
+{
+  "id": "source-generators",
+  "name": "source-generated APIs",
+  "seeds": {
+    "Advanced": {
+      "learningGoal": "Use the built-in source generators: [GeneratedRegex] and System.Text.Json source generation.",
+      "gotchas": [
+        "Regex constructed per call instead of cached or generated",
+        "JsonSerializerContext must list every root type",
+        "partial is required on generated members and containing types"
+      ],
+      "goodSolutionShows": [
+        "[GeneratedRegex] on a partial method",
+        "A JsonSerializerContext used for (de)serialisation",
+        "No runtime reflection-based fallbacks"
+      ],
+      "shapeHints": [
+        "validating and extracting deep-link parameters",
+        "serialising notification payloads"
+      ]
+    },
+    "Expert": {
+      "learningGoal": "Design code that is source-generator and NativeAOT friendly.",
+      "gotchas": [
+        "Reflection-based patterns that generators can't see",
+        "Polymorphic JSON needs [JsonDerivedType]",
+        "Generated code must be partial-compatible with hand-written code"
+      ],
+      "goodSolutionShows": [
+        "Polymorphic serialisation via attributes",
+        "partial members used cleanly",
+        "No trimming-unsafe calls"
+      ],
+      "shapeHints": [
+        "a polymorphic event payload model",
+        "a typed settings loader with generated parsing"
+      ]
+    }
+  }
+}

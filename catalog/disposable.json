@@ -1,0 +1,57 @@
+{
+  "id": "disposable",
+  "name": "IDisposable and IAsyncDisposable",
+  "seeds": {
+    "Intermediate": {
+      "learningGoal": "Own and release resources correctly with using and IDisposable.",
+      "gotchas": [
+        "Disposing something you don't own",
+        "Using an object after it's disposed should throw ObjectDisposedException",
+        "Dispose must be safe to call twice"
+      ],
+      "goodSolutionShows": [
+        "using declarations at the right scope",
+        "Idempotent Dispose",
+        "ObjectDisposedException.ThrowIf for use-after-dispose"
+      ],
+      "shapeHints": [
+        "a temporary file wrapper",
+        "a scoped timer that logs elapsed time on dispose"
+      ]
+    },
+    "Advanced": {
+      "learningGoal": "Implement IAsyncDisposable and composite ownership.",
+      "gotchas": [
+        "await using vs using on IAsyncDisposable",
+        "A class owning several disposables must dispose all even if one throws",
+        "Finalizers are almost never needed for managed resources"
+      ],
+      "goodSolutionShows": [
+        "DisposeAsync that awaits flushes",
+        "Ownership documented and enforced",
+        "All owned resources released when one Dispose throws"
+      ],
+      "shapeHints": [
+        "a buffered writer that flushes on dispose",
+        "a connection wrapper owning a stream and a timer"
+      ]
+    },
+    "Expert": {
+      "learningGoal": "Get the full dispose pattern right for subclassing and unmanaged handles.",
+      "gotchas": [
+        "SafeHandle instead of IntPtr plus finalizer",
+        "Dispose(bool disposing) must not touch managed objects from the finalizer",
+        "GC.SuppressFinalize placement"
+      ],
+      "goodSolutionShows": [
+        "SafeHandle or a clear reason not to need it",
+        "Correct protected virtual Dispose(bool)",
+        "Thread-safe single disposal"
+      ],
+      "shapeHints": [
+        "a base class for resource-owning services",
+        "a pooled object that returns itself on dispose"
+      ]
+    }
+  }
+}

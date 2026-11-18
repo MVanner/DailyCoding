@@ -1,0 +1,62 @@
+{
+  "id": "async-await",
+  "name": "async/await",
+  "seeds": {
+    "Beginner": {
+      "learningGoal": "Write and call async methods correctly: return Task/Task<T>, await results, and let exceptions flow.",
+      "gotchas": [
+        "async void swallows exceptions from the caller's point of view",
+        "Calling .Result or .Wait() blocks and can deadlock",
+        "Forgetting to await means the work may not have finished"
+      ],
+      "goodSolutionShows": [
+        "Task-returning signatures all the way up",
+        "await instead of .Result/.Wait()",
+        "Exceptions observed by the caller"
+      ],
+      "shapeHints": ["loading a user profile then their settings", "a fake HTTP client that returns after a delay"]
+    },
+    "Intermediate": {
+      "learningGoal": "Run independent async work concurrently and support cancellation.",
+      "gotchas": [
+        "Awaiting in a loop runs work sequentially when it could run concurrently",
+        "Task.WhenAll surfaces only the first exception when awaited",
+        "A CancellationToken that is accepted but never passed down or checked"
+      ],
+      "goodSolutionShows": [
+        "Task.WhenAll for independent work",
+        "CancellationToken passed through to every async call",
+        "OperationCanceledException not swallowed"
+      ],
+      "shapeHints": ["fetching several feeds at once with a timeout", "sending notifications to many devices"]
+    },
+    "Advanced": {
+      "learningGoal": "Build resilient async helpers: retries with backoff, throttled concurrency and timeouts.",
+      "gotchas": [
+        "Retrying on cancellation instead of stopping",
+        "Unbounded parallelism overwhelming a dependency",
+        "Timeouts implemented with Task.Delay that leave the original task running unobserved"
+      ],
+      "goodSolutionShows": [
+        "SemaphoreSlim or Parallel.ForEachAsync to cap concurrency",
+        "Retry loop that respects cancellation and only retries transient failures",
+        "Deterministic tests via an injected delay/clock abstraction"
+      ],
+      "shapeHints": ["a RetryPolicy with exponential backoff", "a throttled batch uploader"]
+    },
+    "Expert": {
+      "learningGoal": "Understand ValueTask, IAsyncEnumerable and synchronization context subtleties.",
+      "gotchas": [
+        "Awaiting a ValueTask twice is invalid",
+        "Forgetting [EnumeratorCancellation] on an async iterator's token",
+        "ConfigureAwait(false) placement in library code"
+      ],
+      "goodSolutionShows": [
+        "IAsyncEnumerable with cancellation wired via WithCancellation",
+        "ValueTask used only on hot paths that often complete synchronously",
+        "Library code that doesn't depend on a captured context"
+      ],
+      "shapeHints": ["a paged API client exposed as IAsyncEnumerable", "a cache whose hit path returns ValueTask"]
+    }
+  }
+}

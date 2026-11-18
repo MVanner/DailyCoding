@@ -1,0 +1,57 @@
+{
+  "id": "extension-methods",
+  "name": "extension methods",
+  "seeds": {
+    "Beginner": {
+      "learningGoal": "Write small extension methods that make calling code read better.",
+      "gotchas": [
+        "Extension methods can't access private members",
+        "An extension on object pollutes IntelliSense everywhere",
+        "Extensions are resolved at compile time, not virtually"
+      ],
+      "goodSolutionShows": [
+        "Focused extensions on specific types",
+        "Clear names that read naturally at the call site",
+        "Null handling decided explicitly"
+      ],
+      "shapeHints": [
+        "string.Truncate(maxLength)",
+        "IEnumerable<T>.IsNullOrEmpty()"
+      ]
+    },
+    "Intermediate": {
+      "learningGoal": "Design extension APIs: fluent builders, generic extensions and discoverability.",
+      "gotchas": [
+        "Extension on an interface vs on concrete types",
+        "Generic extensions that box value types",
+        "Namespaces control where extensions are visible"
+      ],
+      "goodSolutionShows": [
+        "Fluent extension chains that return the builder",
+        "Constraints that avoid boxing",
+        "Extensions grouped in a sensible static class/namespace"
+      ],
+      "shapeHints": [
+        "a fluent notification builder",
+        "Dictionary GetOrAdd extension"
+      ]
+    },
+    "Expert": {
+      "learningGoal": "Use extension members (C# 14 extension blocks) and know the resolution rules.",
+      "gotchas": [
+        "Instance member wins over an extension with the same signature",
+        "Extension properties have no backing storage",
+        "Ambiguity between two imported extensions"
+      ],
+      "goodSolutionShows": [
+        "Extension blocks grouping related members",
+        "Static extension members where they read better",
+        "No conflicts with existing instance members"
+      ],
+      "shapeHints": [
+        "extension properties on IEnumerable<T> such as IsEmpty",
+        "static factory extensions on a type you don't own"
+      ]
+    }
+  }
+}

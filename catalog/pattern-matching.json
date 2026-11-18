@@ -1,0 +1,48 @@
+{
+  "id": "pattern-matching",
+  "name": "pattern matching",
+  "seeds": {
+    "Beginner": {
+      "learningGoal": "Replace if/else chains and casts with switch expressions, type patterns and relational patterns.",
+      "gotchas": [
+        "A switch expression without a discard arm throws SwitchExpressionException for unhandled input",
+        "Order of arms matters: a broad pattern before a specific one hides it",
+        "null needs explicit handling"
+      ],
+      "goodSolutionShows": [
+        "switch expressions returning values",
+        "Relational patterns (< 0, >= 100) and 'and/or/not' combinators",
+        "Explicit null arm"
+      ],
+      "shapeHints": ["mapping HTTP status codes to user messages", "classifying a battery level"]
+    },
+    "Intermediate": {
+      "learningGoal": "Use property, positional and list patterns to deconstruct data.",
+      "gotchas": [
+        "Property patterns on nullable properties",
+        "List patterns with slices (..) and how they match empty lists",
+        "Positional patterns rely on Deconstruct"
+      ],
+      "goodSolutionShows": [
+        "Nested property patterns instead of null-checked chains",
+        "List patterns for prefix/suffix checks",
+        "Records with positional deconstruction"
+      ],
+      "shapeHints": ["parsing simple command arguments", "routing deep links by path segments"]
+    },
+    "Advanced": {
+      "learningGoal": "Model a closed set of cases (discriminated-union style) with records and exhaustive switches.",
+      "gotchas": [
+        "The compiler can't prove exhaustiveness over an open hierarchy",
+        "Adding a new case silently falls into a discard arm",
+        "when-guards that overlap"
+      ],
+      "goodSolutionShows": [
+        "Sealed record hierarchy with a private base constructor",
+        "Switch without a catch-all discard where possible",
+        "Behaviour expressed as pure functions over the cases"
+      ],
+      "shapeHints": ["a Result<T> type for validation", "a state machine for a sync job"]
+    }
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "id": "delegates-events-lambdas",
+  "name": "delegates, events and lambdas",
+  "seeds": {
+    "Beginner": {
+      "learningGoal": "Pass behaviour around with Func, Action and lambdas.",
+      "gotchas": [
+        "Func<T> last type argument is the return type",
+        "A lambda capturing a loop variable from a for loop",
+        "Predicate<T> vs Func<T, bool>"
+      ],
+      "goodSolutionShows": [
+        "Small composable functions passed as arguments",
+        "Clear parameter names in lambdas",
+        "No unnecessary custom delegate types"
+      ],
+      "shapeHints": [
+        "filtering notifications with a configurable rule",
+        "a retry helper taking an Action"
+      ]
+    },
+    "Intermediate": {
+      "learningGoal": "Raise and subscribe to events safely, and compose delegates.",
+      "gotchas": [
+        "Raising an event without a null check (use ?.Invoke)",
+        "Subscribers that are never removed keep publishers alive",
+        "Multicast delegates return only the last result"
+      ],
+      "goodSolutionShows": [
+        "Standard EventHandler<TEventArgs> pattern",
+        "Unsubscribe paths (IDisposable subscription)",
+        "Thread-safe raise by copying the delegate"
+      ],
+      "shapeHints": [
+        "a download progress reporter",
+        "a simple in-process event bus"
+      ]
+    },
+    "Advanced": {
+      "learningGoal": "Use closures and higher-order functions deliberately, aware of allocations.",
+      "gotchas": [
+        "Closures allocate a display class per capture scope",
+        "static lambdas prevent accidental captures",
+        "Exceptions in one event handler stop the rest"
+      ],
+      "goodSolutionShows": [
+        "static lambdas where nothing should be captured",
+        "Handlers invoked individually with error isolation",
+        "Function composition that stays readable"
+      ],
+      "shapeHints": [
+        "a middleware pipeline (next delegate)",
+        "a validation rule composer"
+      ]
+    }
+  }
+}

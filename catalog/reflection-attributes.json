@@ -1,0 +1,40 @@
+{
+  "id": "reflection-attributes",
+  "name": "reflection and attributes",
+  "seeds": {
+    "Advanced": {
+      "learningGoal": "Read custom attributes with reflection to drive behaviour.",
+      "gotchas": [
+        "Reflection in a hot path without caching",
+        "Inherited attributes and the inherit flag",
+        "Private members need BindingFlags"
+      ],
+      "goodSolutionShows": [
+        "Attribute metadata cached per type",
+        "Clear errors for misconfigured attributes",
+        "Minimal reflection surface"
+      ],
+      "shapeHints": [
+        "a validator driven by [Required]/[MaxLength]-style attributes",
+        "mapping CSV columns via [Column(\"name\")]"
+      ]
+    },
+    "Expert": {
+      "learningGoal": "Use reflection safely and fast: compiled delegates, generics and trimming awareness.",
+      "gotchas": [
+        "MethodInfo.Invoke is slow; build a delegate once",
+        "Reflection breaks under trimming/NativeAOT without annotations",
+        "Open vs closed generic types"
+      ],
+      "goodSolutionShows": [
+        "Delegates created once and cached",
+        "[DynamicallyAccessedMembers] where needed",
+        "Generic type handling done right"
+      ],
+      "shapeHints": [
+        "a tiny command dispatcher finding handlers by attribute",
+        "a property copier generating getters/setters once"
+      ]
+    }
+  }
+}

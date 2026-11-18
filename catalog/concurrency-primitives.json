@@ -1,0 +1,40 @@
+{
+  "id": "concurrency-primitives",
+  "name": "concurrency primitives",
+  "seeds": {
+    "Advanced": {
+      "learningGoal": "Coordinate work between threads with lock, SemaphoreSlim and Channel<T>.",
+      "gotchas": [
+        "lock can't be used around await; SemaphoreSlim.WaitAsync can",
+        "Forgetting Release in a finally",
+        "Unbounded channels hide back-pressure problems"
+      ],
+      "goodSolutionShows": [
+        "Correct primitive for sync vs async code",
+        "try/finally around every acquire",
+        "Bounded Channel<T> with a clear full-mode"
+      ],
+      "shapeHints": [
+        "a producer/consumer queue for outgoing notifications",
+        "limiting concurrent uploads per tenant"
+      ]
+    },
+    "Expert": {
+      "learningGoal": "Use Interlocked, volatile and lock-free patterns correctly and know when not to.",
+      "gotchas": [
+        "Read-modify-write races with ++ on a shared field",
+        "Double-checked locking without volatile/Lazy",
+        "Lock ordering deadlocks"
+      ],
+      "goodSolutionShows": [
+        "Interlocked operations for counters",
+        "Lazy<T> or LazyInitializer instead of hand-rolled locking",
+        "A clear argument for why the code is thread-safe"
+      ],
+      "shapeHints": [
+        "a thread-safe metrics counter",
+        "a single-flight cache that deduplicates concurrent loads"
+      ]
+    }
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "id": "linq",
+  "name": "LINQ",
+  "seeds": {
+    "Beginner": {
+      "learningGoal": "Filter, project, sort and aggregate in-memory collections with LINQ method syntax instead of hand-written loops.",
+      "gotchas": [
+        "First() throws on an empty sequence; FirstOrDefault() returns default instead",
+        "OrderBy followed by OrderBy discards the first ordering; ThenBy is needed",
+        "Sum/Average on an empty sequence of nullable vs non-nullable values behave differently"
+      ],
+      "goodSolutionShows": [
+        "Readable chains of Where/Select/OrderBy/ThenBy",
+        "The right terminal operator (Any vs Count() > 0, FirstOrDefault vs First)",
+        "No unnecessary ToList() in the middle of a chain"
+      ],
+      "shapeHints": ["summarising a list of orders by customer", "top-N products by revenue", "filtering push notifications by status and date"]
+    },
+    "Intermediate": {
+      "learningGoal": "Use grouping, joining and set operators, and understand deferred execution.",
+      "gotchas": [
+        "Enumerating an IEnumerable twice re-runs the query (and any side effects)",
+        "GroupBy keys with reference types need proper equality",
+        "Distinct/Union on records vs classes compare differently",
+        "A query built inside a loop captures the variable, not its value at that time"
+      ],
+      "goodSolutionShows": [
+        "GroupBy/ToDictionary/ToLookup chosen deliberately",
+        "Materialising once (ToList/ToArray) when the result is enumerated more than once",
+        "Join or GroupJoin instead of nested loops"
+      ],
+      "shapeHints": ["joining users to app installs", "finding duplicates by a composite key", "building a lookup of tenants to feature flags"]
+    },
+    "Advanced": {
+      "learningGoal": "Write custom LINQ-style extension operators with iterators and reason about laziness and allocation.",
+      "gotchas": [
+        "Argument validation inside an iterator method is deferred until enumeration",
+        "Disposing the source enumerator when stopping early",
+        "Buffering operators (OrderBy, Reverse) vs streaming ones"
+      ],
+      "goodSolutionShows": [
+        "Eager argument validation with a separate iterator method",
+        "Streaming implementation that works on infinite sequences where possible",
+        "Correct use of yield return / yield break"
+      ],
+      "shapeHints": ["a Batch/Chunk-like operator with a size limit", "a DistinctBy-style operator with a comparer", "a sliding window operator"]
+    }
+  }
+}
