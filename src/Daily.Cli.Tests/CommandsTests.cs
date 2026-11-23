@@ -55,7 +55,7 @@ public sealed class CommandsTests
         using var f = new Fixture();
         f.Store.Upsert(new HistoryEntry(f.Today, "linq", Level.Beginner, false, ChallengeStatus.Started) { Folder = "/ws/x" });
         f.Store.Upsert(new HistoryEntry(f.Today.AddDays(-1), "async-await", Level.Beginner, false, ChallengeStatus.Completed));
-        var linqBeginner = CatalogLoader.Load(f.Paths.CatalogDir).Single(t => t.Id == "linq").Seeds[Level.Beginner];
+        var linqBeginner = CatalogLoader.Load(Path.Combine(f.Paths.PluginRoot, "catalog")).Single(t => t.Id == "linq").Seeds[Level.Beginner];
 
         var json = JsonDocument.Parse(f.Run("today").Out).RootElement;
 
@@ -391,7 +391,7 @@ public sealed class CommandsTests
 
         var output = f.Run("scaffold", "date-pinned", "--date", "2026-11-15").Out;
 
-        StringAssert.Contains(output, "2026-11-15-date-pinned");
+        StringAssert.Contains(output, "2026-11-15-csharp-date-pinned");
     }
 
     [TestMethod]
@@ -400,5 +400,145 @@ public sealed class CommandsTests
         using var f = new Fixture();
 
         Assert.AreEqual(1, f.Run("today", "--date", "16-11-2026").Exit);
+    }
+
+    [TestMethod]
+    public void Today_IncludesLanguage()
+    {
+        using var f = new Fixture();
+
+        var language = JsonDocument.Parse(f.Run("today").Out).RootElement.GetProperty("language");
+
+        Assert.AreEqual("csharp", language.GetProperty("id").GetString());
+        Assert.AreEqual("Challenge", language.GetProperty("stubDir").GetString());
+        Assert.AreEqual("Challenge.Tests", language.GetProperty("testDir").GetString());
+        Assert.IsTrue(File.Exists(language.GetProperty("guide").GetString()));
+        Assert.IsTrue(language.TryGetProperty("available", out _));
+        Assert.IsTrue(language.TryGetProperty("missing", out _));
+    }
+
+    [TestMethod]
+    public void Languages_ListsEveryLanguageWithLevelHints()
+    {
+        using var f = new Fixture();
+
+        var (exit, output, _) = f.Run("languages");
+
+        Assert.AreEqual(0, exit);
+        var csharp = JsonDocument.Parse(output).RootElement.EnumerateArray().Single(e => e.GetProperty("id").GetString() == "csharp");
+        Assert.AreEqual("C#", csharp.GetProperty("name").GetString());
+        Assert.IsTrue(csharp.GetProperty("levelHints").TryGetProperty("Beginner", out _));
+        Assert.IsTrue(csharp.TryGetProperty("available", out _));
+    }
+
+    private const string LuaDescriptor = """
+        {
+          "id": "lua", "name": "Lua", "stubDir": "src", "testDir": "spec",
+          "sourceExtensions": [".lua"], "ignoreDirs": [], "test": { "commands": [ { "args": ["busted"] } ], "results": "r.xml", "format": "junit" },
+          "naiveForbidden": "\\berror\\b", "requires": [], "ide": "x", "runnerHint": "install busted",
+          "levelHints": { "Beginner": "a", "Intermediate": "b", "Advanced": "c", "Expert": "d" }
+        }
+        """;
+
+    private const string LuaTopic = """
+        { "id": "tables", "name": "Tables", "seeds": { "Beginner": { "learningGoal": "g", "gotchas": [], "goodSolutionShows": [] } } }
+        """;
+
+    /// <summary>A plugin root with the real C# language (absolute catalog/template paths) and a Lua language with one topic.</summary>
+    private static DailyPaths TempPluginRoot(TempDir root, TempDir data)
+    {
+        var csharpJson = File.ReadAllText(Path.Combine(RepoPaths.PluginRoot, "languages", "csharp", "language.json"))
+            .Replace("../../catalog", Path.Combine(RepoPaths.PluginRoot, "catalog").Replace("\\", "/"))
+            .Replace("../../templates/challenge", Path.Combine(RepoPaths.PluginRoot, "templates", "challenge").Replace("\\", "/"));
+        root.Write("languages/csharp/language.json", csharpJson);
+        root.Write("languages/lua/language.json", LuaDescriptor);
+        root.Write("languages/lua/catalog/tables.json", LuaTopic);
+        return new DailyPaths(data.Path, root.Path);
+    }
+
+    private static (int Exit, string Out, string Err) RunWith(DailyPaths paths, params string[] args)
+    {
+        var stdout = new StringWriter();
+        var stderr = new StringWriter();
+        var exit = Program.Run([.. args, "--data", paths.DataDir, "--plugin-root", paths.PluginRoot], new Dictionary<string, string?>(), stdout, stderr);
+        return (exit, stdout.ToString(), stderr.ToString());
+    }
+
+    [TestMethod]
+    public void Repick_ExcludesLanguage()
+    {
+        using var root = new TempDir("root");
+        using var data = new TempDir("data");
+        var paths = TempPluginRoot(root, data);
+        var store = new StateStore(paths);
+        store.SaveConfig(new DailyConfig([new("csharp", Level.Beginner), new("lua", Level.Beginner)], "/ws", 11, 3));
+        var today = CliHelpers.Today();
+        store.Upsert(new HistoryEntry(today, "tables", Level.Beginner, false, ChallengeStatus.Picked) { Language = "lua" });
+
+        var (exit, output, err) = RunWith(paths, "repick", "--exclude", "lua");
+
+        Assert.AreEqual(0, exit, err);
+        Assert.AreEqual("csharp", store.LoadState().For(today)!.Language);
+        Assert.AreEqual("csharp", JsonDocument.Parse(output).RootElement.GetProperty("language").GetString());
+    }
+
+    [TestMethod]
+    public void Repick_StartedEntry_Fails()
+    {
+        using var root = new TempDir("root");
+        using var data = new TempDir("data");
+        var paths = TempPluginRoot(root, data);
+        var store = new StateStore(paths);
+        store.SaveConfig(new DailyConfig([new("csharp", Level.Beginner), new("lua", Level.Beginner)], "/ws", 11, 3));
+        var today = CliHelpers.Today();
+        store.Upsert(new HistoryEntry(today, "tables", Level.Beginner, false, ChallengeStatus.Started) { Language = "lua" });
+
+        var (exit, _, err) = RunWith(paths, "repick", "--exclude", "lua");
+
+        Assert.AreEqual(1, exit);
+        Assert.IsFalse(string.IsNullOrWhiteSpace(err));
+        Assert.AreEqual("lua", store.LoadState().For(today)!.Language);
+    }
+
+    [TestMethod]
+    public void Repick_NoOtherUsableLanguage_Fails()
+    {
+        using var root = new TempDir("root");
+        using var data = new TempDir("data");
+        var paths = TempPluginRoot(root, data);
+        var store = new StateStore(paths);
+        store.SaveConfig(new DailyConfig([new("lua", Level.Beginner)], "/ws", 11, 3));
+        var today = CliHelpers.Today();
+        store.Upsert(new HistoryEntry(today, "tables", Level.Beginner, false, ChallengeStatus.Picked) { Language = "lua" });
+
+        var (exit, _, err) = RunWith(paths, "repick", "--exclude", "lua");
+
+        Assert.AreEqual(1, exit);
+        StringAssert.Contains(err, "No usable language");
+        Assert.AreEqual("lua", store.LoadState().For(today)!.Language);
+    }
+
+    [TestMethod]
+    [TestCategory("Integration")]
+    public void RunTests_UsesFolderMarker_EvenWhenLanguageNotInConfig()
+    {
+        using var root = new TempDir("root");
+        using var data = new TempDir("data");
+        using var ws = new TempDir("ws");
+        var paths = TempPluginRoot(root, data);
+        var config = new DailyConfig([new("lua", Level.Beginner)], ws.Path, Dotnet.InstalledSdkMajor(), 1);
+        new StateStore(paths).SaveConfig(config);
+        var folder = Scaffolder.Create(paths, config, ScaffolderTests.Csharp(paths), new DateOnly(2026, 11, 16), "smoke", force: false);
+        File.WriteAllText(Path.Combine(folder, "Challenge", "Calc.cs"), "namespace Challenge; public static class Calc { public static int Add(int a, int b) => a + b; }");
+        File.WriteAllText(Path.Combine(folder, "Challenge.Tests", "CalcTests.cs"),
+            "namespace Challenge.Tests; [TestClass] public sealed class CalcTests { [TestMethod] public void Adds() => Assert.AreEqual(3, Challenge.Calc.Add(1, 2)); }");
+
+        var (exit, output, err) = RunWith(paths, "run-tests", folder);
+
+        Assert.AreEqual(0, exit, err);
+        var json = JsonDocument.Parse(output).RootElement;
+        Assert.IsTrue(json.GetProperty("ok").GetBoolean(), output);
+        Assert.AreEqual(1, json.GetProperty("total").GetInt32());
+        Assert.AreEqual(1, json.GetProperty("passed").GetInt32());
     }
 }

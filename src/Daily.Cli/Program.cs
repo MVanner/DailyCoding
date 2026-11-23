@@ -17,6 +17,9 @@ public static class Program
         ["record"] = Commands.RecordCommand,
         ["hint"] = Commands.HintCommand,
         ["config"] = Commands.ConfigCommand,
+        ["repick"] = Commands.RepickCommand,
+        ["languages"] = Commands.LanguagesCommand,
+        ["run-tests"] = Commands.RunTestsCommand,
     };
 
     /// <summary>Commands run by the SessionStart hook: they must never print errors or exit non-zero.</summary>

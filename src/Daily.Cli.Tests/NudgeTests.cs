@@ -39,7 +39,7 @@ public sealed class NudgeTests
 
         public DateOnly FindDay(bool stretch)
         {
-            var catalog = CatalogLoader.Load(Paths.CatalogDir);
+            var catalog = CatalogLoader.Load(Path.Combine(Paths.PluginRoot, "catalog"));
             for (var day = Monday; ; day = day.AddDays(1))
             {
                 if (Picker.Choose(day, Level.Intermediate, 7, catalog, []).Stretch == stretch) return day;

@@ -10,6 +10,24 @@ public sealed class ScaffolderTests
     private static (DailyPaths Paths, DailyConfig Config) Setup(TempDir data, string workspace, int sdkMajor = 11) =>
         (new DailyPaths(data.Path, RepoPaths.PluginRoot), new DailyConfig([new("csharp", Level.Intermediate)], workspace, sdkMajor, 1));
 
+    internal static Language Csharp(DailyPaths paths) =>
+        LanguageLoader.Get(LanguageLoader.Load(paths.LanguagesDir), "csharp");
+
+    [TestMethod]
+    public void Create_NamesFolderWithLanguageAndWritesMarker()
+    {
+        using var data = new TempDir();
+        using var ws = new TempDir("ws");
+        var (paths, config) = Setup(data, ws.Path);
+
+        var folder = Scaffolder.Create(paths, config, Csharp(paths), Day, "sum", force: false);
+
+        Assert.AreEqual(Path.Combine(ws.Path, "2026-11-16-csharp-sum"), folder);
+        Assert.AreEqual("csharp", File.ReadAllText(Path.Combine(folder, ".daily-language")).Trim());
+        Assert.AreEqual("csharp", Scaffolder.LanguageOf(folder));
+        Assert.IsNull(Scaffolder.LanguageOf(ws.Path));
+    }
+
     [TestMethod]
     public void Create_CopiesTemplateAndSubstitutesTfm()
     {
@@ -17,9 +35,9 @@ public sealed class ScaffolderTests
         using var ws = new TempDir("ws");
         var (paths, config) = Setup(data, ws.Path);
 
-        var folder = Scaffolder.Create(paths, config, Day, "async-retry", force: false);
+        var folder = Scaffolder.Create(paths, config, Csharp(paths), Day, "async-retry", force: false);
 
-        Assert.AreEqual(Path.Combine(ws.Path, "2026-11-16-async-retry"), folder);
+        Assert.AreEqual(Path.Combine(ws.Path, "2026-11-16-csharp-async-retry"), folder);
         foreach (var file in new[] { "Challenge.slnx", "Challenge/Challenge.csproj", "Challenge.Tests/Challenge.Tests.csproj", ".gitignore" })
         {
             Assert.IsTrue(File.Exists(Path.Combine(folder, file)), file);
@@ -43,7 +61,7 @@ public sealed class ScaffolderTests
         using var ws = new TempDir("ws");
         var (paths, config) = Setup(data, ws.Path);
 
-        Assert.ThrowsExactly<ArgumentException>(() => Scaffolder.Create(paths, config, Day, slug, force: false));
+        Assert.ThrowsExactly<ArgumentException>(() => Scaffolder.Create(paths, config, Csharp(paths), Day, slug, force: false));
     }
 
     [TestMethod]
@@ -52,12 +70,12 @@ public sealed class ScaffolderTests
         using var data = new TempDir();
         using var ws = new TempDir("ws");
         var (paths, config) = Setup(data, ws.Path);
-        var folder = Scaffolder.Create(paths, config, Day, "linq-groups", force: false);
+        var folder = Scaffolder.Create(paths, config, Csharp(paths), Day, "linq-groups", force: false);
         File.WriteAllText(Path.Combine(folder, "leftover.txt"), "old");
 
-        Assert.ThrowsExactly<InvalidOperationException>(() => Scaffolder.Create(paths, config, Day, "linq-groups", force: false));
+        Assert.ThrowsExactly<InvalidOperationException>(() => Scaffolder.Create(paths, config, Csharp(paths), Day, "linq-groups", force: false));
 
-        Scaffolder.Create(paths, config, Day, "linq-groups", force: true);
+        Scaffolder.Create(paths, config, Csharp(paths), Day, "linq-groups", force: true);
         Assert.IsFalse(File.Exists(Path.Combine(folder, "leftover.txt")));
         Assert.IsTrue(File.Exists(Path.Combine(folder, "Challenge.slnx")));
     }
@@ -69,7 +87,7 @@ public sealed class ScaffolderTests
         using var ws = new TempDir("Jane Doe");
         var (paths, config) = Setup(data, Path.Combine(ws.Path, "Daily Coding"));
 
-        var folder = Scaffolder.Create(paths, config, Day, "records", force: false);
+        var folder = Scaffolder.Create(paths, config, Csharp(paths), Day, "records", force: false);
 
         Assert.IsTrue(File.Exists(Path.Combine(folder, "Challenge", "Challenge.csproj")));
     }
@@ -106,7 +124,7 @@ public sealed class ScaffolderTests
         using var data = new TempDir();
         using var ws = new TempDir("ws with space");
         var (paths, config) = Setup(data, ws.Path, Dotnet.InstalledSdkMajor());
-        var folder = Scaffolder.Create(paths, config, Day, "smoke-test", force: false);
+        var folder = Scaffolder.Create(paths, config, Csharp(paths), Day, "smoke-test", force: false);
         File.WriteAllText(Path.Combine(folder, "Challenge", "Calc.cs"), "namespace Challenge; public static class Calc { public static int Add(int a, int b) => a + b; }");
         File.WriteAllText(Path.Combine(folder, "Challenge.Tests", "CalcTests.cs"),
             "namespace Challenge.Tests; [TestClass] public sealed class CalcTests { [TestMethod] public void Adds() => Assert.AreEqual(3, Challenge.Calc.Add(1, 2)); }");

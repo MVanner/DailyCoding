@@ -4,6 +4,7 @@ namespace Daily.Cli;
 public static class Commands
 {
     private const int RecentCount = 14;
+    private const int OutputLimit = 4000;
     private const string NoUsableLanguage = "No usable language — run /daily:setup.";
 
     /// <summary>
@@ -20,13 +21,17 @@ public static class Commands
         }
 
         var today = CliHelpers.Date(args);
-        var catalogs = Catalogs.Load(LanguageLoader.Load(paths.LanguagesDir));
+        var languages = LanguageLoader.Load(paths.LanguagesDir);
+        var catalogs = Catalogs.Load(languages);
         var entry = Today.Ensure(store, config, catalogs, today);
         if (entry is null)
         {
             stderr.WriteLine(NoUsableLanguage);
             return ExitCodes.Error;
         }
+
+        var language = LanguageLoader.Get(languages, entry.Language);
+        var tools = ToolCheck.Check(language);
 
         var topic = catalogs.GetValueOrDefault(entry.Language)?.FirstOrDefault(t => t.Id == entry.TopicId);
         var history = store.LoadState().History;
@@ -39,6 +44,17 @@ public static class Commands
             topic = new { id = entry.TopicId, name = topic?.Name ?? entry.TopicId },
             seed = topic?.Seeds.GetValueOrDefault(entry.Level),
             config,
+            language = new
+            {
+                id = language.Id,
+                name = language.Name,
+                stubDir = language.Descriptor.StubDir,
+                testDir = language.Descriptor.TestDir,
+                ide = language.Descriptor.Ide,
+                guide = language.GuidePath,
+                available = tools.Available,
+                missing = tools.Missing,
+            },
             recent = history.Where(e => e.Date < today).OrderByDescending(e => e.Date).Take(RecentCount),
             referenceDir = ReferenceDir(paths, today),
             unfinished = unfinished is null ? null : new { entry = unfinished, referenceDir = ReferenceDir(paths, unfinished.Date) },
@@ -136,6 +152,86 @@ public static class Commands
 
         store.Upsert(updated);
         stdout.WriteLine(Json.Serialize(updated));
+        return ExitCodes.Ok;
+    }
+
+    /// <summary>
+    /// <c>repick --exclude &lt;id&gt; [--date d]</c> — replaces a still-Picked entry with one from another language
+    /// (for when the day's language turns out to be unusable on this machine).
+    /// </summary>
+    public static int RepickCommand(string[] args, DailyPaths paths, TextWriter stdout, TextWriter stderr)
+    {
+        var excluded = Option(args, "--exclude");
+        if (excluded is null)
+        {
+            stderr.WriteLine("Usage: repick --exclude <languageId> [--date yyyy-MM-dd]");
+            return ExitCodes.Error;
+        }
+
+        var store = new StateStore(paths);
+        var config = CliHelpers.RequireConfig(store, stderr);
+        if (config is null)
+        {
+            return ExitCodes.NotConfigured;
+        }
+
+        var date = CliHelpers.Date(args);
+        var state = store.LoadState();
+        var entry = state.For(date);
+        if (entry is null || entry.Status != ChallengeStatus.Picked)
+        {
+            stderr.WriteLine(entry is null
+                ? $"No challenge for {date:yyyy-MM-dd}; nothing to repick."
+                : $"Today's challenge is {entry.Status}; only a Picked challenge can be repicked.");
+            return ExitCodes.Error;
+        }
+
+        var catalogs = Catalogs.Load(LanguageLoader.Load(paths.LanguagesDir));
+        var replacement = Today.CreatePickedEntry(date, config, catalogs, state.History.Where(e => e.Date != date).ToList(), new HashSet<string> { excluded });
+        if (replacement is null)
+        {
+            stderr.WriteLine(NoUsableLanguage);
+            return ExitCodes.Error;
+        }
+
+        store.Upsert(replacement);
+        stdout.WriteLine(Json.Serialize(replacement));
+        return ExitCodes.Ok;
+    }
+
+    /// <summary><c>languages</c> — every available language with its tool status and level hints.</summary>
+    public static int LanguagesCommand(string[] args, DailyPaths paths, TextWriter stdout, TextWriter stderr)
+    {
+        var list = LanguageLoader.Load(paths.LanguagesDir).Select(l =>
+        {
+            var tools = ToolCheck.Check(l);
+            return new { id = l.Id, name = l.Name, available = tools.Available, missing = tools.Missing, levelHints = l.Descriptor.LevelHints };
+        });
+        stdout.WriteLine(Json.Serialize(list));
+        return ExitCodes.Ok;
+    }
+
+    /// <summary><c>run-tests &lt;folder&gt;</c> — runs the folder's tests with its own language's runner.</summary>
+    public static int RunTestsCommand(string[] args, DailyPaths paths, TextWriter stdout, TextWriter stderr)
+    {
+        if (args.Length == 0)
+        {
+            stderr.WriteLine("Usage: run-tests <folder>");
+            return ExitCodes.Error;
+        }
+
+        var folder = Path.GetFullPath(args[0]);
+        var language = LanguageLoader.Get(LanguageLoader.Load(paths.LanguagesDir), Scaffolder.LanguageOf(folder) ?? "csharp");
+        var (result, output) = TestRunner.Run(language, folder, TimeSpan.FromMinutes(5));
+        stdout.WriteLine(Json.Serialize(new
+        {
+            ok = result is not null && result.Failed == 0,
+            passed = result?.Passed ?? 0,
+            failed = result?.Failed ?? 0,
+            total = result?.Total ?? 0,
+            failures = result?.Failures ?? [],
+            output = output.Length > OutputLimit ? output[^OutputLimit..] : output,
+        }));
         return ExitCodes.Ok;
     }
 

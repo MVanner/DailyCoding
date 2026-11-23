@@ -27,8 +27,6 @@ public sealed class DailyPathsTests
         Assert.AreEqual(Path.Combine(paths.DataDir, "state.json"), paths.StateFile);
         Assert.AreEqual(Path.Combine(paths.DataDir, "bin"), paths.BinDir);
         Assert.AreEqual(Path.Combine(paths.DataDir, "references"), paths.ReferencesDir);
-        Assert.AreEqual(Path.Combine(paths.PluginRoot, "catalog"), paths.CatalogDir);
-        Assert.AreEqual(Path.Combine(paths.PluginRoot, "templates", "challenge"), paths.TemplatesDir);
         Assert.AreEqual(Path.Combine(paths.DataDir, "hook-errors.log"), paths.HookErrorLog);
     }
 
