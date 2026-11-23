@@ -1,0 +1,60 @@
+{
+  "id": "codable",
+  "name": "Codable",
+  "seeds": {
+    "Beginner": {
+      "learningGoal": "Encode and decode simple models with JSONEncoder and JSONDecoder.",
+      "gotchas": [
+        "Missing keys throw DecodingError.keyNotFound unless the property is optional",
+        "JSONEncoder output key order is not stable unless outputFormatting includes sortedKeys",
+        "Date and Data need an explicit strategy"
+      ],
+      "goodSolutionShows": [
+        "Plain Codable structs with synthesized conformance",
+        "sortedKeys formatting in tests for stable output",
+        "Round-trip test (encode then decode equals original)"
+      ],
+      "shapeHints": [
+        "a user profile JSON round-trip",
+        "decoding an array of products",
+        "encoding a settings model"
+      ]
+    },
+    "Intermediate": {
+      "learningGoal": "Customise keys and values with CodingKeys, date strategies and optional / default fields.",
+      "gotchas": [
+        "Snake_case keys need convertFromSnakeCase or CodingKeys",
+        "Decoding a missing optional is nil but a null-typed mismatch throws",
+        "Date decoding strategy mismatches silently produce errors"
+      ],
+      "goodSolutionShows": [
+        "CodingKeys mapping to JSON names",
+        "Optional vs default value for missing fields via custom init(from:)",
+        "Decoding errors surfaced with clear context"
+      ],
+      "shapeHints": [
+        "decoding API payloads with snake_case keys",
+        "a model with defaulted missing fields",
+        "ISO 8601 dates decoded from a fixed string"
+      ]
+    },
+    "Advanced": {
+      "learningGoal": "Write custom Encodable/Decodable with nested containers and polymorphic payloads.",
+      "gotchas": [
+        "Unkeyed container order matters and decoding must consume elements",
+        "Polymorphic decoding needs a discriminator key",
+        "Nested containers must be created for each level or keys are lost"
+      ],
+      "goodSolutionShows": [
+        "init(from:) with nestedContainer and singleValueContainer",
+        "Enum with associated values encoded with a type tag",
+        "Round-trip tests including error cases"
+      ],
+      "shapeHints": [
+        "a Shape enum encoded as { type, payload }",
+        "flattening a nested JSON structure into a flat model",
+        "decoding a heterogeneous array of events"
+      ]
+    }
+  }
+}

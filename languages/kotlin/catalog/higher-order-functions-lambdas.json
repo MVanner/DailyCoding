@@ -1,0 +1,60 @@
+{
+  "id": "higher-order-functions-lambdas",
+  "name": "Higher-order functions & lambdas",
+  "seeds": {
+    "Beginner": {
+      "learningGoal": "Pass lambdas, use function types and return functions.",
+      "gotchas": [
+        "A lambda that captures a var sees later updates",
+        "return inside a lambda returns from the enclosing function only if inline",
+        "Trailing lambda syntax moves the lambda outside the parentheses"
+      ],
+      "goodSolutionShows": [
+        "Function types as parameters",
+        "Returning a function (counter, multiplier)",
+        "it for single-parameter lambdas"
+      ],
+      "shapeHints": [
+        "applying a discount strategy passed as a lambda",
+        "a counter factory",
+        "a retry helper taking an operation lambda"
+      ]
+    },
+    "Intermediate": {
+      "learningGoal": "Use inline functions, function references and compose functions.",
+      "gotchas": [
+        "Non-local return is allowed only from inline lambdas",
+        "crossinline and noinline restrictions",
+        "Function references to overloaded functions need type context"
+      ],
+      "goodSolutionShows": [
+        "inline for lambda-taking utilities",
+        "Function references (::name) in place of trivial lambdas",
+        "Composition helper (andThen)"
+      ],
+      "shapeHints": [
+        "a measure-and-return helper taking an injected clock",
+        "a pipeline composed of small functions",
+        "a validator combinator (all, any)"
+      ]
+    },
+    "Advanced": {
+      "learningGoal": "Implement higher-order utilities with generics, currying and memoization.",
+      "gotchas": [
+        "Memoization with a mutable map is not thread-safe, and recursive memoized functions modify the map during computation",
+        "Generic function types and variance (in/out)",
+        "Currying creates new closures per call"
+      ],
+      "goodSolutionShows": [
+        "Generic memoize with explicit cache",
+        "Variance-correct function parameters",
+        "Pure function tests with call counts"
+      ],
+      "shapeHints": [
+        "a memoize helper counting underlying invocations",
+        "a debounce-like helper using an injected clock",
+        "a generic compose with multiple arities"
+      ]
+    }
+  }
+}

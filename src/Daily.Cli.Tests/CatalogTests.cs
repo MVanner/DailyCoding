@@ -92,6 +92,56 @@ public sealed class CatalogTests
     }
 
     [TestMethod]
+    public void RealCatalogs_AreValid()
+    {
+        var languages = LanguageLoader.Load(Path.Combine(RepoPaths.PluginRoot, "languages"));
+        var catalogs = Catalogs.Load(languages);
+
+        foreach (var language in languages)
+        {
+            var topics = catalogs[language.Id];
+            Assert.IsGreaterThanOrEqualTo(10, topics.Count, $"{language.Id} needs at least 10 topics");
+            foreach (var topic in topics)
+            {
+                Assert.IsGreaterThanOrEqualTo(2, topic.Seeds.Count, $"{language.Id}/{topic.Id} should cover at least 2 levels");
+                foreach (var (level, seed) in topic.Seeds)
+                {
+                    var where = $"{language.Id}/{topic.Id}/{level}";
+                    Assert.IsFalse(string.IsNullOrWhiteSpace(seed.LearningGoal), where);
+                    Assert.IsNotEmpty(seed.Gotchas, where);
+                    Assert.IsNotEmpty(seed.GoodSolutionShows, where);
+                    Assert.IsNotEmpty(seed.ShapeHints, where);
+                }
+            }
+        }
+    }
+
+    [TestMethod]
+    [DataRow("csharp", Level.Beginner)]
+    [DataRow("csharp", Level.Intermediate)]
+    [DataRow("csharp", Level.Advanced)]
+    [DataRow("csharp", Level.Expert)]
+    [DataRow("swift", Level.Beginner)]
+    [DataRow("swift", Level.Intermediate)]
+    [DataRow("swift", Level.Advanced)]
+    [DataRow("swift", Level.Expert)]
+    [DataRow("kotlin", Level.Beginner)]
+    [DataRow("kotlin", Level.Intermediate)]
+    [DataRow("kotlin", Level.Advanced)]
+    [DataRow("kotlin", Level.Expert)]
+    [DataRow("lua", Level.Beginner)]
+    [DataRow("lua", Level.Intermediate)]
+    [DataRow("lua", Level.Advanced)]
+    [DataRow("lua", Level.Expert)]
+    public void EveryLanguage_HasAtLeastThreeTopicsAtEveryLevel(string languageId, Level level)
+    {
+        var languages = LanguageLoader.Load(Path.Combine(RepoPaths.PluginRoot, "languages"));
+        var count = Catalogs.Load(languages)[languageId].Count(t => t.Seeds.ContainsKey(level));
+
+        Assert.IsGreaterThanOrEqualTo(3, count, $"{languageId}/{level}: {count} topics");
+    }
+
+    [TestMethod]
     public void RealCatalog_HasTheStarterTopics()
     {
         var ids = CatalogLoader.Load(Path.Combine(RepoPaths.PluginRoot, "catalog")).Select(t => t.Id).ToHashSet();
@@ -117,5 +167,18 @@ public sealed class CatalogTests
         var count = CatalogLoader.Load(Path.Combine(RepoPaths.PluginRoot, "catalog")).Count(t => t.Seeds.ContainsKey(level));
 
         Assert.IsGreaterThanOrEqualTo(minimum, count, $"{level}: {count} topics");
+    }
+
+    [TestMethod]
+    public void OldRecursiveLoad_SeesOnlyCsharpTopics()
+    {
+        var root = RepoPaths.PluginRoot;
+        var csharp = Catalogs.Load(LanguageLoader.Load(Path.Combine(root, "languages")))["csharp"];
+
+        Assert.HasCount(csharp.Count, CatalogLoader.Load(Path.Combine(root, "catalog")));
+        var catalogDir = Path.Combine(root, "catalog");
+        var nested = Directory.EnumerateFiles(catalogDir, "*.json", SearchOption.AllDirectories)
+            .Where(f => Path.GetDirectoryName(f) != catalogDir);
+        Assert.IsFalse(nested.Any(), "catalog/ must only hold C# topics at its top level");
     }
 }

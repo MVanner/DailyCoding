@@ -1,5 +1,4 @@
 using System.Text.RegularExpressions;
-using System.Xml.Linq;
 
 namespace Daily.Cli;
 
@@ -14,7 +13,7 @@ public sealed record VerifyResult(
 
 /// <summary>
 /// The quality gate for a generated challenge: the stub builds and fails at least 70 % of the tests, the reference
-/// passes every test (and there are at least 3), and a naive implementation (no throws) fails at least 70 % of them. On success the reference is moved out of
+/// passes every test (and there are at least 3), and a naive implementation (nothing the language forbids, e.g. throws) fails at least 70 % of them. On success the reference is moved out of
 /// the workspace into references/&lt;date&gt;/ and .verify/ is removed.
 /// </summary>
 public static partial class Verifier
@@ -23,35 +22,35 @@ public static partial class Verifier
     public const double NaiveMustFail = 0.7;
 
     private static readonly TimeSpan Timeout = TimeSpan.FromMinutes(5);
-    private static readonly string[] SkippedDirs = ["bin", "obj", ".verify", "TestResults"];
-    private static readonly XNamespace Trx = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010";
+    private const string VerifyDirName = ".verify";
 
-    public static VerifyResult Run(DailyPaths paths, string challengeDir, DateOnly date)
+    public static VerifyResult Run(DailyPaths paths, Language language, string challengeDir, DateOnly date)
     {
         var problems = new List<string>();
-        var verifyDir = Path.Combine(challengeDir, ".verify");
+        var verifyDir = Path.Combine(challengeDir, VerifyDirName);
         var referenceDir = Path.Combine(verifyDir, "reference");
         var naiveDir = Path.Combine(verifyDir, "naive");
         var hasReference = Directory.Exists(referenceDir);
         var hasNaive = Directory.Exists(naiveDir);
+        var stubDirName = language.Descriptor.StubDir;
 
-        if (!hasReference) problems.Add("Missing .verify/reference/ (reference versions of the files in Challenge/).");
+        if (!hasReference) problems.Add($"Missing .verify/reference/ (reference versions of the files in {stubDirName}/).");
         if (!hasNaive) problems.Add("Missing .verify/naive/ (naive versions returning default/empty values).");
-        if (hasReference) CheckOverlayFiles(challengeDir, referenceDir, "reference", problems);
+        if (hasReference) CheckOverlayFiles(language, challengeDir, referenceDir, "reference", problems);
         if (hasNaive)
         {
-            CheckOverlayFiles(challengeDir, naiveDir, "naive", problems);
-            CheckNaiveDoesNotThrow(naiveDir, problems);
+            CheckOverlayFiles(language, challengeDir, naiveDir, "naive", problems);
+            CheckNaiveIsNaive(language, naiveDir, problems);
         }
 
         // The shipped stub: must build, and the tests must mostly fail against it.
-        var stub = RunTests(challengeDir, overlayDir: null, "stub", problems);
+        var stub = RunTests(language, challengeDir, overlayDir: null, "stub", problems);
         if (stub is { } s)
         {
             RequireMostlyFailing(s, "stub", "the shipped stub", problems);
         }
 
-        var reference = hasReference ? RunTests(challengeDir, referenceDir, "reference", problems) : null;
+        var reference = hasReference ? RunTests(language, challengeDir, referenceDir, "reference", problems) : null;
         if (reference is { } r)
         {
             if (r.Total < MinimumTests)
@@ -64,7 +63,7 @@ public static partial class Verifier
             }
         }
 
-        var naive = hasNaive ? RunTests(challengeDir, naiveDir, "naive", problems) : null;
+        var naive = hasNaive ? RunTests(language, challengeDir, naiveDir, "naive", problems) : null;
         if (naive is { } n)
         {
             RequireMostlyFailing(n, "naive", "the naive stub", problems);
@@ -103,35 +102,39 @@ public static partial class Verifier
             return ExitCodes.Error;
         }
 
-        stdout.WriteLine(Json.Serialize(Run(paths, Path.GetFullPath(args[0]), CliHelpers.Date(args))));
+        var folder = Path.GetFullPath(args[0]);
+        if (!Directory.Exists(folder))
+        {
+            stderr.WriteLine($"Folder not found: {folder}");
+            return ExitCodes.Error;
+        }
+
+        var language = LanguageLoader.Get(CliHelpers.LoadLanguages(paths), Scaffolder.LanguageOf(folder) ?? "csharp");
+        stdout.WriteLine(Json.Serialize(Run(paths, language, folder, CliHelpers.Date(args))));
         return ExitCodes.Ok;
     }
 
     private readonly record struct TestCounts(int Passed, int Failed, int Total);
 
-    /// <summary>Runs the tests on a temp copy, with <paramref name="overlayDir"/> copied over Challenge/. Null when it doesn't build.</summary>
-    private static TestCounts? RunTests(string challengeDir, string? overlayDir, string name, List<string> problems)
+    /// <summary>Runs the tests on a temp copy, with <paramref name="overlayDir"/> copied over the stub folder. Null when it doesn't build.</summary>
+    private static TestCounts? RunTests(Language language, string challengeDir, string? overlayDir, string name, List<string> problems)
     {
-        var work = CopyToTemp(challengeDir);
+        var work = CopyToTemp(language, challengeDir);
         try
         {
             if (overlayDir is not null)
             {
-                CopyTree(overlayDir, Path.Combine(work, "Challenge"), []);
+                CopyTree(overlayDir, Path.Combine(work, language.Descriptor.StubDir), []);
             }
 
-            var results = Path.Combine(work, "TestResults");
-            var (_, output) = ProcessRunner.Dotnet(work, Timeout, "test", "--logger", "trx;LogFileName=result.trx", "--results-directory", results);
-            var trx = Directory.Exists(results) ? Directory.EnumerateFiles(results, "*.trx", SearchOption.AllDirectories).FirstOrDefault() : null;
-            if (trx is null)
+            var (result, output) = TestRunner.Run(language, work, Timeout);
+            if (result is null)
             {
                 problems.Add($"{name}: does not build or no tests ran: " + FirstError(output));
                 return null;
             }
 
-            var counters = XDocument.Load(trx).Descendants(Trx + "Counters").Single();
-            int Read(string attribute) => (int?)counters.Attribute(attribute) ?? 0;
-            return new TestCounts(Read("passed"), Read("failed"), Read("total"));
+            return new TestCounts(result.Passed, result.Failed, result.Total);
         }
         finally
         {
@@ -149,37 +152,41 @@ public static partial class Verifier
     }
 
     /// <summary>Reference and naive files replace stub files: each must have a counterpart in Challenge/.</summary>
-    private static void CheckOverlayFiles(string challengeDir, string overlayDir, string name, List<string> problems)
+    private static void CheckOverlayFiles(Language language, string challengeDir, string overlayDir, string name, List<string> problems)
     {
         foreach (var file in Directory.EnumerateFiles(overlayDir, "*", SearchOption.AllDirectories))
         {
             var relative = Path.GetRelativePath(overlayDir, file);
-            if (!File.Exists(Path.Combine(challengeDir, "Challenge", relative)))
+            if (!File.Exists(Path.Combine(challengeDir, language.Descriptor.StubDir, relative)))
             {
-                problems.Add($"{name}: {relative.Replace('\\', '/')} has no matching stub file in Challenge/.");
+                problems.Add($"{name}: {relative.Replace('\\', '/')} has no matching stub file in {language.Descriptor.StubDir}/.");
             }
         }
     }
 
-    /// <summary>A naive version that throws would make any test suite look strict.</summary>
-    private static void CheckNaiveDoesNotThrow(string naiveDir, List<string> problems)
+    /// <summary>A naive version that uses something the language forbids (e.g. throws) would make any test suite look strict.</summary>
+    private static void CheckNaiveIsNaive(Language language, string naiveDir, List<string> problems)
     {
-        foreach (var file in Directory.EnumerateFiles(naiveDir, "*.cs", SearchOption.AllDirectories))
+        var forbidden = new Regex(language.Descriptor.NaiveForbidden);
+        foreach (var file in Directory.EnumerateFiles(naiveDir, "*", SearchOption.AllDirectories))
         {
-            if (ThrowKeyword().IsMatch(File.ReadAllText(file)))
+            if (!language.Descriptor.SourceExtensions.Contains(Path.GetExtension(file)))
             {
-                problems.Add($"naive: {Path.GetFileName(file)} contains `throw`; the naive version must return default/empty values or echo input, never throw.");
+                continue;
+            }
+
+            var match = forbidden.Match(File.ReadAllText(file));
+            if (match.Success)
+            {
+                problems.Add($"naive: {Path.GetFileName(file)} contains `{match.Value}`; the naive version must return default/empty values or echo input, never throw or fail.");
             }
         }
     }
 
-    [GeneratedRegex(@"\bthrow\b")]
-    private static partial Regex ThrowKeyword();
-
-    private static string CopyToTemp(string challengeDir)
+    private static string CopyToTemp(Language language, string challengeDir)
     {
         var work = Path.Combine(Path.GetTempPath(), "daily-verify", Guid.NewGuid().ToString("N")[..12]);
-        CopyTree(challengeDir, work, SkippedDirs);
+        CopyTree(challengeDir, work, [.. language.Descriptor.IgnoreDirs, VerifyDirName]);
         return work;
     }
 
@@ -201,8 +208,18 @@ public static partial class Verifier
         }
     }
 
-    private static string FirstError(string output) =>
-        output.Split('\n').Select(l => l.Trim()).FirstOrDefault(l => l.Contains("error", StringComparison.OrdinalIgnoreCase)) ?? output.Trim().Split('\n').LastOrDefault() ?? "";
+    /// <summary>Up to the first three compiler/runner error lines (including Kotlin's <c>e: file:line:col message</c>), or the last output line when there are none.</summary>
+    public static string FirstError(string output)
+    {
+        var lines = output.Split('\n').Select(l => l.Trim()).ToList();
+        var errors = lines
+            .Where(l => l.Contains("error", StringComparison.OrdinalIgnoreCase) || l.StartsWith("e: ", StringComparison.Ordinal))
+            .Select(l => l.Length > 400 ? l[..400] + "..." : l)
+            .Distinct()
+            .Take(3)
+            .ToList();
+        return errors.Count > 0 ? string.Join(" | ", errors) : lines.Where(l => l.Length > 0).LastOrDefault() ?? "";
+    }
 
     private static void TryDelete(string dir)
     {

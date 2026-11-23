@@ -1,0 +1,60 @@
+{
+  "id": "exceptions-result",
+  "name": "Exceptions & Result",
+  "seeds": {
+    "Beginner": {
+      "learningGoal": "Throw and catch exceptions, use require, check and error for preconditions.",
+      "gotchas": [
+        "require throws IllegalArgumentException while check throws IllegalStateException",
+        "Kotlin has no checked exceptions",
+        "try is an expression; the last expression is its value"
+      ],
+      "goodSolutionShows": [
+        "require for arguments and check for state",
+        "try as an expression",
+        "Specific exceptions caught, not Exception"
+      ],
+      "shapeHints": [
+        "validating a transfer amount and account state",
+        "parsing a number with a fallback",
+        "a custom domain exception"
+      ]
+    },
+    "Intermediate": {
+      "learningGoal": "Use runCatching, Result and domain-specific error types.",
+      "gotchas": [
+        "runCatching catches Throwable including CancellationException in coroutines",
+        "Result cannot be returned from some contexts without opt-in in older Kotlin versions",
+        "getOrThrow rethrows the original exception"
+      ],
+      "goodSolutionShows": [
+        "Result map, recover and fold chains",
+        "Domain exceptions with cause",
+        "Use of sealed results where Result's Throwable is too coarse"
+      ],
+      "shapeHints": [
+        "parsing a batch of lines returning successes and failures",
+        "wrapping a throwing loader and recovering with a default",
+        "mapping low-level exceptions to domain errors"
+      ]
+    },
+    "Advanced": {
+      "learningGoal": "Design error handling strategies combining exceptions, sealed results and suspending code.",
+      "gotchas": [
+        "Swallowing CancellationException breaks structured concurrency",
+        "Exception in finally masks the original exception (addSuppressed)",
+        "use{} closes resources and adds suppressed exceptions"
+      ],
+      "goodSolutionShows": [
+        "Rethrow CancellationException",
+        "use or try/finally for resource cleanup with suppressed exceptions",
+        "Sealed error result for expected failures, exceptions for bugs"
+      ],
+      "shapeHints": [
+        "a resource wrapper whose close also fails",
+        "a suspend retry helper that doesn't retry cancellation",
+        "a validator accumulating all errors"
+      ]
+    }
+  }
+}

@@ -34,5 +34,5 @@ if ($LASTEXITCODE -ne 0) { throw 'daily helper did not run after building' }
 Write-Host ''
 Write-Host 'Done. Next:'
 Write-Host '  1. Start (or restart) Claude Code.'
-Write-Host '  2. Run /daily:setup to pick your level and workspace.'
+Write-Host '  2. Run /daily:setup to pick your languages, a level per language and your workspace.'
 Write-Host 'Updates: git pull in this repo, then /daily:setup to rebuild (the nudge reminds you).'

@@ -67,3 +67,29 @@ public static class CatalogLoader
         return topics;
     }
 }
+
+public static class Catalogs
+{
+    /// <summary>
+    /// Loads every language's topics, keyed by language id; a language without a catalog folder has no topics. A language
+    /// whose catalog is broken gets no topics and a message in <paramref name="warnings"/> instead of failing the others.
+    /// </summary>
+    public static IReadOnlyDictionary<string, IReadOnlyList<Topic>> Load(IReadOnlyList<Language> languages, ICollection<string>? warnings = null)
+    {
+        var result = new Dictionary<string, IReadOnlyList<Topic>>();
+        foreach (var language in languages)
+        {
+            try
+            {
+                result[language.Id] = Directory.Exists(language.CatalogDir) ? CatalogLoader.Load(language.CatalogDir) : [];
+            }
+            catch (Exception ex) when (ex is CatalogException or IOException or UnauthorizedAccessException or JsonException)
+            {
+                result[language.Id] = [];
+                warnings?.Add($"Catalog of '{language.Id}' skipped: {ex.Message}");
+            }
+        }
+
+        return result;
+    }
+}

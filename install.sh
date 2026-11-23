@@ -33,6 +33,6 @@ cat <<'EOF2'
 
 Done. Next:
   1. Start (or restart) Claude Code in any folder.
-  2. Run /daily:setup to pick your level and workspace.
+  2. Run /daily:setup to pick your languages, a level per language and your workspace.
 Updates: `git pull` in this repo, then /daily:setup to rebuild (the nudge reminds you).
 EOF2

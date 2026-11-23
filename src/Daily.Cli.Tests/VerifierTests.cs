@@ -52,8 +52,8 @@ public sealed class VerifierTests
         public Fixture(string tests, string? reference = Reference, string? naive = Naive, string stub = Stub)
         {
             Paths = new DailyPaths(_data.Path, RepoPaths.PluginRoot);
-            var config = new DailyConfig(Level.Beginner, _ws.Path, Dotnet.InstalledSdkMajor(), 1);
-            Folder = Scaffolder.Create(Paths, config, Day, "sum", force: false);
+            var config = new DailyConfig([new("csharp", Level.Beginner)], _ws.Path, Dotnet.InstalledSdkMajor(), 1);
+            Folder = Scaffolder.Create(Paths, config, Language, Day, "sum", force: false);
             File.WriteAllText(Path.Combine(Folder, "Challenge", "Calc.cs"), stub);
             File.WriteAllText(Path.Combine(Folder, "Challenge.Tests", "CalcTests.cs"), tests);
             if (reference is not null) Write(".verify/reference/Calc.cs", reference);
@@ -61,6 +61,7 @@ public sealed class VerifierTests
         }
 
         public DailyPaths Paths { get; }
+        public Language Language => ScaffolderTests.Csharp(Paths);
         public string Folder { get; }
 
         public void Write(string relative, string content)
@@ -82,7 +83,7 @@ public sealed class VerifierTests
     {
         using var f = new Fixture(GoodTests);
 
-        var result = Verifier.Run(f.Paths, f.Folder, Day);
+        var result = Verifier.Run(f.Paths, f.Language, f.Folder, Day);
 
         Assert.IsTrue(result.Ok, string.Join(" | ", result.Problems));
         Assert.IsTrue(result.StubBuilds);
@@ -100,7 +101,7 @@ public sealed class VerifierTests
     {
         using var f = new Fixture(LenientTests);
 
-        var result = Verifier.Run(f.Paths, f.Folder, Day);
+        var result = Verifier.Run(f.Paths, f.Language, f.Folder, Day);
 
         Assert.IsFalse(result.Ok);
         Assert.AreEqual(0, result.NaiveFailed);
@@ -113,7 +114,7 @@ public sealed class VerifierTests
     {
         using var f = new Fixture(GoodTests, reference: WrongReference);
 
-        var result = Verifier.Run(f.Paths, f.Folder, Day);
+        var result = Verifier.Run(f.Paths, f.Language, f.Folder, Day);
 
         Assert.IsFalse(result.Ok);
         Assert.IsLessThan(result.ReferenceTotal, result.ReferencePassed);
@@ -125,7 +126,7 @@ public sealed class VerifierTests
     {
         using var f = new Fixture(TwoTests);
 
-        var result = Verifier.Run(f.Paths, f.Folder, Day);
+        var result = Verifier.Run(f.Paths, f.Language, f.Folder, Day);
 
         Assert.IsFalse(result.Ok);
         Assert.IsTrue(result.Problems.Any(p => p.Contains("at least 3", StringComparison.Ordinal)));
@@ -136,7 +137,7 @@ public sealed class VerifierTests
     {
         using var f = new Fixture(GoodTests, naive: null);
 
-        var result = Verifier.Run(f.Paths, f.Folder, Day);
+        var result = Verifier.Run(f.Paths, f.Language, f.Folder, Day);
 
         Assert.IsFalse(result.Ok);
         Assert.IsTrue(result.Problems.Any(p => p.Contains(".verify/naive", StringComparison.Ordinal)));
@@ -147,7 +148,7 @@ public sealed class VerifierTests
     {
         using var f = new Fixture(GoodTests, stub: "namespace Challenge; public static class Calc { }");
 
-        var result = Verifier.Run(f.Paths, f.Folder, Day);
+        var result = Verifier.Run(f.Paths, f.Language, f.Folder, Day);
 
         Assert.IsFalse(result.Ok);
         Assert.IsFalse(result.StubBuilds);
@@ -158,7 +159,7 @@ public sealed class VerifierTests
     {
         using var f = new Fixture(LenientTests, naive: "namespace Challenge; public static class Calc { public static int Sum(IEnumerable<int> values) => throw new InvalidOperationException(); }");
 
-        var result = Verifier.Run(f.Paths, f.Folder, Day);
+        var result = Verifier.Run(f.Paths, f.Language, f.Folder, Day);
 
         Assert.IsFalse(result.Ok);
         Assert.IsTrue(result.Problems.Any(p => p.Contains("naive", StringComparison.Ordinal) && p.Contains("throw", StringComparison.Ordinal)), string.Join(" | ", result.Problems));
@@ -170,7 +171,7 @@ public sealed class VerifierTests
         using var f = new Fixture(GoodTests);
         f.Write(".verify/reference/Helper.cs", "namespace Challenge; internal static class Helper { }");
 
-        var result = Verifier.Run(f.Paths, f.Folder, Day);
+        var result = Verifier.Run(f.Paths, f.Language, f.Folder, Day);
 
         Assert.IsFalse(result.Ok);
         Assert.IsTrue(result.Problems.Any(p => p.Contains("Helper.cs", StringComparison.Ordinal)), string.Join(" | ", result.Problems));
@@ -181,7 +182,7 @@ public sealed class VerifierTests
     {
         using var f = new Fixture(GoodTests, stub: Reference);
 
-        var result = Verifier.Run(f.Paths, f.Folder, Day);
+        var result = Verifier.Run(f.Paths, f.Language, f.Folder, Day);
 
         Assert.IsFalse(result.Ok);
         Assert.IsTrue(result.StubBuilds);

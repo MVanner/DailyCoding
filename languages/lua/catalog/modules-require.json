@@ -1,0 +1,61 @@
+{
+  "id": "modules-require",
+  "name": "Modules & require",
+  "seeds": {
+    "Beginner": {
+      "learningGoal": "Write a module table, return it, and use require with caching.",
+      "gotchas": [
+        "require caches by name in package.loaded, so a second require returns the same table",
+        "A module that forgets to return M gives true",
+        "Global assignment instead of local leaks into the environment"
+      ],
+      "goodSolutionShows": [
+        "local M = {} ... return M pattern",
+        "Private helper functions kept local",
+        "Tests proving module identity across requires"
+      ],
+      "shapeHints": [
+        "a string utilities module",
+        "a counter module whose state is shared by all requirers",
+        "a small math helpers module"
+      ]
+    },
+    "Intermediate": {
+      "learningGoal": "Structure multi-file modules with init.lua, dependency injection and package.loaded.",
+      "gotchas": [
+        "Circular requires get a partially loaded module or loop",
+        "Clearing package.loaded[name] is needed to reload in tests",
+        "package.path order decides which file wins"
+      ],
+      "goodSolutionShows": [
+        "Lazy require inside functions to break cycles",
+        "Dependencies injected rather than required globally",
+        "Reload via package.loaded in tests"
+      ],
+      "shapeHints": [
+        "a plugin with core, util and init modules",
+        "injecting a logger into a module",
+        "a lazy-loaded optional dependency with a fallback"
+      ]
+    },
+    "Advanced": {
+      "learningGoal": "Design module APIs with versioning, lazy submodules and sandboxed environments.",
+      "gotchas": [
+        "Lazy submodule via __index calls require once and caches on the table",
+        "package.preload provides modules without files",
+        "require caches in package.loaded, so a module re-required in a later test returns the same table unless package.loaded[name] is cleared first"
+      ],
+      "goodSolutionShows": [
+        "__index-based lazy loader",
+        "package.preload used to provide fake modules in tests",
+        "Stable public API surface",
+        "No environment sandboxing (setfenv/_ENV differ between Lua versions); isolation through package.loaded and package.preload"
+      ],
+      "shapeHints": [
+        "a lazy-loading module table (M.ui, M.util)",
+        "a fake module injected through package.preload",
+        "a registry module with explicit reset for tests"
+      ]
+    }
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "id": "coroutines-structured-concurrency",
+  "name": "Coroutines basics & structured concurrency",
+  "seeds": {
+    "Intermediate": {
+      "learningGoal": "Launch and await concurrent work with coroutineScope, async and launch, tested in virtual time.",
+      "gotchas": [
+        "A failing child cancels the whole coroutineScope",
+        "runTest skips delays, so currentTime shows virtual not real time",
+        "async results must be awaited or exceptions are lost until awaited"
+      ],
+      "goodSolutionShows": [
+        "coroutineScope with async/await for parallel decomposition",
+        "delay-based logic tested with virtual time",
+        "No GlobalScope and no runBlocking in library code"
+      ],
+      "shapeHints": [
+        "fetching two values concurrently with injected suspend lambdas and asserting total virtual time",
+        "a parallel map that preserves input order",
+        "a timeout around a slow operation"
+      ]
+    },
+    "Advanced": {
+      "learningGoal": "Handle cancellation, timeouts, exceptions and supervision correctly.",
+      "gotchas": [
+        "Catching CancellationException breaks cancellation",
+        "withTimeout throws while withTimeoutOrNull returns null",
+        "supervisorScope isolates child failures but exceptions in launch still propagate to the handler"
+      ],
+      "goodSolutionShows": [
+        "Cooperative cancellation (ensureActive, isActive) in loops",
+        "finally blocks with NonCancellable for cleanup",
+        "Rethrow CancellationException"
+      ],
+      "shapeHints": [
+        "a retry with backoff using delay and virtual time",
+        "a parallel fetch where one failure must not cancel the others",
+        "a race returning the first result and cancelling the rest"
+      ]
+    },
+    "Expert": {
+      "learningGoal": "Design concurrency primitives with Mutex, channels and dispatcher control.",
+      "gotchas": [
+        "Shared mutable state needs a Mutex or confinement",
+        "Channel capacity and close semantics decide dropped or buffered elements",
+        "Dispatcher injection is needed for deterministic tests"
+      ],
+      "goodSolutionShows": [
+        "Injected CoroutineDispatcher",
+        "Mutex.withLock around check-then-act",
+        "Channels closed and consumed deterministically"
+      ],
+      "shapeHints": [
+        "a rate limiter with an injected clock",
+        "a worker pool consuming from a Channel",
+        "a single-flight cache deduplicating concurrent loads"
+      ]
+    }
+  }
+}

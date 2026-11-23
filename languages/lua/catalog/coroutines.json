@@ -1,0 +1,60 @@
+{
+  "id": "coroutines",
+  "name": "Coroutines",
+  "seeds": {
+    "Intermediate": {
+      "learningGoal": "Drive coroutines with resume and yield, producing generators and passing values both ways.",
+      "gotchas": [
+        "resume returns true plus values or false plus error",
+        "Resuming a dead coroutine returns false with 'cannot resume dead coroutine'",
+        "yield passes values out and resume passes values in"
+      ],
+      "goodSolutionShows": [
+        "coroutine.wrap generators",
+        "Status checks with coroutine.status",
+        "Two-way value passing"
+      ],
+      "shapeHints": [
+        "a generator of game spawn waves",
+        "a producer/consumer pair",
+        "a scripted sequence that advances one step per update call"
+      ]
+    },
+    "Advanced": {
+      "learningGoal": "Use coroutines for cooperative scheduling: sequencing over time and async-style APIs.",
+      "gotchas": [
+        "Errors inside a coroutine do not propagate, resume returns false",
+        "yield across pcall is not allowed in Lua 5.1 (but is in LuaJIT)",
+        "A scheduler needs a time source and must not use real sleep"
+      ],
+      "goodSolutionShows": [
+        "A scheduler with an injected clock or dt that wakes coroutines",
+        "Error handling around resume",
+        "Deterministic ordering of wake-ups"
+      ],
+      "shapeHints": [
+        "a cutscene/dialogue sequencer waiting N seconds (dt passed in) between steps",
+        "a Neovim-style async runner where a fake vim.schedule queues callbacks and the coroutine resumes in them",
+        "a task scheduler with wait(seconds)"
+      ]
+    },
+    "Expert": {
+      "learningGoal": "Build structured async helpers on coroutines: await, cancellation and combinators.",
+      "gotchas": [
+        "Cancelling a coroutine that holds resources needs explicit cleanup",
+        "A callback that fires synchronously resumes the coroutine before it yielded",
+        "Combinators must collect results in order"
+      ],
+      "goodSolutionShows": [
+        "Callback-to-coroutine bridge handling sync callbacks",
+        "Cancellation tokens",
+        "all() combinator preserving order, driven by a fake scheduler"
+      ],
+      "shapeHints": [
+        "an await helper wrapping callback-style fake vim.system or timers",
+        "a join of several tasks",
+        "a cancellable sleep sequence in a game timeline"
+      ]
+    }
+  }
+}

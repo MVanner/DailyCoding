@@ -1,0 +1,42 @@
+{
+  "id": "neovim-keymap-registry",
+  "name": "Neovim keymaps & autocommands registry",
+  "seeds": {
+    "Intermediate": {
+      "learningGoal": "Build a keymap registry that records mappings, detects conflicts and applies them through a fake vim.keymap.set.",
+      "gotchas": [
+        "Same lhs in the same mode overrides silently in Neovim, so detect conflicts yourself",
+        "mode can be a string or a list of modes",
+        "Buffer-local mappings are separate from global ones"
+      ],
+      "goodSolutionShows": [
+        "Normalising mode into a list",
+        "Registry stores intent, apply() calls the fake vim.keymap.set",
+        "Conflict detection reported, not thrown away"
+      ],
+      "shapeHints": [
+        "a keymap registry with conflict detection",
+        "applying mappings to a fake vim.keymap.set that records calls",
+        "grouping mappings by plugin with a description prefix"
+      ]
+    },
+    "Advanced": {
+      "learningGoal": "Manage autocommand groups with idempotent setup and cleanup using a fake vim.api.",
+      "gotchas": [
+        "Creating an augroup without clear = true duplicates autocommands on re-source",
+        "Pattern lists vs single patterns",
+        "Callbacks run with event data tables; tests must supply them"
+      ],
+      "goodSolutionShows": [
+        "augroup created with clear semantics in the fake",
+        "A dispatcher that triggers fake events to run callbacks",
+        "Deletion of a registered autocommand via returned id"
+      ],
+      "shapeHints": [
+        "an autocommand registry with fire(event, args) on a fake vim.api",
+        "debouncing a BufWritePost handler with an injected timer function",
+        "re-running setup without duplicating handlers"
+      ]
+    }
+  }
+}

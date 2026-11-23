@@ -1,0 +1,60 @@
+{
+  "id": "optionals",
+  "name": "Optionals & unwrapping",
+  "seeds": {
+    "Beginner": {
+      "learningGoal": "Handle absent values with optionals using if let, guard let and nil-coalescing instead of force-unwrapping.",
+      "gotchas": [
+        "Force-unwrapping nil crashes the test process, so a test can only assert on the safe path",
+        "An empty string is not nil; Int(\"\") and Int(\" 42\") return nil",
+        "Optional chaining returns an optional, even when the final property is non-optional"
+      ],
+      "goodSolutionShows": [
+        "guard let with an early return rather than nested if let pyramids",
+        "?? with a sensible default instead of !",
+        "No force-unwraps anywhere"
+      ],
+      "shapeHints": [
+        "parsing a user profile from string fields where some are missing",
+        "picking the first non-empty display name from several optional sources",
+        "reading an optional nested address.city safely"
+      ]
+    },
+    "Intermediate": {
+      "learningGoal": "Transform optionals with map, flatMap and compactMap and avoid double-optional traps.",
+      "gotchas": [
+        "map on an optional that returns an optional yields Optional<Optional<T>>; flatMap flattens",
+        "compactMap drops nils but also hides parse failures the caller may want to count",
+        "Dictionary subscripts return an optional, and a value that is itself optional makes a double optional"
+      ],
+      "goodSolutionShows": [
+        "map/flatMap chains on Optional instead of nested if let",
+        "compactMap over a collection for parse-and-filter",
+        "Clear semantics for missing vs invalid input"
+      ],
+      "shapeHints": [
+        "parsing a list of numeric strings and reporting which indices failed",
+        "resolving a settings value through a chain of optional lookups",
+        "merging optional fields from two partial records"
+      ]
+    },
+    "Advanced": {
+      "learningGoal": "Design APIs where optionality models real absence, using optional pattern matching, Optional extensions and throwing alternatives.",
+      "gotchas": [
+        "if case let x? = value and switch over optionals must be exhaustive about .none",
+        "Optionals compare with == and != when the wrapped type is Equatable (nil == nil, nil != 1), but < and > are not available on optionals and need unwrapping",
+        "Optional<Bool> in conditions is tri-state and easy to misread"
+      ],
+      "goodSolutionShows": [
+        "Optional extension (e.g. a requiring or orThrow helper) that reads naturally",
+        "Pattern matching with .some/.none and ? patterns where they clarify",
+        "Choosing optional vs throws vs default deliberately"
+      ],
+      "shapeHints": [
+        "an Optional extension that converts nil into a typed error",
+        "a tri-state consent flag modelled safely",
+        "a lookup function returning Result instead of nil with a reason"
+      ]
+    }
+  }
+}

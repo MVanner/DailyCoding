@@ -1,0 +1,80 @@
+{
+  "id": "protocols-extensions",
+  "name": "Protocols & extensions",
+  "seeds": {
+    "Beginner": {
+      "learningGoal": "Define a protocol, conform types to it and add behaviour with extensions.",
+      "gotchas": [
+        "A protocol extension method that is not a requirement is statically dispatched",
+        "Protocols cannot store properties, only declare them",
+        "Conforming in an extension must still satisfy every requirement"
+      ],
+      "goodSolutionShows": [
+        "A small protocol with two conforming types and a function accepting the protocol",
+        "Protocol extension supplying a default implementation",
+        "Extensions to add computed properties instead of subclassing"
+      ],
+      "shapeHints": [
+        "shapes with area and perimeter",
+        "notification channels that format a message differently",
+        "a Describable protocol with a default description"
+      ]
+    },
+    "Intermediate": {
+      "learningGoal": "Use protocol extensions with constraints and default implementations, understanding static vs dynamic dispatch.",
+      "gotchas": [
+        "A default implementation not declared as a requirement is not overridden through the protocol type",
+        "Conditional conformance: extension Array: P where Element: P",
+        "Ambiguity when two extensions with overlapping constraints both apply"
+      ],
+      "goodSolutionShows": [
+        "Constrained extensions (where Self: Equatable etc.)",
+        "Requirement declared in the protocol so dispatch is dynamic",
+        "Composition of small protocols"
+      ],
+      "shapeHints": [
+        "a Validator protocol with composed validators",
+        "extending Sequence with a statistic helper only for numeric elements",
+        "a Pricing protocol with default discount logic"
+      ]
+    },
+    "Advanced": {
+      "learningGoal": "Design protocol-oriented abstractions with protocol composition, existentials and conditional conformance.",
+      "gotchas": [
+        "Operations on an array of any-boxed values dispatch to each element's own conformance, so tests need elements of different concrete types",
+        "Equality across heterogeneous existentials needs an explicit rule such as comparing the concrete type first, and tests must cover equal and unequal pairs of different types",
+        "A default provided through a constrained extension applies only where the constraint holds, so tests need elements that satisfy it and elements that fall back"
+      ],
+      "goodSolutionShows": [
+        "Conditional conformance such as Equatable for a generic wrapper",
+        "some used for return types and any only where heterogeneity is needed",
+        "Tests proving behaviour through the protocol, not concrete types",
+        "Retroactive conformance avoided, or isolated, for types the module does not own",
+        "Self-requirement protocols used as existentials only through any"
+      ],
+      "shapeHints": [
+        "a Plugin pipeline of heterogeneous stages",
+        "Comparable for a wrapper of Comparable values",
+        "a heterogeneous collection of Renderable items with constrained helpers"
+      ]
+    },
+    "Expert": {
+      "learningGoal": "Combine protocol composition, existentials and constrained extensions into an extensible design, controlling which implementation wins and testing it through the protocol.",
+      "gotchas": [
+        "Two constrained extensions that provide the same method are ambiguous when both apply, and the more constrained one wins only when it is strictly more specific",
+        "A conforming type's method with the same name as a defaulted non-requirement is called through the concrete type but not through the protocol type",
+        "Operations on a collection of existentials can only use the protocol's requirements, so extra behaviour needs a requirement or an optional capability protocol checked with as?"
+      ],
+      "goodSolutionShows": [
+        "Capability protocols checked with as? and tested with conforming and non-conforming types",
+        "Behaviour verified through the existential type rather than the concrete types",
+        "Defaults declared as requirements so overrides are honoured through the protocol"
+      ],
+      "shapeHints": [
+        "a plugin system where some plugins also conform to a Configurable capability",
+        "validator composition with a general all-of and a specialised path for String elements",
+        "a Formatter protocol whose collection extension picks a specialised path for strings"
+      ]
+    }
+  }
+}

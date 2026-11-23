@@ -1,0 +1,42 @@
+{
+  "id": "game-state-machines",
+  "name": "Game state machines",
+  "seeds": {
+    "Intermediate": {
+      "learningGoal": "Implement a finite state machine with transitions, enter/exit hooks and guarded events.",
+      "gotchas": [
+        "Transitions to the same state: should enter/exit fire again?",
+        "Invalid events should be ignored or reported, but consistently",
+        "Hooks must fire in order: exit old, then enter new"
+      ],
+      "goodSolutionShows": [
+        "Table-driven transitions rather than if-chains",
+        "Enter and exit callbacks recorded in tests",
+        "Pure logic with dt passed to update"
+      ],
+      "shapeHints": [
+        "an enemy AI with idle, chase and attack states",
+        "a menu flow with pause and resume",
+        "a door with open, closed and locked states"
+      ]
+    },
+    "Advanced": {
+      "learningGoal": "Build a hierarchical or pushdown state machine with timers driven by dt.",
+      "gotchas": [
+        "Pushing a state must pause but not exit the one below",
+        "Timers accumulate dt and may overshoot, so carry over the remainder",
+        "Transition requested inside update should apply after the update completes"
+      ],
+      "goodSolutionShows": [
+        "Stack of states with pause/resume semantics",
+        "Timed transitions accumulating dt",
+        "Deferred transition applied once per update"
+      ],
+      "shapeHints": [
+        "a pause menu pushed over gameplay",
+        "a boss with phases advancing after N seconds of dt",
+        "a character with stun and invulnerability timers"
+      ]
+    }
+  }
+}

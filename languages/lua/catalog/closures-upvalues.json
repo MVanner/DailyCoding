@@ -1,0 +1,60 @@
+{
+  "id": "closures-upvalues",
+  "name": "Closures & upvalues",
+  "seeds": {
+    "Beginner": {
+      "learningGoal": "Create functions that remember state through upvalues.",
+      "gotchas": [
+        "Each call to the factory makes a new upvalue; calls to the same closure share it",
+        "Loop variables in for loops are fresh per iteration in Lua, but a while-loop variable is shared",
+        "Closures keep captured values alive"
+      ],
+      "goodSolutionShows": [
+        "Counter and accumulator factories",
+        "Private state hidden in the closure",
+        "Independent instances from one factory"
+      ],
+      "shapeHints": [
+        "makeCounter with step",
+        "a once() wrapper",
+        "a rate-limited callback using an injected clock function"
+      ]
+    },
+    "Intermediate": {
+      "learningGoal": "Use closures for iterators, memoisation and callbacks.",
+      "gotchas": [
+        "A stateful iterator returned by a factory vs stateless generic for",
+        "Memoising nil or false results needs a distinct cache sentinel",
+        "Closures capturing a loop variable in a while loop share it"
+      ],
+      "goodSolutionShows": [
+        "Closure-based iterators used with for ... in",
+        "Memoise with explicit key handling for multiple arguments",
+        "No global state"
+      ],
+      "shapeHints": [
+        "a range iterator",
+        "memoised fibonacci or path-cost function",
+        "a debounce helper with injected time"
+      ]
+    },
+    "Advanced": {
+      "learningGoal": "Implement functional utilities with correct upvalue sharing: partial, compose, curry and event emitters.",
+      "gotchas": [
+        "Two closures created in the same scope share upvalues",
+        "Varargs cannot be captured directly; they must be packed",
+        "Callbacks removed while iterating a listener list skip entries"
+      ],
+      "goodSolutionShows": [
+        "Safe removal of listeners during emit",
+        "Packing varargs with select('#', ...)",
+        "Compose and partial that preserve nil arguments"
+      ],
+      "shapeHints": [
+        "an event emitter with on, off and emit",
+        "a partial/curry helper",
+        "an undo stack of closures"
+      ]
+    }
+  }
+}

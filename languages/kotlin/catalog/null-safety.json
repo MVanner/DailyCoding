@@ -1,0 +1,60 @@
+{
+  "id": "null-safety",
+  "name": "Null safety",
+  "seeds": {
+    "Beginner": {
+      "learningGoal": "Use nullable types with safe calls, the Elvis operator and let instead of null checks and !!.",
+      "gotchas": [
+        "!! throws NullPointerException; a test can only assert on the safe path",
+        "?.let { } skips the block for null, which is easy to confuse with an empty value",
+        "String?.isNullOrBlank() vs isNullOrEmpty() treat whitespace differently"
+      ],
+      "goodSolutionShows": [
+        "?. and ?: replacing nested if (x != null)",
+        "No !! anywhere",
+        "Early return with ?: return"
+      ],
+      "shapeHints": [
+        "resolving a user's display name from nullable first, last and nickname",
+        "reading a nested optional address city",
+        "parsing a nullable string to an Int with a default"
+      ]
+    },
+    "Intermediate": {
+      "learningGoal": "Combine nullable chains with smart casts, safe casts and collection helpers such as mapNotNull and firstOrNull.",
+      "gotchas": [
+        "Smart cast fails on mutable var properties and open or custom-getter properties",
+        "as? returns null while as throws ClassCastException",
+        "map { it?.x } keeps nulls while mapNotNull drops them"
+      ],
+      "goodSolutionShows": [
+        "mapNotNull / filterNotNull instead of filter plus !!",
+        "as? with ?: for type-based branching",
+        "Local val to enable smart cast"
+      ],
+      "shapeHints": [
+        "parsing a list of strings and reporting how many failed",
+        "looking up a config through several fallback sources",
+        "extracting typed values from a Map<String, Any?>"
+      ]
+    },
+    "Advanced": {
+      "learningGoal": "Design APIs that make absence explicit and handle platform-type and generic nullability edge cases.",
+      "gotchas": [
+        "A generic T has an implicit nullable upper bound (T : Any? ); use T : Any to forbid null",
+        "Map.get returns V? even if V is nullable, making null ambiguous",
+        "requireNotNull and checkNotNull throw different exception types"
+      ],
+      "goodSolutionShows": [
+        "T : Any bound where null must be rejected",
+        "contains/containsKey to distinguish absent from null value",
+        "requireNotNull with lazy message"
+      ],
+      "shapeHints": [
+        "a typed cache that distinguishes missing from cached null",
+        "a generic Result-like holder rejecting null",
+        "a safe lookup helper over nested maps"
+      ]
+    }
+  }
+}

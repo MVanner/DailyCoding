@@ -1,0 +1,60 @@
+{
+  "id": "async-await-structured-concurrency",
+  "name": "async/await & structured concurrency",
+  "seeds": {
+    "Intermediate": {
+      "learningGoal": "Write async functions that fan out with async let and TaskGroup, collecting results deterministically.",
+      "gotchas": [
+        "TaskGroup results arrive in completion order, not submission order",
+        "async let child tasks are cancelled and awaited when scope exits",
+        "Task.sleep and clocks make tests slow unless injected"
+      ],
+      "goodSolutionShows": [
+        "TaskGroup with result ordering restored by index",
+        "async let for a fixed number of concurrent calls",
+        "An injected async dependency (closure) for deterministic tests"
+      ],
+      "shapeHints": [
+        "fetching several user profiles via an injected async loader and returning them in input order",
+        "combining two async lookups into one result",
+        "limiting concurrency to N tasks with an injected worker closure"
+      ]
+    },
+    "Advanced": {
+      "learningGoal": "Handle cancellation, timeouts and error propagation in structured concurrency.",
+      "gotchas": [
+        "Cancellation is cooperative; a task must check Task.isCancelled or call try Task.checkCancellation",
+        "A throwing child cancels siblings in a throwing group but results already collected are lost",
+        "Unstructured Task {} escapes the parent's cancellation"
+      ],
+      "goodSolutionShows": [
+        "Cancellation checks inside loops",
+        "withThrowingTaskGroup with first-success semantics",
+        "Not using detached tasks where structure suffices"
+      ],
+      "shapeHints": [
+        "a race that returns the first successful result and cancels others",
+        "a timeout wrapper using an injected sleeper",
+        "a retry loop respecting cancellation"
+      ]
+    },
+    "Expert": {
+      "learningGoal": "Bridge callback APIs and design async sequences with continuations and AsyncStream.",
+      "gotchas": [
+        "A checked continuation must be resumed exactly once",
+        "AsyncStream buffering policy decides dropped values",
+        "Forgetting onTermination leaks the producer"
+      ],
+      "goodSolutionShows": [
+        "withCheckedThrowingContinuation resumed once in every path",
+        "AsyncStream finishing when the source completes",
+        "Test that consumes the stream deterministically"
+      ],
+      "shapeHints": [
+        "wrapping a callback-based loader as async",
+        "turning a delegate-style event source into an AsyncStream",
+        "merging two AsyncStreams deterministically"
+      ]
+    }
+  }
+}

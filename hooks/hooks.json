@@ -1,5 +1,5 @@
 {
-  "description": "Once a day, on the first Claude Code start, show a one-line nudge for today's C# challenge.",
+  "description": "Once a day, on the first Claude Code start, show a one-line nudge for today's coding challenge.",
   "hooks": {
     "SessionStart": [
       {

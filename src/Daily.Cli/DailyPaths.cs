@@ -11,8 +11,7 @@ public sealed record DailyPaths(string DataDir, string PluginRoot)
     public string BinDir => Path.Combine(DataDir, "bin");
     public string ReferencesDir => Path.Combine(DataDir, "references");
     public string HookErrorLog => Path.Combine(DataDir, "hook-errors.log");
-    public string CatalogDir => Path.Combine(PluginRoot, "catalog");
-    public string TemplatesDir => Path.Combine(PluginRoot, "templates", "challenge");
+    public string LanguagesDir => Path.Combine(PluginRoot, "languages");
 
     /// <summary>
     /// Resolves paths from <c>--data</c>/<c>--plugin-root</c>, falling back to the

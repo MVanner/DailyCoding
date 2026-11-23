@@ -1,0 +1,34 @@
+{
+  "id": "kotlin",
+  "name": "Kotlin",
+  "stubDir": "src/main/kotlin",
+  "testDir": "src/test/kotlin",
+  "sourceExtensions": [".kt", ".kts"],
+  "ignoreDirs": ["build", ".gradle", ".kotlin"],
+  "test": {
+    "commands": [
+      { "args": ["./gradlew", "test", "--console=plain", "--quiet"], "os": "unix" },
+      { "args": ["gradlew.bat", "test", "--console=plain", "--quiet"], "os": "windows" }
+    ],
+    "results": "build/test-results/test/*.xml",
+    "format": "junit"
+  },
+  "naiveForbidden": "\\b(throw|TODO\\s*\\(|error\\s*\\()",
+  "requires": [
+    {
+      "command": "java",
+      "args": ["-version"],
+      "versionPattern": "version \"(?:1\\.)?(\\d+(?:\\.\\d+)*)",
+      "minVersion": "17",
+      "installHint": "Install a JDK 17 or newer, e.g. Temurin from https://adoptium.net. Android Studio's bundled JDK works when JAVA_HOME points to it."
+    }
+  ],
+  "ide": "Open the folder in IntelliJ IDEA or Android Studio.",
+  "runnerHint": "Install a JDK 17 or newer, e.g. Temurin from https://adoptium.net. Android Studio's bundled JDK works when JAVA_HOME points to it.",
+  "levelHints": {
+    "Beginner": "new to Kotlin: null safety, data classes, collections.",
+    "Intermediate": "comfortable day to day: sealed classes and `when`, extension and scope functions, lambdas.",
+    "Advanced": "design trade-offs: coroutines, Flow, generics and variance, delegation.",
+    "Expert": "deep language and runtime topics: structured concurrency edge cases, Flow operators, variance-correct generics."
+  }
+}

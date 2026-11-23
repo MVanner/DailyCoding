@@ -1,0 +1,60 @@
+{
+  "id": "vector-math-aabb",
+  "name": "Vector math & AABB collision",
+  "seeds": {
+    "Beginner": {
+      "learningGoal": "Implement 2D vector operations and a simple rectangle overlap test.",
+      "gotchas": [
+        "Touching edges: decide whether < or <= and document it",
+        "Normalising a zero vector divides by zero (nan or inf)",
+        "Floating point comparisons need an epsilon"
+      ],
+      "goodSolutionShows": [
+        "Vec2 functions that return new tables without mutating inputs",
+        "Safe normalise for zero length",
+        "AABB overlap using separate axis checks"
+      ],
+      "shapeHints": [
+        "add, scale, length and normalise for a player's velocity",
+        "a bullet-versus-wall rectangle overlap",
+        "a point inside rectangle check for UI hit testing"
+      ]
+    },
+    "Intermediate": {
+      "learningGoal": "Resolve AABB collisions: penetration depth, minimum translation and swept movement along axes.",
+      "gotchas": [
+        "Resolving both axes at once causes sticking in corners; resolve axis by axis",
+        "The sign of the push-out depends on which side the overlap is smaller",
+        "Tunnelling at high speed when moving more than a tile per step"
+      ],
+      "goodSolutionShows": [
+        "Penetration on each axis with the smaller one chosen",
+        "Move-then-resolve per axis",
+        "Deterministic results for exact edge contact"
+      ],
+      "shapeHints": [
+        "a player rectangle moving against tile walls",
+        "push-out resolution for two overlapping boxes",
+        "a simple platformer step with gravity (dt passed in)"
+      ]
+    },
+    "Advanced": {
+      "learningGoal": "Implement swept AABB or ray-vs-box tests returning time of impact and normal.",
+      "gotchas": [
+        "Division by zero for axis-parallel rays should use huge values, not nan",
+        "Starting inside the box",
+        "Time of impact must be clamped to [0, 1]"
+      ],
+      "goodSolutionShows": [
+        "Slab method for ray vs box",
+        "Returning t and the surface normal",
+        "Tests with grazing and parallel cases"
+      ],
+      "shapeHints": [
+        "a bullet that must not tunnel through a thin wall",
+        "a ray from a character's eyes hitting boxes",
+        "a sliding response along a wall after impact"
+      ]
+    }
+  }
+}

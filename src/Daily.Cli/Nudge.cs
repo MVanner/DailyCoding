@@ -7,7 +7,8 @@ namespace Daily.Cli;
 /// <summary>The SessionStart hook: one line on the first session of the day, nothing otherwise.</summary>
 public static class Nudge
 {
-    public const string NotConfiguredMessage = "☕ Daily C# challenges are installed — run /daily:setup to pick your level";
+    public const string NotConfiguredMessage = "☕ Daily coding challenges are installed — run /daily:setup to pick your languages";
+    public const string NoUsableLanguageMessage = "☕ No daily challenge language is usable — run /daily:setup";
     public const string StaleSuffix = " (plugin updated — run /daily:setup to rebuild)";
 
     // Default escaping keeps hook output pure ASCII (☕ becomes \u2615), so it survives a non-UTF-8 console code page on Windows.
@@ -30,14 +31,30 @@ public static class Nudge
             return Output(NotConfiguredMessage);
         }
 
-        var catalog = CatalogLoader.Load(paths.CatalogDir);
-        var entry = state.For(today) ?? Today.CreatePickedEntry(today, config, catalog, state.History);
+        var warnings = new List<string>();
+        var languages = CliHelpers.LoadLanguages(paths, warnings);
+        var catalogs = Catalogs.Load(languages, warnings);
+        var entry = Today.Resolve(state, config, catalogs, today);
+        if (entry is null && warnings.Count > 0)
+        {
+            // Nothing is usable because something is broken, not because of the config: stay silent (the command logs this).
+            throw new InvalidOperationException(string.Join(" | ", warnings));
+        }
+
+        LogWarnings(paths, warnings);
+        if (entry is null)
+        {
+            store.SaveState(state with { LastNudgeDate = today });
+            return Output(NoUsableLanguageMessage);
+        }
+
         var history = state.History.Where(e => e.Date != today).Append(entry).OrderBy(e => e.Date).ToList();
         store.SaveState(new DailyState(today, history));
 
-        var topicName = catalog.FirstOrDefault(t => t.Id == entry.TopicId)?.Name ?? entry.TopicId;
+        var topicName = catalogs.GetValueOrDefault(entry.Language)?.FirstOrDefault(t => t.Id == entry.TopicId)?.Name ?? entry.TopicId;
         var stretch = entry.Stretch ? " — stretch day" : "";
-        var message = $"☕ Today's C# challenge is ready ({entry.Level} · {topicName}{stretch}) — /daily:start when you have 15 min";
+        var languageName = languages.FirstOrDefault(l => l.Id == entry.Language)?.Name ?? entry.Language;
+        var message = $"☕ Today's {languageName} challenge is ready ({entry.Level} · {topicName}{stretch}) — /daily:start when you have 15 min";
         if (BuildStamp.IsStale(paths))
         {
             message += StaleSuffix;
@@ -71,6 +88,24 @@ public static class Nudge
         }
 
         return ExitCodes.Ok;
+    }
+
+    private static void LogWarnings(DailyPaths paths, List<string> warnings)
+    {
+        if (warnings.Count == 0)
+        {
+            return;
+        }
+
+        try
+        {
+            Directory.CreateDirectory(paths.DataDir);
+            File.AppendAllLines(paths.HookErrorLog, warnings.Select(w => $"{DateTimeOffset.Now:O} {w}"));
+        }
+        catch (Exception)
+        {
+            // Logging is best effort; the hook must stay silent.
+        }
     }
 
     private static string Output(string message) =>

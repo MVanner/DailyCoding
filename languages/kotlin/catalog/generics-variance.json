@@ -1,0 +1,61 @@
+{
+  "id": "generics-variance",
+  "name": "Generics & variance",
+  "seeds": {
+    "Intermediate": {
+      "learningGoal": "Write generic functions with upper bounds and understand declaration-site variance.",
+      "gotchas": [
+        "List<out E> is covariant, MutableList<E> is invariant",
+        "Erasure: a List<String> and a List<Int> are indistinguishable at runtime, so a type-filtering helper must inspect the elements and be tested with mixed lists",
+        "Comparing a T without a Comparable bound does not compile"
+      ],
+      "goodSolutionShows": [
+        "Upper bounds (T : Comparable<T>) replacing casts",
+        "out and in used where the type is only produced or consumed",
+        "where clause for multiple bounds",
+        "filterIsInstance or an explicit KClass instead of an is-check on a parameterised type"
+      ],
+      "shapeHints": [
+        "a generic maxOf over Comparable",
+        "a read-only Box<out T> and a Sink<in T>",
+        "a typed event bus"
+      ]
+    },
+    "Advanced": {
+      "learningGoal": "Use reified type parameters, star projections and use-site variance.",
+      "gotchas": [
+        "reified requires inline",
+        "Star projection hides the type, so reads are Any? and writes impossible",
+        "Use-site out/in projections limit members"
+      ],
+      "goodSolutionShows": [
+        "inline reified for filterIsInstance-like helpers",
+        "Correct use-site variance when copying between collections",
+        "Type-safe heterogeneous container with KClass keys"
+      ],
+      "shapeHints": [
+        "a typed registry keyed by KClass",
+        "a copy function from MutableList<in T> to List<out T>",
+        "a generic parse helper using reified T"
+      ]
+    },
+    "Expert": {
+      "learningGoal": "Design variance-correct APIs and handle type-system corner cases.",
+      "gotchas": [
+        "A covariant container's contains(element) can be called with a value that is not a T through a widened reference, so tests cover lookups of foreign values",
+        "Platform types and generic arrays",
+        "Nothing as a subtype enabling covariant empty values"
+      ],
+      "goodSolutionShows": [
+        "@UnsafeVariance used sparingly and explained",
+        "Sealed generic hierarchies with out T",
+        "API that avoids unchecked casts"
+      ],
+      "shapeHints": [
+        "a covariant Either with Nothing-typed Left or Right",
+        "a typed key-value store with safe getters",
+        "a Comparator-like in T abstraction"
+      ]
+    }
+  }
+}

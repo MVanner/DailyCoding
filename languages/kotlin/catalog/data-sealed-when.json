@@ -1,0 +1,60 @@
+{
+  "id": "data-sealed-when",
+  "name": "Data & sealed classes with when",
+  "seeds": {
+    "Beginner": {
+      "learningGoal": "Model values with data classes and use copy, destructuring and equality.",
+      "gotchas": [
+        "copy is shallow, so mutable list properties remain shared",
+        "Only constructor properties participate in equals, hashCode and toString",
+        "Destructuring order follows constructor order"
+      ],
+      "goodSolutionShows": [
+        "Data class with val properties and copy for updates",
+        "Destructuring where it clarifies",
+        "Equality tests based on structural equality"
+      ],
+      "shapeHints": [
+        "a Money or Point data class with copy and plus",
+        "a user profile updated immutably",
+        "using data classes as map keys"
+      ]
+    },
+    "Intermediate": {
+      "learningGoal": "Model a closed set of cases with a sealed hierarchy and an exhaustive when expression.",
+      "gotchas": [
+        "else in a when over a sealed type hides newly added subtypes",
+        "Sealed interface subtypes may be objects or classes; object comparison is by identity",
+        "when used as a statement is not forced to be exhaustive for non-sealed subjects"
+      ],
+      "goodSolutionShows": [
+        "when as an expression without else",
+        "data object or object for stateless cases",
+        "Sealed result type instead of exceptions or booleans"
+      ],
+      "shapeHints": [
+        "a UiState of Loading, Content and Error",
+        "payment methods with different fields",
+        "an expression tree evaluator"
+      ]
+    },
+    "Advanced": {
+      "learningGoal": "Use sealed hierarchies recursively, with generics, and pattern-like when with guards and smart casts.",
+      "gotchas": [
+        "Generic sealed classes need variance (out T) to allow Nothing subtypes",
+        "Smart cast inside when requires the subject to be a stable val",
+        "when with multiple conditions per branch loses smart-cast precision"
+      ],
+      "goodSolutionShows": [
+        "sealed interface Result<out T> with map and flatMap",
+        "Exhaustive recursion on a tree",
+        "Subject variable in when(val x = ...)"
+      ],
+      "shapeHints": [
+        "a typed Result with map and fold",
+        "a simplifier for an arithmetic expression tree",
+        "a command parser returning sealed commands"
+      ]
+    }
+  }
+}

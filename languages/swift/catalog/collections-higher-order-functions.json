@@ -1,0 +1,60 @@
+{
+  "id": "collections-higher-order-functions",
+  "name": "Collections & higher-order functions",
+  "seeds": {
+    "Beginner": {
+      "learningGoal": "Transform arrays and dictionaries with map, filter, reduce and sorted.",
+      "gotchas": [
+        "sort mutates in place while sorted returns a copy",
+        "reduce with the wrong initial value breaks empty input",
+        "Dictionary iteration order is not guaranteed"
+      ],
+      "goodSolutionShows": [
+        "map/filter/reduce chains instead of manual loops",
+        "sorted(by:) with a clear comparator",
+        "Correct behaviour on empty collections"
+      ],
+      "shapeHints": [
+        "summing order totals above a threshold",
+        "sorting contacts by last then first name",
+        "counting word frequencies"
+      ]
+    },
+    "Intermediate": {
+      "learningGoal": "Use grouping, zipping, compactMap, flatMap and Dictionary(grouping:) / merging.",
+      "gotchas": [
+        "flatMap on collections flattens while on optionals is different",
+        "Dictionary(uniqueKeysWithValues:) traps on duplicate keys",
+        "stable sorting is guaranteed only for sorted in recent Swift versions, so tie-breaking should be explicit"
+      ],
+      "goodSolutionShows": [
+        "Dictionary(grouping:by:) with mapValues",
+        "uniquingKeysWith or merging for duplicates",
+        "Explicit tie-breaking in comparators"
+      ],
+      "shapeHints": [
+        "grouping transactions by month and summing",
+        "merging two inventory dictionaries",
+        "pairing names with scores via zip"
+      ]
+    },
+    "Advanced": {
+      "learningGoal": "Write efficient custom collection algorithms and lazy pipelines.",
+      "gotchas": [
+        "Lazy collections re-evaluate closures on every access",
+        "Array slicing keeps original indices, so ArraySlice index 0 may not exist",
+        "Chained copying creates quadratic work"
+      ],
+      "goodSolutionShows": [
+        "lazy to avoid intermediate arrays with first(where:) short-circuit",
+        "Index-safe slice handling using startIndex",
+        "An extension on Sequence or Collection with clear generic constraints"
+      ],
+      "shapeHints": [
+        "a sliding window and chunked extension",
+        "a top-K selection without full sort",
+        "a stable group-by-run (consecutive duplicates) function"
+      ]
+    }
+  }
+}

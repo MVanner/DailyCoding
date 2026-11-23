@@ -1,0 +1,60 @@
+{
+  "id": "immutability",
+  "name": "Immutability",
+  "seeds": {
+    "Beginner": {
+      "learningGoal": "Prefer val, read-only collections and copy-based updates.",
+      "gotchas": [
+        "List is a read-only view and may change if the backing MutableList changes",
+        "val reference does not make the object immutable",
+        "data class copy is shallow"
+      ],
+      "goodSolutionShows": [
+        "val over var",
+        "Defensive copy (toList) when accepting a mutable list",
+        "Immutable update via copy"
+      ],
+      "shapeHints": [
+        "a shopping cart updated immutably",
+        "a settings snapshot",
+        "a user profile with tag list"
+      ]
+    },
+    "Intermediate": {
+      "learningGoal": "Build immutable models and update nested structures.",
+      "gotchas": [
+        "Nested copy needs copy at each level",
+        "Exposing a MutableList through a List getter still allows casting abuse",
+        "Initialisation order and open properties"
+      ],
+      "goodSolutionShows": [
+        "Nested update helpers",
+        "Private mutable backing field with a read-only exposure",
+        "Builder returning an immutable result"
+      ],
+      "shapeHints": [
+        "updating a nested address inside a user",
+        "an immutable tree with path update",
+        "an inventory with add and remove returning new instances"
+      ]
+    },
+    "Advanced": {
+      "learningGoal": "Implement persistent or structurally shared collections and thread-safe sharing of immutable state.",
+      "gotchas": [
+        "Copying whole collections per update is O(n)",
+        "Mutable state hidden in lazy properties",
+        "Equality of immutable collections vs identity"
+      ],
+      "goodSolutionShows": [
+        "Structural sharing in a simple persistent stack or list",
+        "Immutable snapshots with atomic replacement",
+        "Tests for value-equality and non-mutation of the previous version"
+      ],
+      "shapeHints": [
+        "a persistent stack with push and pop",
+        "a versioned configuration with history",
+        "an undo stack of immutable states"
+      ]
+    }
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "id": "metatables-oop",
+  "name": "Metatables & OOP",
+  "seeds": {
+    "Intermediate": {
+      "learningGoal": "Build classes with metatables and __index, including method syntax and inheritance.",
+      "gotchas": [
+        "Forgetting Class.__index = Class makes methods invisible",
+        "obj.method(obj) and obj:method() differ only in syntax, but calling with . loses self",
+        "Mutable fields defined on the class are shared by all instances"
+      ],
+      "goodSolutionShows": [
+        "new() constructor via setmetatable",
+        "Inheritance through a metatable chain",
+        "Instance state set in new, not on the class table"
+      ],
+      "shapeHints": [
+        "a Stack or Queue class",
+        "an Entity base class with a Player subclass",
+        "an Account class with deposit and withdraw"
+      ]
+    },
+    "Advanced": {
+      "learningGoal": "Use operator metamethods __eq, __lt, __le, __tostring, __add and __call correctly.",
+      "gotchas": [
+        "__eq is only consulted for two distinct tables, and 5.1 requires both to share the same __eq function (use one metatable for all instances)",
+        "Define __le explicitly; relying on the 5.1 fallback to not (b < a) breaks on newer Lua",
+        "__index with a function receives (table, key); rawget avoids recursion"
+      ],
+      "goodSolutionShows": [
+        "A Vec2 or Version type with __add, __eq, __lt and __tostring",
+        "rawget/rawset where recursion would occur",
+        "Tests comparing with == and < on instances"
+      ],
+      "shapeHints": [
+        "a Vec2 with __add, __sub, __mul and __eq",
+        "semantic version comparison with __lt and __le",
+        "a Money type with __tostring and arithmetic"
+      ]
+    },
+    "Expert": {
+      "learningGoal": "Control table access with __index and __newindex proxies, read-only tables and defaults.",
+      "gotchas": [
+        "__newindex only fires for absent keys",
+        "pairs on a proxy walks the proxy's own (empty) keys; do not rely on __pairs, which not every runtime honours, and expose an explicit iterator method instead",
+        "# on an empty proxy is 0 and __len is not honoured for tables on 5.1, so expose an explicit size method"
+      ],
+      "goodSolutionShows": [
+        "Read-only proxy raising an error on write",
+        "Default-valued table via __index",
+        "Tracking writes through a proxy"
+      ],
+      "shapeHints": [
+        "a read-only config table",
+        "a table with default values per key",
+        "a change tracker recording writes for undo"
+      ]
+    }
+  }
+}

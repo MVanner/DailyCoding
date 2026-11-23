@@ -1,0 +1,60 @@
+{
+  "id": "error-handling-pcall",
+  "name": "Error handling with pcall & error",
+  "seeds": {
+    "Beginner": {
+      "learningGoal": "Raise and catch errors with error and pcall.",
+      "gotchas": [
+        "error with a string adds position info unless level 0 is passed",
+        "pcall returns false plus the error value, which may be a table",
+        "Errors in the protected function do not propagate"
+      ],
+      "goodSolutionShows": [
+        "pcall around risky calls",
+        "error with tables for structured errors",
+        "Returning nil plus message for expected failures"
+      ],
+      "shapeHints": [
+        "safe division",
+        "validating a config value and raising",
+        "a parse function returning nil, err"
+      ]
+    },
+    "Intermediate": {
+      "learningGoal": "Use xpcall with handlers, error levels and error objects.",
+      "gotchas": [
+        "xpcall handler runs before the stack unwinds and in 5.1 does not accept extra arguments",
+        "error(msg, 2) blames the caller",
+        "Error objects with __tostring"
+      ],
+      "goodSolutionShows": [
+        "Structured error tables with codes",
+        "xpcall with traceback handler",
+        "Rethrow preserving the original error"
+      ],
+      "shapeHints": [
+        "a try/catch/finally helper",
+        "a validation function blaming the caller",
+        "a retry helper with an injected attempt count"
+      ]
+    },
+    "Advanced": {
+      "learningGoal": "Design resilient APIs: assert idioms, error propagation across coroutines and cleanup guarantees.",
+      "gotchas": [
+        "assert returns all its arguments when true and its message may be non-string",
+        "Errors across coroutine boundaries need explicit propagation",
+        "Cleanup must run on error as well"
+      ],
+      "goodSolutionShows": [
+        "Cleanup via pcall and rethrow",
+        "Error wrapping with context",
+        "Clear distinction of expected failures vs bugs"
+      ],
+      "shapeHints": [
+        "a with_resource helper that always releases",
+        "an isolated plugin hook runner continuing after failures and collecting errors",
+        "a command dispatcher that reports errors without crashing"
+      ]
+    }
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "id": "flow",
+  "name": "Flow",
+  "seeds": {
+    "Intermediate": {
+      "learningGoal": "Build and transform cold Flows with map, filter, take and terminal operators.",
+      "gotchas": [
+        "Cold flows rerun for each collector",
+        "take cancels the upstream after N items",
+        "flow builder code runs in the collector's context; use flowOn to change it"
+      ],
+      "goodSolutionShows": [
+        "Operators composed on Flow rather than collecting into lists early",
+        "toList or first as terminal operators in tests",
+        "Context preservation"
+      ],
+      "shapeHints": [
+        "a Flow of readings filtered and averaged in windows",
+        "paging through a source producing a Flow",
+        "emitting ticks driven by an injected delay in virtual time"
+      ]
+    },
+    "Advanced": {
+      "learningGoal": "Handle errors, retry, combine and buffer flows.",
+      "gotchas": [
+        "catch only catches upstream exceptions",
+        "combine emits when any source emits after all have emitted once, zip pairs one-to-one",
+        "buffer and conflate change which values are seen"
+      ],
+      "goodSolutionShows": [
+        "catch and retry placement relative to operators",
+        "combine vs zip chosen deliberately",
+        "Deterministic tests via runTest and virtual time"
+      ],
+      "shapeHints": [
+        "a retrying Flow with a deterministic failure sequence",
+        "combining a price Flow and a currency Flow",
+        "a debounce implementation tested with virtual time"
+      ]
+    },
+    "Expert": {
+      "learningGoal": "Work with hot flows: StateFlow, SharedFlow and custom operators.",
+      "gotchas": [
+        "StateFlow conflates equal values",
+        "SharedFlow replay and buffer overflow settings decide lost events",
+        "A collector that is slow can suspend emitters"
+      ],
+      "goodSolutionShows": [
+        "StateFlow for state and SharedFlow for events",
+        "Custom operator via flow { collect { } } or transform",
+        "Tests collecting into a list inside backgroundScope with runTest"
+      ],
+      "shapeHints": [
+        "an event bus with replay semantics",
+        "a derived StateFlow computed from two sources",
+        "a custom chunked-by-time operator with an injected clock"
+      ]
+    }
+  }
+}

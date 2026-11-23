@@ -1,0 +1,42 @@
+{
+  "id": "neovim-plugin-structure",
+  "name": "Neovim-style plugin structure",
+  "seeds": {
+    "Intermediate": {
+      "learningGoal": "Write a plugin's setup(vim, opts) that merges user options over defaults without mutating either.",
+      "gotchas": [
+        "The real vim.tbl_deep_extend is not available in tests; either the fake vim supplies it or the plugin writes its own merge",
+        "Merging must not mutate the defaults table shared across calls",
+        "Lists should be replaced, not merged index by index"
+      ],
+      "goodSolutionShows": [
+        "Defaults table copied before merge",
+        "Deep merge for nested option tables",
+        "Validation with clear errors for wrong option types"
+      ],
+      "shapeHints": [
+        "a plugin config merge where a fake vim supplies tbl_deep_extend and notify",
+        "validating opts and reporting through a fake vim.notify",
+        "setup called twice and staying idempotent"
+      ]
+    },
+    "Advanced": {
+      "learningGoal": "Structure a plugin with lazy setup, a command registry and teardown, against a fake vim.",
+      "gotchas": [
+        "setup must be safe to call more than once",
+        "State kept in module-level tables leaks between tests unless reset",
+        "Commands registered on the fake vim.api must be recorded for assertions"
+      ],
+      "goodSolutionShows": [
+        "A fake vim recording api calls (create_user_command, notify) passed in",
+        "A teardown or disable function undoing registrations",
+        "Public API separated from internals"
+      ],
+      "shapeHints": [
+        "a plugin registering user commands via a fake vim.api and exposing disable()",
+        "a feature-toggle module that keeps state in a table",
+        "a plugin whose setup is a no-op when called twice"
+      ]
+    }
+  }
+}
