@@ -30,12 +30,22 @@ public static class Nudge
             return Output(NotConfiguredMessage);
         }
 
-        var catalog = CatalogLoader.Load(paths.CatalogDir);
-        var entry = state.For(today) ?? Today.CreatePickedEntry(today, config, catalog, state.History);
+        var catalogs = Catalogs.Load(LanguageLoader.Load(paths.LanguagesDir));
+        var entry = state.For(today);
+        if (entry is null || Today.NeedsRepick(entry, config, catalogs))
+        {
+            entry = Today.CreatePickedEntry(today, config, catalogs, state.History.Where(e => e.Date != today).ToList());
+        }
+
+        if (entry is null)
+        {
+            return null;
+        }
+
         var history = state.History.Where(e => e.Date != today).Append(entry).OrderBy(e => e.Date).ToList();
         store.SaveState(new DailyState(today, history));
 
-        var topicName = catalog.FirstOrDefault(t => t.Id == entry.TopicId)?.Name ?? entry.TopicId;
+        var topicName = catalogs.GetValueOrDefault(entry.Language)?.FirstOrDefault(t => t.Id == entry.TopicId)?.Name ?? entry.TopicId;
         var stretch = entry.Stretch ? " — stretch day" : "";
         var message = $"☕ Today's C# challenge is ready ({entry.Level} · {topicName}{stretch}) — /daily:start when you have 15 min";
         if (BuildStamp.IsStale(paths))

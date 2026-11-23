@@ -4,6 +4,7 @@ namespace Daily.Cli;
 public static class Commands
 {
     private const int RecentCount = 14;
+    private const string NoUsableLanguage = "No usable language — run /daily:setup.";
 
     /// <summary>
     /// <c>today [--date d]</c> — the day's entry (picking one if the hook hasn't), its seed, config, recent history and
@@ -19,9 +20,15 @@ public static class Commands
         }
 
         var today = CliHelpers.Date(args);
-        var catalog = CatalogLoader.Load(paths.CatalogDir);
-        var entry = EnsureEntry(store, config, catalog, today);
-        var topic = catalog.FirstOrDefault(t => t.Id == entry.TopicId);
+        var catalogs = Catalogs.Load(LanguageLoader.Load(paths.LanguagesDir));
+        var entry = Today.Ensure(store, config, catalogs, today);
+        if (entry is null)
+        {
+            stderr.WriteLine(NoUsableLanguage);
+            return ExitCodes.Error;
+        }
+
+        var topic = catalogs.GetValueOrDefault(entry.Language)?.FirstOrDefault(t => t.Id == entry.TopicId);
         var history = store.LoadState().History;
         var unfinished = history.Where(e => e.Date < today && e.Status == ChallengeStatus.Started).MaxBy(e => e.Date);
 
@@ -59,9 +66,21 @@ public static class Commands
         }
 
         var date = CliHelpers.Date(args);
-        var entry = date == CliHelpers.Today()
-            ? EnsureEntry(store, config, CatalogLoader.Load(paths.CatalogDir), date)
-            : store.LoadState().For(date);
+        HistoryEntry? entry;
+        if (date == CliHelpers.Today())
+        {
+            entry = Today.Ensure(store, config, Catalogs.Load(LanguageLoader.Load(paths.LanguagesDir)), date);
+            if (entry is null)
+            {
+                stderr.WriteLine(NoUsableLanguage);
+                return ExitCodes.Error;
+            }
+        }
+        else
+        {
+            entry = store.LoadState().For(date);
+        }
+
         if (entry is null)
         {
             stderr.WriteLine($"No challenge for {date:yyyy-MM-dd}.");
@@ -236,19 +255,6 @@ public static class Commands
     {
         var dir = Path.Combine(paths.ReferencesDir, date.ToString("yyyy-MM-dd"));
         return Directory.Exists(dir) ? dir : null;
-    }
-
-    private static HistoryEntry EnsureEntry(StateStore store, DailyConfig config, IReadOnlyList<Topic> catalog, DateOnly today)
-    {
-        var state = store.LoadState();
-        var entry = state.For(today);
-        if (entry is null)
-        {
-            entry = Today.CreatePickedEntry(today, config, catalog, state.History);
-            store.Upsert(entry);
-        }
-
-        return entry;
     }
 
     private static bool Allowed(HistoryEntry entry, TextWriter stderr, params ChallengeStatus[] from)

@@ -67,3 +67,12 @@ public static class CatalogLoader
         return topics;
     }
 }
+
+public static class Catalogs
+{
+    /// <summary>Loads every language's topics, keyed by language id; a language without a catalog folder has no topics.</summary>
+    public static IReadOnlyDictionary<string, IReadOnlyList<Topic>> Load(IReadOnlyList<Language> languages) =>
+        languages.ToDictionary(
+            l => l.Id,
+            l => Directory.Exists(l.CatalogDir) ? CatalogLoader.Load(l.CatalogDir) : (IReadOnlyList<Topic>)[]);
+}

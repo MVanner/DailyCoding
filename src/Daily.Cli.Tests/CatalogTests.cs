@@ -118,4 +118,17 @@ public sealed class CatalogTests
 
         Assert.IsGreaterThanOrEqualTo(minimum, count, $"{level}: {count} topics");
     }
+
+    [TestMethod]
+    public void OldRecursiveLoad_SeesOnlyCsharpTopics()
+    {
+        var root = RepoPaths.PluginRoot;
+        var csharp = Catalogs.Load(LanguageLoader.Load(Path.Combine(root, "languages")))["csharp"];
+
+        Assert.HasCount(csharp.Count, CatalogLoader.Load(Path.Combine(root, "catalog")));
+        var catalogDir = Path.Combine(root, "catalog");
+        var nested = Directory.EnumerateFiles(catalogDir, "*.json", SearchOption.AllDirectories)
+            .Where(f => Path.GetDirectoryName(f) != catalogDir);
+        Assert.IsFalse(nested.Any(), "catalog/ must only hold C# topics at its top level");
+    }
 }

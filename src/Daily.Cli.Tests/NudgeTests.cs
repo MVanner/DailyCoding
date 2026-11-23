@@ -21,6 +21,7 @@ public sealed class NudgeTests
         public Fixture(bool configured = true)
         {
             _root.Write("catalog/async-await.json", Topic);
+            _root.Write("languages/csharp/language.json", File.ReadAllText(Path.Combine(RepoPaths.PluginRoot, "languages", "csharp", "language.json")));
             _root.Write("src/Daily.Cli/Program.cs", "// v1");
             _root.Write("src/Daily.Cli/Daily.Cli.csproj", "<Project />");
             Paths = new DailyPaths(_data.Path, _root.Path);
