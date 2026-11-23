@@ -29,18 +29,24 @@ public static class Today
             || !catalogs.TryGetValue(entry.Language, out var topics)
             || !topics.Any(t => t.Id == entry.TopicId));
 
-    /// <summary>Today's entry: created if missing, re-picked if it is Picked and no longer valid; null when no language is usable.</summary>
-    public static HistoryEntry? Ensure(StateStore store, DailyConfig config, IReadOnlyDictionary<string, IReadOnlyList<Topic>> catalogs, DateOnly today)
+    /// <summary>Pure: today's existing entry unless it is Picked and no longer valid, else a fresh pick from history minus today; null when no language is usable.</summary>
+    public static HistoryEntry? Resolve(DailyState state, DailyConfig config, IReadOnlyDictionary<string, IReadOnlyList<Topic>> catalogs, DateOnly today)
     {
-        var state = store.LoadState();
         var existing = state.For(today);
         if (existing is not null && !NeedsRepick(existing, config, catalogs))
         {
             return existing;
         }
 
-        var entry = CreatePickedEntry(today, config, catalogs, state.History.Where(e => e.Date != today).ToList());
-        if (entry is not null)
+        return CreatePickedEntry(today, config, catalogs, state.History.Where(e => e.Date != today).ToList());
+    }
+
+    /// <summary>Today's entry, persisted: created if missing, re-picked if stale; null when no language is usable.</summary>
+    public static HistoryEntry? Ensure(StateStore store, DailyConfig config, IReadOnlyDictionary<string, IReadOnlyList<Topic>> catalogs, DateOnly today)
+    {
+        var state = store.LoadState();
+        var entry = Resolve(state, config, catalogs, today);
+        if (entry is not null && !ReferenceEquals(entry, state.For(today)))
         {
             store.Upsert(entry);
         }

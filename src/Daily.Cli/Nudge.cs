@@ -7,7 +7,8 @@ namespace Daily.Cli;
 /// <summary>The SessionStart hook: one line on the first session of the day, nothing otherwise.</summary>
 public static class Nudge
 {
-    public const string NotConfiguredMessage = "☕ Daily C# challenges are installed — run /daily:setup to pick your level";
+    public const string NotConfiguredMessage = "☕ Daily coding challenges are installed — run /daily:setup to pick your languages";
+    public const string NoUsableLanguageMessage = "☕ No daily challenge language is usable — run /daily:setup";
     public const string StaleSuffix = " (plugin updated — run /daily:setup to rebuild)";
 
     // Default escaping keeps hook output pure ASCII (☕ becomes \u2615), so it survives a non-UTF-8 console code page on Windows.
@@ -30,16 +31,13 @@ public static class Nudge
             return Output(NotConfiguredMessage);
         }
 
-        var catalogs = Catalogs.Load(LanguageLoader.Load(paths.LanguagesDir));
-        var entry = state.For(today);
-        if (entry is null || Today.NeedsRepick(entry, config, catalogs))
-        {
-            entry = Today.CreatePickedEntry(today, config, catalogs, state.History.Where(e => e.Date != today).ToList());
-        }
-
+        var languages = LanguageLoader.Load(paths.LanguagesDir);
+        var catalogs = Catalogs.Load(languages);
+        var entry = Today.Resolve(state, config, catalogs, today);
         if (entry is null)
         {
-            return null;
+            store.SaveState(state with { LastNudgeDate = today });
+            return Output(NoUsableLanguageMessage);
         }
 
         var history = state.History.Where(e => e.Date != today).Append(entry).OrderBy(e => e.Date).ToList();
@@ -47,7 +45,8 @@ public static class Nudge
 
         var topicName = catalogs.GetValueOrDefault(entry.Language)?.FirstOrDefault(t => t.Id == entry.TopicId)?.Name ?? entry.TopicId;
         var stretch = entry.Stretch ? " — stretch day" : "";
-        var message = $"☕ Today's C# challenge is ready ({entry.Level} · {topicName}{stretch}) — /daily:start when you have 15 min";
+        var languageName = languages.FirstOrDefault(l => l.Id == entry.Language)?.Name ?? entry.Language;
+        var message = $"☕ Today's {languageName} challenge is ready ({entry.Level} · {topicName}{stretch}) — /daily:start when you have 15 min";
         if (BuildStamp.IsStale(paths))
         {
             message += StaleSuffix;

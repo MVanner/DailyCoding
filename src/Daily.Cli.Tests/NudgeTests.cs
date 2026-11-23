@@ -13,6 +13,19 @@ public sealed class NudgeTests
                      "Advanced": { "learningGoal": "g", "gotchas": ["x"], "goodSolutionShows": ["y"] } } }
         """;
 
+    private const string LuaDescriptor = """
+        {
+          "id": "lua", "name": "Lua", "stubDir": "src", "testDir": "spec",
+          "sourceExtensions": [".lua"], "ignoreDirs": [], "test": { "commands": [ { "args": ["busted"] } ], "results": "r.xml", "format": "junit" },
+          "naiveForbidden": "\\berror\\b", "requires": [], "ide": "x", "runnerHint": "install busted",
+          "levelHints": { "Beginner": "a", "Intermediate": "b", "Advanced": "c", "Expert": "d" }
+        }
+        """;
+
+    private const string LuaTopic = """
+        { "id": "tables", "name": "Tables", "seeds": { "Beginner": { "learningGoal": "g", "gotchas": [], "goodSolutionShows": [] } } }
+        """;
+
     private sealed class Fixture : IDisposable
     {
         private readonly TempDir _data = new("data");
@@ -60,7 +73,7 @@ public sealed class NudgeTests
     }
 
     [TestMethod]
-    public void FirstRunOfDay_ReturnsMessageWithLevelAndTopicName()
+    public void FirstRunOfDay_NamesLanguage()
     {
         using var f = new Fixture();
         var day = f.FindDay(stretch: false);
@@ -113,9 +126,49 @@ public sealed class NudgeTests
     {
         using var f = new Fixture(configured: false);
 
-        Assert.AreEqual("☕ Daily C# challenges are installed — run /daily:setup to pick your level", Message(Nudge.Run(f.Paths, Monday)));
+        Assert.AreEqual("☕ Daily coding challenges are installed — run /daily:setup to pick your languages", Message(Nudge.Run(f.Paths, Monday)));
         Assert.IsNull(Nudge.Run(f.Paths, Monday));
         Assert.IsNotNull(Nudge.Run(f.Paths, Monday.AddDays(1)));
+    }
+
+    [TestMethod]
+    public void LuaDay_NamesLua()
+    {
+        using var f = new Fixture(configured: false);
+        f.Root.Write("languages/lua/language.json", LuaDescriptor);
+        f.Root.Write("languages/lua/catalog/tables.json", LuaTopic);
+        f.Store.SaveConfig(new DailyConfig([new("lua", Level.Beginner)], "/ws", 11, 7));
+        BuildStamp.Write(f.Paths);
+
+        var message = Message(Nudge.Run(f.Paths, Monday));
+
+        Assert.AreEqual("☕ Today's Lua challenge is ready (Beginner · Tables) — /daily:start when you have 15 min", message);
+        Assert.AreEqual("lua", f.Store.LoadState().For(Monday)!.Language);
+    }
+
+    [TestMethod]
+    public void PickedEntryWithRemovedLanguage_IsRepickedAndNamed()
+    {
+        using var f = new Fixture();
+        f.Store.Upsert(new HistoryEntry(Monday, "tables", Level.Beginner, false, ChallengeStatus.Picked) { Language = "lua" });
+
+        var message = Message(Nudge.Run(f.Paths, Monday));
+
+        StringAssert.StartsWith(message, "☕ Today's C# challenge is ready (");
+        Assert.AreEqual("csharp", f.Store.LoadState().For(Monday)!.Language);
+    }
+
+    [TestMethod]
+    public void NoUsableLanguage_SuggestsSetup()
+    {
+        using var f = new Fixture(configured: false);
+        f.Root.Write("languages/lua/language.json", LuaDescriptor);
+        f.Store.SaveConfig(new DailyConfig([new("lua", Level.Beginner)], "/ws", 11, 7));
+        BuildStamp.Write(f.Paths);
+
+        Assert.AreEqual("☕ No daily challenge language is usable — run /daily:setup", Message(Nudge.Run(f.Paths, Monday)));
+        Assert.IsNull(Nudge.Run(f.Paths, Monday));
+        Assert.AreEqual(Monday, f.Store.LoadState().LastNudgeDate);
     }
 
     [TestMethod]
@@ -170,6 +223,8 @@ public sealed class NudgeTests
     {
         using var f = new Fixture();
         f.Root.Write("catalog/async-await.json", "{ not json");
+        f.Root.Write("languages/lua/language.json", LuaDescriptor);
+        f.Root.Write("languages/lua/catalog/tables.json", "{ not json");
         var stdout = new StringWriter();
         var stderr = new StringWriter();
 

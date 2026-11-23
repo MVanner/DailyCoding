@@ -465,6 +465,21 @@ public sealed class CommandsTests
     }
 
     [TestMethod]
+    public void Today_NoUsableLanguage_Exits1()
+    {
+        using var root = new TempDir("root");
+        using var data = new TempDir("data");
+        var paths = TempPluginRoot(root, data);
+        File.Delete(Path.Combine(paths.PluginRoot, "languages", "lua", "catalog", "tables.json"));
+        new StateStore(paths).SaveConfig(new DailyConfig([new("lua", Level.Beginner)], "/ws", 11, 3));
+
+        var (exit, _, err) = RunWith(paths, "today");
+
+        Assert.AreEqual(1, exit);
+        StringAssert.Contains(err, "run /daily:setup");
+    }
+
+    [TestMethod]
     public void Repick_ExcludesLanguage()
     {
         using var root = new TempDir("root");
