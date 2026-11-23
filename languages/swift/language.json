@@ -1,0 +1,32 @@
+{
+  "id": "swift",
+  "name": "Swift",
+  "stubDir": "Sources/Challenge",
+  "testDir": "Tests/ChallengeTests",
+  "sourceExtensions": [".swift"],
+  "ignoreDirs": [".build", ".swiftpm"],
+  "test": {
+    "commands": [
+      { "args": ["swift", "test", "--parallel", "--xunit-output", ".build/results.xml"] }
+    ],
+    "results": ".build/results.xml",
+    "format": "junit"
+  },
+  "naiveForbidden": "\\b(fatalError|preconditionFailure|throw)\\b",
+  "requires": [
+    {
+      "command": "swift",
+      "args": ["--version"],
+      "minVersion": "6.0",
+      "installHint": "Install Xcode 16 or newer, or a Swift 6 toolchain from https://swift.org/install."
+    }
+  ],
+  "ide": "Run `open Package.swift` to open it in Xcode.",
+  "runnerHint": "Install Xcode 16 or newer, or a Swift 6 toolchain from https://swift.org/install.",
+  "levelHints": {
+    "Beginner": "new to Swift: optionals, structs vs classes, collections.",
+    "Intermediate": "comfortable day to day: protocols and extensions, enums with associated values, error handling, closures.",
+    "Advanced": "design trade-offs: generics and associated types, async/await, actors, ARC and capture lists.",
+    "Expert": "deep language and runtime topics: Sendable and strict concurrency, copy-on-write types, result builders, performance."
+  }
+}

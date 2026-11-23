@@ -61,21 +61,21 @@ public sealed class LanguageIntegrationTests
                 .Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries)
                 .Any(dir => File.Exists(Path.Combine(dir, tool))));
 
-    private sealed class Fixture : IDisposable
+    private class LangFixture : IDisposable
     {
         private readonly TempDir _data = new("data");
         private readonly TempDir _ws = new("ws dir");
 
-        public Fixture(string tests, string? reference = LuaReference, string? naive = LuaNaive, string stub = LuaStub)
+        protected LangFixture(string language, string stubFile, string stub, string testFile, string tests, string verifyFile, string? reference, string? naive)
         {
             Paths = new DailyPaths(_data.Path, RepoPaths.PluginRoot);
-            var config = new DailyConfig([new("lua", Level.Beginner)], _ws.Path, 10, 1);
-            Language = LanguageLoader.Get(LanguageLoader.Load(Paths.LanguagesDir), "lua");
+            var config = new DailyConfig([new(language, Level.Beginner)], _ws.Path, 10, 1);
+            Language = LanguageLoader.Get(LanguageLoader.Load(Paths.LanguagesDir), language);
             Folder = Scaffolder.Create(Paths, config, Language, Day, "sum", force: false);
-            Write("src/calc.lua", stub);
-            Write("spec/challenge_spec.lua", tests);
-            if (reference is not null) Write(".verify/reference/calc.lua", reference);
-            if (naive is not null) Write(".verify/naive/calc.lua", naive);
+            Write(stubFile, stub);
+            Write(testFile, tests);
+            if (reference is not null) Write(".verify/reference/" + verifyFile, reference);
+            if (naive is not null) Write(".verify/naive/" + verifyFile, naive);
         }
 
         public DailyPaths Paths { get; }
@@ -95,6 +95,9 @@ public sealed class LanguageIntegrationTests
             _ws.Dispose();
         }
     }
+
+    private sealed class Fixture(string tests, string? reference = LuaReference, string? naive = LuaNaive, string stub = LuaStub)
+        : LangFixture("lua", "src/calc.lua", stub, "spec/challenge_spec.lua", tests, "calc.lua", reference, naive);
 
     private static void RequireLua()
     {
@@ -282,40 +285,8 @@ public sealed class LanguageIntegrationTests
         }
     }
 
-    private sealed class KotlinFixture : IDisposable
-    {
-        private readonly TempDir _data = new("data");
-        private readonly TempDir _ws = new("ws dir");
-
-        public KotlinFixture(string tests, string stub = KotlinStub, string? reference = KotlinReference, string? naive = KotlinNaive)
-        {
-            Paths = new DailyPaths(_data.Path, RepoPaths.PluginRoot);
-            var config = new DailyConfig([new("kotlin", Level.Beginner)], _ws.Path, 10, 1);
-            Language = LanguageLoader.Get(LanguageLoader.Load(Paths.LanguagesDir), "kotlin");
-            Folder = Scaffolder.Create(Paths, config, Language, Day, "sum", force: false);
-            Write("src/main/kotlin/Sum.kt", stub);
-            Write("src/test/kotlin/SumTest.kt", tests);
-            if (reference is not null) Write(".verify/reference/Sum.kt", reference);
-            if (naive is not null) Write(".verify/naive/Sum.kt", naive);
-        }
-
-        public DailyPaths Paths { get; }
-        public Language Language { get; }
-        public string Folder { get; }
-
-        public void Write(string relative, string content)
-        {
-            var file = Path.Combine(Folder, relative);
-            Directory.CreateDirectory(Path.GetDirectoryName(file)!);
-            File.WriteAllText(file, content);
-        }
-
-        public void Dispose()
-        {
-            _data.Dispose();
-            _ws.Dispose();
-        }
-    }
+    private sealed class KotlinFixture(string tests, string stub = KotlinStub, string? reference = KotlinReference, string? naive = KotlinNaive)
+        : LangFixture("kotlin", "src/main/kotlin/Sum.kt", stub, "src/test/kotlin/SumTest.kt", tests, "Sum.kt", reference, naive);
 
     [TestMethod]
     public void Kotlin_GoodChallenge_Verifies()
@@ -367,5 +338,136 @@ public sealed class LanguageIntegrationTests
         Assert.IsTrue(result.Ok, string.Join(" | ", result.Problems));
         Assert.AreEqual(5, result.ReferenceTotal);
         Assert.AreEqual(5, result.ReferencePassed);
+    }
+
+    private const string SwiftStub = """
+        public func sum(_ values: [Int]) -> Int {
+            return -1 // TODO: implement
+        }
+        """;
+
+    private const string SwiftReference = """
+        public func sum(_ values: [Int]) -> Int {
+            return values.reduce(0, +)
+        }
+        """;
+
+    private const string SwiftNaive = """
+        public func sum(_ values: [Int]) -> Int {
+            return 0
+        }
+        """;
+
+    private const string SwiftNaiveWithFatalError = """
+        public func sum(_ values: [Int]) -> Int {
+            fatalError("not implemented")
+        }
+        """;
+
+    private const string SwiftCrashingReference = """
+        public func sum(_ values: [Int]) -> Int {
+            fatalError("boom")
+        }
+        """;
+
+    private const string SwiftBrokenStub = """
+        public func sum(_ values: [Int]) -> Int {
+            this does not compile
+        }
+        """;
+
+    private const string SwiftGoodTests = """
+        import XCTest
+        @testable import Challenge
+
+        final class SumTests: XCTestCase {
+            func testEmptyIsZero() { XCTAssertEqual(sum([]), 0) }
+            func testAdds() { XCTAssertEqual(sum([1, 2, 3]), 6) }
+            func testHandlesNegatives() { XCTAssertEqual(sum([-1, 5]), 4) }
+            func testSingleValue() { XCTAssertEqual(sum([10]), 10) }
+        }
+        """;
+
+    private static bool SwiftAtLeast6()
+    {
+        try
+        {
+            var psi = new System.Diagnostics.ProcessStartInfo("swift", "--version")
+            {
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+            };
+            using var p = System.Diagnostics.Process.Start(psi)!;
+            var output = p.StandardOutput.ReadToEnd() + p.StandardError.ReadToEnd();
+            p.WaitForExit();
+            var m = System.Text.RegularExpressions.Regex.Match(output, @"Swift version (\d+)");
+            return m.Success && int.Parse(m.Groups[1].Value) >= 6;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+    }
+
+    private static void RequireSwift()
+    {
+        if (!SwiftAtLeast6())
+        {
+            Assert.Inconclusive("No swift >= 6.0 on PATH.");
+        }
+    }
+
+    private sealed class SwiftFixture(string tests, string stub = SwiftStub, string? reference = SwiftReference, string? naive = SwiftNaive)
+        : LangFixture("swift", "Sources/Challenge/Sum.swift", stub, "Tests/ChallengeTests/SumTests.swift", tests, "Sum.swift", reference, naive);
+
+    [TestMethod]
+    public void Swift_GoodChallenge_Verifies()
+    {
+        RequireSwift();
+        using var f = new SwiftFixture(SwiftGoodTests);
+
+        var result = Verifier.Run(f.Paths, f.Language, f.Folder, Day);
+
+        Assert.IsTrue(result.Ok, string.Join(" | ", result.Problems));
+        Assert.IsTrue(result.StubBuilds);
+        Assert.AreEqual(4, result.ReferencePassed);
+        Assert.AreEqual(4, result.ReferenceTotal);
+        Assert.AreEqual(3, result.NaiveFailed);
+    }
+
+    [TestMethod]
+    public void Swift_NaiveWithFatalError_Rejected()
+    {
+        RequireSwift();
+        using var f = new SwiftFixture(SwiftGoodTests, naive: SwiftNaiveWithFatalError);
+
+        var result = Verifier.Run(f.Paths, f.Language, f.Folder, Day);
+
+        Assert.IsFalse(result.Ok);
+        Assert.IsTrue(result.Problems.Any(p => p.Contains("naive", StringComparison.Ordinal) && p.Contains("fatalError", StringComparison.Ordinal)), string.Join(" | ", result.Problems));
+    }
+
+    [TestMethod]
+    public void Swift_BrokenStub_DoesNotBuild()
+    {
+        RequireSwift();
+        using var f = new SwiftFixture(SwiftGoodTests, stub: SwiftBrokenStub);
+
+        var result = Verifier.Run(f.Paths, f.Language, f.Folder, Day);
+
+        Assert.IsFalse(result.Ok);
+        Assert.IsFalse(result.StubBuilds);
+    }
+
+    [TestMethod]
+    public void Swift_CrashingTest_IsNotAPass()
+    {
+        RequireSwift();
+        using var f = new SwiftFixture(SwiftGoodTests, reference: SwiftCrashingReference);
+
+        var result = Verifier.Run(f.Paths, f.Language, f.Folder, Day);
+
+        Assert.IsFalse(result.Ok);
+        Assert.IsFalse(result.ReferencePassed > 0 && result.ReferencePassed == result.ReferenceTotal, $"{result.ReferencePassed}/{result.ReferenceTotal}");
     }
 }
