@@ -4,6 +4,7 @@ Language-specific rules for the daily challenge. The skills reference these sect
 
 ## Layout
 
+- Run the tests: `dotnet test` in the challenge folder, or run `Challenge.Tests` in Rider.
 - `Challenge/` holds the stub (`*.cs`), `Challenge.Tests/` holds the tests, `Challenge.slnx` ties them together.
 - The scaffolded template targets the developer's .NET SDK and needs nothing outside the .NET base library.
 

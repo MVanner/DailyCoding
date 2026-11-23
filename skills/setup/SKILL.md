@@ -28,7 +28,7 @@ Then run `CLI stamp-write`. If the build fails, show the first compiler error an
 
 ## 3. Current settings
 
-Run `CLI config show`. Exit code 2 means first-time setup. Otherwise show the current languages with their levels and the workspace and ask whether they want to change any of them; if not, skip to step 10.
+Run `CLI config show`. Exit code 2 means first-time setup. Otherwise show the current languages with their levels and the workspace and ask whether they want to change any of them; if not, skip to step 8 (the `sdkMajor` refresh, which still applies if `csharp` is configured), skip step 9 and finish with step 10.
 
 ## 4. Languages
 
@@ -54,7 +54,7 @@ Ask where challenge folders should go. Offer the default — the `DailyCoding` f
 
 ## 8. SDK version (C# only)
 
-If `csharp` was saved: run `CLI config set sdkMajor <major from step 1>` (C# projects target `net<major>.0`). Otherwise skip this step.
+If `csharp` was saved (or, when nothing was changed in step 3, is already configured): run `CLI config set sdkMajor <major from step 1>` (C# projects target `net<major>.0`). Otherwise skip this step.
 
 ## 9. Warm-up
 

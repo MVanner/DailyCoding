@@ -286,9 +286,16 @@ public static class Commands
         }
         finally
         {
-            if (Directory.Exists(temp))
+            try
             {
-                Directory.Delete(temp, recursive: true);
+                if (Directory.Exists(temp))
+                {
+                    Directory.Delete(temp, recursive: true);
+                }
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                // Best effort: a lingering daemon (e.g. Gradle) may still hold files; the temp dir is harmless.
             }
         }
     }

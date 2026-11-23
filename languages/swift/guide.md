@@ -4,6 +4,7 @@ Language-specific rules for the daily challenge. The skills reference these sect
 
 ## Layout
 
+- Run the tests: `swift test --parallel` from the challenge folder.
 - Swift Package Manager project (package and library target `Challenge`, test target `ChallengeTests`), `swift-tools-version: 6.0`. Never edit `Package.swift`.
 - `Sources/Challenge/` holds the stub (`*.swift`), `Tests/ChallengeTests/` holds the tests. Files may be nested in subfolders. There is no module-level `package` line; the library module is `Challenge`.
 - Run with `swift test --parallel` from the challenge folder (the `--parallel` flag is required: without it Swift 6 writes no XCTest results file). The XCTest results go to `.build/results.xml`; a missing or empty file means a compile error, a crash or no tests ran: "does not build". Swift 6 also writes a separate `.build/results-swift-testing.xml`; it is ignored, so use XCTest only.

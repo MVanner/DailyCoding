@@ -4,6 +4,7 @@ Language-specific rules for the daily challenge. The skills reference these sect
 
 ## Layout
 
+- Run the tests: `luajit spec/runner.lua` from the challenge folder (fallbacks: `lua spec/runner.lua`, `nvim -l spec/runner.lua`). It prints a summary line such as `3 tests, 1 failures` to stdout and writes `results.xml`.
 - `src/` holds the stub modules (`*.lua`), `spec/challenge_spec.lua` holds the tests, `spec/runner.lua` is the provided test runner (never edit it).
 - Run with `luajit spec/runner.lua` (fallbacks: `lua spec/runner.lua`, `nvim -l spec/runner.lua`) from the challenge folder; results go to `results.xml`.
 - The runner puts `./src/?.lua` and `./src/?/init.lua` on `package.path`, so tests use `require("calc")` for `src/calc.lua`, and `require("pkg.mod")` maps to `src/pkg/mod.lua`.

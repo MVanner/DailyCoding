@@ -29,5 +29,22 @@ public sealed class SkillTextTests
         }
 
         StringAssert.Contains(Skill("setup"), "CLI languages");
+
+        var setup = Skill("setup");
+        var noChange = setup[setup.IndexOf("## 3. Current settings", StringComparison.Ordinal)..setup.IndexOf("## 4.", StringComparison.Ordinal)];
+        StringAssert.Contains(noChange, "sdkMajor");
+        StringAssert.Contains(setup[setup.IndexOf("## 8.", StringComparison.Ordinal)..setup.IndexOf("## 9.", StringComparison.Ordinal)], "sdkMajor");
+    }
+
+    [TestMethod]
+    public void EveryGuideLayoutExplainsHowToRunTheTests()
+    {
+        foreach (var guide in Directory.GetFiles(Path.Combine(RepoPaths.PluginRoot, "languages"), "guide.md", SearchOption.AllDirectories))
+        {
+            var text = File.ReadAllText(guide);
+            var start = text.IndexOf("## Layout", StringComparison.Ordinal);
+            var end = text.IndexOf("\n## ", start + 1, StringComparison.Ordinal);
+            StringAssert.Contains(text[start..end], "Run the tests", guide);
+        }
     }
 }

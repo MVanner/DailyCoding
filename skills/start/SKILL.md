@@ -47,7 +47,7 @@ Pick a short kebab-case slug (3–40 chars, `a-z0-9-`), e.g. `async-retry-policy
 1. `CLI record generation-attempt --date <date>`
 2. `CLI scaffold <slug> --date <date>` → JSON `folder`. (On a regeneration use `CLI scaffold <slug> --date <date> --force`.)
 3. In that folder write:
-   - `README.md`: title; the task in plain words; the public API they must implement; constraints; "Time box: 10–20 min"; "Done when: all the tests pass" (plus how to run them, from the guide's `## Layout` section); on a stretch day one line saying it's a stretch day. No solution hints.
+   - `README.md`: title; the task in plain words; the public API they must implement; constraints; "Time box: 10–20 min"; "Done when: all tests in `<language.testDir>` pass" plus the guide's "Run the tests" line from `## Layout`; on a stretch day one line saying it's a stretch day. No solution hints.
    - the **stub** in `<language.stubDir>/` — follow the guide's `## Stub` section (and `## Layout` for file names and locations). Supporting types the task doesn't ask them to write may be complete.
    - the **tests** in `<language.testDir>/` — follow the guide's `## Tests` section: **at least 3 tests, ideally 5–8**, with clear names that describe behaviour. Before going on, check each seed gotcha is exercised by at least one test; add tests until it is.
    - `.verify/reference/` — a correct, idiomatic solution, following the guide's `## Reference and naive` section: the same file names and relative paths as the stub files in `<language.stubDir>/` (only the files with code to implement).

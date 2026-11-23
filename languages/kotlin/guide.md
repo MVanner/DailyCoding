@@ -4,6 +4,7 @@ Language-specific rules for the daily challenge. The skills reference these sect
 
 ## Layout
 
+- Run the tests: `./gradlew test` (`gradlew.bat test` on Windows) from the challenge folder.
 - Gradle Kotlin DSL project (root project `challenge`) on the JVM with the committed Gradle wrapper. Never edit `build.gradle.kts`, `settings.gradle.kts`, `gradle.properties` or the wrapper files.
 - `src/main/kotlin/` holds the stub (`*.kt`), `src/test/kotlin/` holds the tests. Files may be nested in subfolders, but every file declares `package challenge`.
 - Run with `./gradlew test` (`gradlew.bat test` on Windows) from the challenge folder. The first run downloads Gradle and the dependencies, so it needs network and is slow; later runs are fast. Results go to `build/test-results/test/*.xml`.
