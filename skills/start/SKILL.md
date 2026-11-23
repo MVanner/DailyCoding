@@ -16,7 +16,7 @@ If the dll doesn't exist or `CLI today` exits 2, tell the developer to run `/dai
 
 ## 1. Today
 
-Run `CLI today`. It returns JSON with `date`, `entry` (status, language, topicId, level, stretch, folder, generationAttempts), `topic` (`id`, `name`), `seed` (`learningGoal`, `gotchas`, `goodSolutionShows`, `shapeHints`), `language` (`id`, `name`, `stubDir`, `testDir`, `ide`, `guide`, `available`, `missing`), `config` and `recent` (last 14 days). If it exits 1 with "No usable language", tell the developer to run `/daily:setup` and stop.
+Run `CLI today`. It returns JSON with `date`, `entry` (status, language, topicId, level, stretch, folder, generationAttempts), `topic` (`id`, `name`), `seed` (`learningGoal`, `gotchas`, `goodSolutionShows`, `shapeHints`), `language` (`id`, `name`, `stubDir`, `testDir`, `ide`, `guide`, `available`, `missing`), `config`, `warnings` (files of some language that were skipped because they're broken; mention them briefly if non-empty) and `recent` (last 14 days). If it exits 1 with "No usable language", tell the developer to run `/daily:setup` and stop.
 
 If the output has no `language` field (the helper is from an older plugin version), tell the developer to run /daily:setup and stop.
 

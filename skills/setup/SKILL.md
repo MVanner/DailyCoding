@@ -32,7 +32,7 @@ Run `CLI config show`. Exit code 2 means first-time setup. Otherwise show the cu
 
 ## 4. Languages
 
-Run `CLI languages` → a list of `{ id, name, available, missing, levelHints }` (`missing` holds install hints for tools that aren't installed).
+Run `CLI languages` → a list of `{ id, name, available, missing, levelHints }` (`missing` holds install hints for tools that aren't installed). Anything printed on stderr as `warning: ...` means a language's files are broken and it was skipped; tell the developer.
 
 Ask with AskUserQuestion, `multiSelect`, "Which languages do you want daily challenges in?": one option per language (at most 4 per question; if there are more, ask in several questions). Each option's description says it's ready, or "not installed yet" followed by its `missing` hints. Mark the currently configured languages when re-running setup. One day's challenge uses one of the selected languages, picked by rotation.
 

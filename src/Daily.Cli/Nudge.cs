@@ -31,9 +31,17 @@ public static class Nudge
             return Output(NotConfiguredMessage);
         }
 
-        var languages = LanguageLoader.Load(paths.LanguagesDir);
-        var catalogs = Catalogs.Load(languages);
+        var warnings = new List<string>();
+        var languages = CliHelpers.LoadLanguages(paths, warnings);
+        var catalogs = Catalogs.Load(languages, warnings);
         var entry = Today.Resolve(state, config, catalogs, today);
+        if (entry is null && warnings.Count > 0)
+        {
+            // Nothing is usable because something is broken, not because of the config: stay silent (the command logs this).
+            throw new InvalidOperationException(string.Join(" | ", warnings));
+        }
+
+        LogWarnings(paths, warnings);
         if (entry is null)
         {
             store.SaveState(state with { LastNudgeDate = today });
@@ -80,6 +88,24 @@ public static class Nudge
         }
 
         return ExitCodes.Ok;
+    }
+
+    private static void LogWarnings(DailyPaths paths, List<string> warnings)
+    {
+        if (warnings.Count == 0)
+        {
+            return;
+        }
+
+        try
+        {
+            Directory.CreateDirectory(paths.DataDir);
+            File.AppendAllLines(paths.HookErrorLog, warnings.Select(w => $"{DateTimeOffset.Now:O} {w}"));
+        }
+        catch (Exception)
+        {
+            // Logging is best effort; the hook must stay silent.
+        }
     }
 
     private static string Output(string message) =>

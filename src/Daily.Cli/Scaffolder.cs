@@ -84,7 +84,7 @@ public static partial class Scaffolder
         }
 
         var date = CliHelpers.Date(args);
-        var languages = LanguageLoader.Load(paths.LanguagesDir);
+        var languages = CliHelpers.LoadLanguages(paths);
         var store = new StateStore(paths);
         var entry = Today.Ensure(store, config, Catalogs.Load(languages), date);
         if (entry is null)

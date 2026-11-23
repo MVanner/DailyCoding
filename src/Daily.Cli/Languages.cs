@@ -47,18 +47,31 @@ public static class LanguageLoader
 {
     private const string DescriptorFile = "language.json";
 
-    public static IReadOnlyList<Language> Load(string languagesDir)
+    /// <summary>
+    /// Loads every language. A broken descriptor throws, unless <paramref name="warnings"/> is given: then that language is
+    /// skipped and the problem is added to it, so one bad language never takes the others down.
+    /// </summary>
+    public static IReadOnlyList<Language> Load(string languagesDir, ICollection<string>? warnings = null)
     {
         if (!Directory.Exists(languagesDir))
         {
             throw new LanguageException($"Languages folder not found: {languagesDir}");
         }
 
-        return Directory.GetDirectories(languagesDir)
-            .Order(StringComparer.Ordinal)
-            .Where(dir => File.Exists(Path.Combine(dir, DescriptorFile)))
-            .Select(LoadOne)
-            .ToList();
+        var languages = new List<Language>();
+        foreach (var dir in Directory.GetDirectories(languagesDir).Order(StringComparer.Ordinal).Where(d => File.Exists(Path.Combine(d, DescriptorFile))))
+        {
+            try
+            {
+                languages.Add(LoadOne(dir));
+            }
+            catch (Exception ex) when (warnings is not null && ex is LanguageException or IOException or UnauthorizedAccessException or JsonException)
+            {
+                warnings.Add($"Language '{Path.GetFileName(dir)}' skipped: {ex.Message}");
+            }
+        }
+
+        return languages;
     }
 
     public static Language Get(IReadOnlyList<Language> all, string id) =>

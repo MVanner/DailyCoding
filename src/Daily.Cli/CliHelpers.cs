@@ -15,6 +15,10 @@ public static class CliHelpers
         return config;
     }
 
+    /// <summary>Loads the languages, skipping (and reporting in <paramref name="warnings"/>) any with a broken descriptor.</summary>
+    public static IReadOnlyList<Language> LoadLanguages(DailyPaths paths, ICollection<string>? warnings = null) =>
+        LanguageLoader.Load(paths.LanguagesDir, warnings ?? new List<string>());
+
     public static DateOnly Today() => DateOnly.FromDateTime(DateTime.Now);
 
     /// <summary>The <c>--date yyyy-MM-dd</c> option if given (skills pin the date for a whole run), otherwise today.</summary>

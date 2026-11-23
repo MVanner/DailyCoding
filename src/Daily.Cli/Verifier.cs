@@ -109,7 +109,7 @@ public static partial class Verifier
             return ExitCodes.Error;
         }
 
-        var language = LanguageLoader.Get(LanguageLoader.Load(paths.LanguagesDir), Scaffolder.LanguageOf(folder) ?? "csharp");
+        var language = LanguageLoader.Get(CliHelpers.LoadLanguages(paths), Scaffolder.LanguageOf(folder) ?? "csharp");
         stdout.WriteLine(Json.Serialize(Run(paths, language, folder, CliHelpers.Date(args))));
         return ExitCodes.Ok;
     }

@@ -480,6 +480,39 @@ public sealed class CommandsTests
     }
 
     [TestMethod]
+    public void Today_BrokenCatalogOfAnotherLanguage_StillWorksAndWarns()
+    {
+        using var root = new TempDir("root");
+        using var data = new TempDir("data");
+        var paths = TempPluginRoot(root, data);
+        root.Write("languages/lua/catalog/bad.json", "{ \"id\": ");
+        new StateStore(paths).SaveConfig(new DailyConfig([new("csharp", Level.Beginner)], "/ws", 11, 3));
+
+        var (exit, output, err) = RunWith(paths, "today");
+
+        Assert.AreEqual(0, exit, err);
+        var json = JsonDocument.Parse(output).RootElement;
+        Assert.AreEqual("csharp", json.GetProperty("entry").GetProperty("language").GetString());
+        StringAssert.Contains(json.GetProperty("warnings")[0].GetString(), "bad.json");
+    }
+
+    [TestMethod]
+    public void Languages_BrokenDescriptor_IsSkippedWithWarning()
+    {
+        using var root = new TempDir("root");
+        using var data = new TempDir("data");
+        var paths = TempPluginRoot(root, data);
+        root.Write("languages/lua/language.json", "{ not json");
+
+        var (exit, output, err) = RunWith(paths, "languages");
+
+        Assert.AreEqual(0, exit, err);
+        var json = JsonDocument.Parse(output).RootElement;
+        CollectionAssert.AreEqual(new[] { "csharp" }, json.EnumerateArray().Select(l => l.GetProperty("id").GetString()).ToArray());
+        StringAssert.Contains(err, "language.json");
+    }
+
+    [TestMethod]
     public void Repick_ExcludesLanguage()
     {
         using var root = new TempDir("root");

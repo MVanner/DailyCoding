@@ -88,6 +88,22 @@ public sealed class NudgeTests
     }
 
     [TestMethod]
+    public void BrokenCatalogOfUnselectedLanguage_StillNudgesAndLogsTheError()
+    {
+        using var f = new Fixture();
+        var day = f.FindDay(stretch: false);
+        f.Root.Write("languages/lua/language.json", LuaDescriptor);
+        f.Root.Write("languages/lua/catalog/bad.json", "{ \"id\": ");
+        BuildStamp.Write(f.Paths);
+
+        var json = Nudge.Run(f.Paths, day);
+
+        Assert.AreEqual("☕ Today's C# challenge is ready (Intermediate · async/await) — /daily:start when you have 15 min", Message(json));
+        var log = File.ReadAllText(f.Paths.HookErrorLog);
+        StringAssert.Contains(log, "bad.json");
+    }
+
+    [TestMethod]
     public void SecondRunSameDay_ReturnsNull()
     {
         using var f = new Fixture();

@@ -21,8 +21,9 @@ public static class Commands
         }
 
         var today = CliHelpers.Date(args);
-        var languages = LanguageLoader.Load(paths.LanguagesDir);
-        var catalogs = Catalogs.Load(languages);
+        var warnings = new List<string>();
+        var languages = CliHelpers.LoadLanguages(paths, warnings);
+        var catalogs = Catalogs.Load(languages, warnings);
         var entry = Today.Ensure(store, config, catalogs, today);
         if (entry is null)
         {
@@ -44,6 +45,7 @@ public static class Commands
             topic = new { id = entry.TopicId, name = topic?.Name ?? entry.TopicId },
             seed = topic?.Seeds.GetValueOrDefault(entry.Level),
             config,
+            warnings,
             language = new
             {
                 id = language.Id,
@@ -85,7 +87,7 @@ public static class Commands
         HistoryEntry? entry;
         if (date == CliHelpers.Today())
         {
-            entry = Today.Ensure(store, config, Catalogs.Load(LanguageLoader.Load(paths.LanguagesDir)), date);
+            entry = Today.Ensure(store, config, Catalogs.Load(CliHelpers.LoadLanguages(paths)), date);
             if (entry is null)
             {
                 stderr.WriteLine(NoUsableLanguage);
@@ -186,7 +188,7 @@ public static class Commands
             return ExitCodes.Error;
         }
 
-        var catalogs = Catalogs.Load(LanguageLoader.Load(paths.LanguagesDir));
+        var catalogs = Catalogs.Load(CliHelpers.LoadLanguages(paths));
         var replacement = Today.CreatePickedEntry(date, config, catalogs, state.History.Where(e => e.Date != date).ToList(), new HashSet<string>(excluded.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)));
         if (replacement is null)
         {
@@ -202,12 +204,18 @@ public static class Commands
     /// <summary><c>languages</c> — every available language with its tool status and level hints.</summary>
     public static int LanguagesCommand(string[] args, DailyPaths paths, TextWriter stdout, TextWriter stderr)
     {
-        var list = LanguageLoader.Load(paths.LanguagesDir).Select(l =>
+        var warnings = new List<string>();
+        var list = CliHelpers.LoadLanguages(paths, warnings).Select(l =>
         {
             var tools = ToolCheck.Check(l);
             return new { id = l.Id, name = l.Name, available = tools.Available, missing = tools.Missing, levelHints = l.Descriptor.LevelHints };
         });
         stdout.WriteLine(Json.Serialize(list));
+        foreach (var warning in warnings)
+        {
+            stderr.WriteLine("warning: " + warning);
+        }
+
         return ExitCodes.Ok;
     }
 
@@ -227,7 +235,7 @@ public static class Commands
             return ExitCodes.Error;
         }
 
-        var language = LanguageLoader.Get(LanguageLoader.Load(paths.LanguagesDir), Scaffolder.LanguageOf(folder) ?? "csharp");
+        var language = LanguageLoader.Get(CliHelpers.LoadLanguages(paths), Scaffolder.LanguageOf(folder) ?? "csharp");
         var (result, output) = TestRunner.Run(language, folder, TimeSpan.FromMinutes(5));
         stdout.WriteLine(Json.Serialize(new
         {
@@ -257,7 +265,7 @@ public static class Commands
         Language language;
         try
         {
-            language = LanguageLoader.Get(LanguageLoader.Load(paths.LanguagesDir), args[0]);
+            language = LanguageLoader.Get(CliHelpers.LoadLanguages(paths), args[0]);
         }
         catch (LanguageException ex)
         {
@@ -398,7 +406,7 @@ public static class Commands
                 var wanted = ids.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).Distinct().ToList();
                 try
                 {
-                    var all = LanguageLoader.Load(paths.LanguagesDir);
+                    var all = CliHelpers.LoadLanguages(paths);
                     foreach (var id in wanted)
                     {
                         LanguageLoader.Get(all, id);
