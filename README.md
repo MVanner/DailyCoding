@@ -8,7 +8,7 @@ The first time you open Claude Code each day you see one line:
 ☕ Today's C# challenge is ready (Intermediate · async/await) — /daily:start when you have 15 min
 ```
 
-Nothing else happens until you ask. Later sessions that day stay quiet.
+The line names the day's language (C# here; other days it says Swift, Kotlin or Lua). Nothing else happens until you ask. Later sessions that day stay quiet.
 
 | Command | What it does |
 |---------|--------------|
@@ -25,7 +25,7 @@ Needs a clone of this repo and the .NET 10 SDK or newer (everyone: the helper an
 | Language | Needs |
 |----------|-------|
 | C# | Nothing beyond the .NET 10 SDK. |
-| Swift | Swift 6 toolchain (Xcode 16 or newer). macOS; Linux is untested. Tests run with `swift test --parallel --xunit-output .build/results.xml` (on Swift 6.4.2 the non-parallel form wrote no XCTest XML). |
+| Swift | Swift 6 toolchain (Xcode 16 or newer). macOS; Linux is untested. |
 | Kotlin | JDK 17 or newer. The Gradle wrapper is included (Gradle 9.9.2, Kotlin 2.4.21, kotlinx-coroutines 1.11.0); the first Kotlin run downloads Gradle and the dependencies. |
 | Lua | LuaJIT, or Lua 5.1 or newer, or Neovim 0.9 or newer (`nvim -l`). Challenges use Lua 5.1 semantics. |
 
@@ -45,7 +45,7 @@ powershell -ExecutionPolicy Bypass -File .\install.ps1
 
 (`-ExecutionPolicy Bypass` because Windows blocks unsigned scripts by default; it applies to this one run only.)
 
-The script adds this repo as the `daily-coding` plugin marketplace, installs `daily` for your user, and builds the helper so the nudge works straight away. If the `claude` CLI isn't on your PATH (desktop app only), it prints the two `/plugin` commands to type in the app instead, and still builds the helper. Then run `/daily:setup` in Claude Code. It asks which languages you want, a level for each, and where challenge folders go, then warms up each selected non-C# toolchain (a first test run on an empty template, so your first challenge isn't slow).
+The script adds this repo as the `daily-coding` plugin marketplace, installs `daily` for your user, and builds the helper so the nudge works straight away. If the `claude` CLI isn't on your PATH (desktop app only), it prints the two `/plugin` commands to type in the app instead, and still builds the helper. Then run `/daily:setup` in Claude Code. It asks which languages you want, a level for each, and where challenge folders go, then warms up each selected non-C# toolchain (a first test run of a tiny known-good sample, so your first challenge isn't slow and a broken toolchain is caught now; a language whose warm-up fails is left out).
 
 > **Installed through `/plugin` without the script, or reinstalled?** The nudge runs a helper that only exists after the install script or `/daily:setup` has built it. Until then Claude Code shows a `SessionStart hook error` at startup. Run `/daily:setup` once and it goes away. (The hook deliberately runs a pre-built helper rather than a C# script: a script needs the .NET SDK, and would fail in every repo whose `global.json` pins an SDK you don't have.)
 
@@ -93,20 +93,22 @@ Each topic needs at least two levels; every seed needs a `learningGoal`, at leas
 
 ## Adding a language
 
-Each language lives in `languages/<id>/` (C# keeps its `catalog/` and `templates/challenge/` at the top level and points to them from its descriptor). You need four things:
+Each language lives in `languages/<id>/` (C# keeps its `catalog/` and `templates/challenge/` at the top level and points to them from its descriptor). You need five things:
 
-1. **`language.json`**, the descriptor. Fields (see the existing ones): `id`, `name`; `stubDir` and `testDir` (where the stub and the tests live in a challenge); `sourceExtensions` and `ignoreDirs`; `test` (`commands` to run, optionally per `os`; `results` glob; `format` `trx` or `junit`; optional `env`); `naiveForbidden` (regex the naive implementation must not match, e.g. `throw`); `requires` (toolchain checks with `command`, `args`, `minVersion`, `installHint`); `ide`, `runnerHint`, `levelHints` (one line per level, shown by setup). `catalogDir` and `templateDir` default to `catalog/` and `template/` inside the language folder.
+1. **`language.json`**, the descriptor. Fields (see the existing ones): `id`, `name`; `stubDir` and `testDir` (where the stub and the tests live in a challenge); `sourceExtensions` and `ignoreDirs`; `test` (`commands` to run, optionally per `os`; `results` glob; `format` `trx` or `junit`; optional `env`); `naiveForbidden` (regex the naive implementation must not match, e.g. `throw`); `requires` (toolchain checks with `command`, `args`, `minVersion`, `installHint` and an optional `versionPattern`, a regex with one capture group that picks the version out of the command's output; without it the first number is used); `ide`, `runnerHint`, `levelHints` (one line per level, shown by setup). `catalogDir` and `templateDir` default to `catalog/` and `template/` inside the language folder.
 2. **`template/`**, a bare project that builds and runs its tests with the `test` command.
 3. **`guide.md`** with these headings: `## Layout`, `## Stub`, `## Tests`, `## Reference and naive`, `## Allowed libraries`, `## Review: idiomatic <Language>`, `## Hint examples`. The skills read the guide by heading.
 4. **`catalog/`** with topic files (see above).
+5. **`warmup/`** (every language except C#): a tiny known-good sample laid out like a challenge, with one source file under `stubDir` and one passing test under `testDir`. `/daily:setup` runs it on top of the template to prove the toolchain works.
 
-`LanguageTests.EveryLanguage_HasTemplateGuideAndCatalog` and `CatalogTests.RealCatalogs_AreValid` check the template, guide and catalog.
+`LanguageTests.EveryLanguage_HasTemplateGuideAndCatalog`, `LanguageTests.RealLanguages_NonCsharpHaveWarmupSampleMappingIntoStubAndTestDirs` and `CatalogTests.RealCatalogs_AreValid` check the template, guide, warm-up sample and catalog.
 
 ## Developing the plugin
 
 - Open `DailyCoding.slnx` in Rider. Helper: `src/Daily.Cli` (no third-party dependencies). Tests: `dotnet test` (the `Integration` category builds real projects in every installed language and takes a few minutes; `--filter TestCategory!=Integration` for the fast ones).
 - Hook: `hooks/hooks.json` runs `dotnet <data>/bin/Daily.Cli.dll nudge` in exec form (no shell), so it behaves the same on macOS and Windows. It never prints errors or exits non-zero.
 - Skills: `skills/*/SKILL.md`.
+- Swift runs its tests with `swift test --parallel --xunit-output .build/results.xml`; on Swift 6.4.2 the non-parallel form wrote no XCTest XML.
 
 ## Platform notes and first-run checklist
 
@@ -114,5 +116,6 @@ Verified on macOS with the Claude Code CLI: install script, hook through Claude 
 
 - **Desktop app (macOS and Windows):** the hook runs `dotnet` from the app's own `PATH`. If you see a `SessionStart hook error` at startup instead of the nudge, the app can't find `dotnet`. On macOS the official .NET installer puts it in `/usr/local/share/dotnet` (on the GUI `PATH` via `/etc/paths.d/dotnet`); an SDK installed only under `~/.dotnet` isn't visible to apps launched from the Dock — install the SDK with the official installer, or link it: `sudo ln -s ~/.dotnet/dotnet /usr/local/bin/dotnet`. On Windows the .NET installer adds `C:\Program Files\dotnet\` to the system `PATH`; restart the app after installing.
 - **Windows:** run `install.ps1`, then check: the nudge appears once on the first start of the day; `/daily:start` creates a folder under `%USERPROFILE%\DailyCoding` (including a user name with a space); `/daily:check` runs the tests; no hook error before `/daily:setup` has run.
+- **Windows, non-C# languages:** Kotlin and Lua should work but are untested; Swift is not supported on Windows.
 - **After `git pull`:** if the helper's code changed, the nudge ends with "plugin updated — run /daily:setup to rebuild".
 - If the nudge never shows, look in `hook-errors.log` in the data folder.
