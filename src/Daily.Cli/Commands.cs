@@ -231,7 +231,7 @@ public static class Commands
         var (result, output) = TestRunner.Run(language, folder, TimeSpan.FromMinutes(5));
         stdout.WriteLine(Json.Serialize(new
         {
-            ok = result is not null && result.Failed == 0,
+            ok = result is not null && result.Total > 0 && result.Passed == result.Total,
             passed = result?.Passed ?? 0,
             failed = result?.Failed ?? 0,
             total = result?.Total ?? 0,

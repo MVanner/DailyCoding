@@ -73,7 +73,7 @@ public static class TrxResults
 
     public static TestRunResult? Read(IEnumerable<string> files)
     {
-        int passed = 0, failed = 0, total = 0;
+        int passed = 0, total = 0;
         var failures = new List<TestFailure>();
         var any = false;
 
@@ -97,7 +97,6 @@ public static class TrxResults
 
             int Count(string attribute) => (int?)counters.Attribute(attribute) ?? 0;
             passed += Count("passed");
-            failed += Count("failed");
             total += Count("total");
             any = true;
 
@@ -108,6 +107,6 @@ public static class TrxResults
                     (string?)r.Element(Trx + "Output")?.Element(Trx + "ErrorInfo")?.Element(Trx + "Message") ?? "")));
         }
 
-        return any && total > 0 ? new TestRunResult(passed, failed, total, [.. failures]) : null;
+        return any && total > 0 ? new TestRunResult(passed, total - passed, total, [.. failures]) : null;
     }
 }

@@ -98,6 +98,29 @@ public sealed class TestRunnerTests
     }
 
     [TestMethod]
+    public void Run_NonZeroExitWithOnlyPassingResults_IsNull()
+    {
+        var lang = MakeLanguage("""[{"args":["sh","-c","mkdir -p out && echo '<testsuite><testcase name=\"a\" classname=\"C\"/></testsuite>' > out/r.xml; exit 3"]}]""");
+        using var work = new TempDir("work");
+
+        var (result, _) = TestRunner.Run(lang, work.Path, TimeSpan.FromSeconds(30));
+
+        Assert.IsNull(result);
+    }
+
+    [TestMethod]
+    public void Run_NonZeroExitWithFailedTests_KeepsTheResult()
+    {
+        var lang = MakeLanguage("""[{"args":["sh","-c","mkdir -p out && echo '<testsuite><testcase name=\"a\" classname=\"C\"><failure message=\"x\"/></testcase></testsuite>' > out/r.xml; exit 1"]}]""");
+        using var work = new TempDir("work");
+
+        var (result, _) = TestRunner.Run(lang, work.Path, TimeSpan.FromSeconds(30));
+
+        Assert.IsNotNull(result);
+        Assert.AreEqual(1, result.Failed);
+    }
+
+    [TestMethod]
     public void Run_IgnoresStaleResultsWhenCommandWritesNone()
     {
         if (OperatingSystem.IsWindows()) { Assert.Inconclusive("unix shell required"); }

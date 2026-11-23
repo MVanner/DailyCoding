@@ -208,8 +208,18 @@ public static partial class Verifier
         }
     }
 
-    private static string FirstError(string output) =>
-        output.Split('\n').Select(l => l.Trim()).FirstOrDefault(l => l.Contains("error", StringComparison.OrdinalIgnoreCase)) ?? output.Trim().Split('\n').LastOrDefault() ?? "";
+    /// <summary>Up to the first three compiler/runner error lines (including Kotlin's <c>e: file:line:col message</c>), or the last output line when there are none.</summary>
+    public static string FirstError(string output)
+    {
+        var lines = output.Split('\n').Select(l => l.Trim()).ToList();
+        var errors = lines
+            .Where(l => l.Contains("error", StringComparison.OrdinalIgnoreCase) || l.StartsWith("e: ", StringComparison.Ordinal))
+            .Select(l => l.Length > 400 ? l[..400] + "..." : l)
+            .Distinct()
+            .Take(3)
+            .ToList();
+        return errors.Count > 0 ? string.Join(" | ", errors) : lines.Where(l => l.Length > 0).LastOrDefault() ?? "";
+    }
 
     private static void TryDelete(string dir)
     {

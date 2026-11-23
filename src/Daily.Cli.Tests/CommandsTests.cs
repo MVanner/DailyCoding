@@ -657,6 +657,28 @@ public sealed class CommandsTests
     }
 
     [TestMethod]
+    public void RunTests_NotExecutedTest_IsNotOk()
+    {
+        using var root = new TempDir("root");
+        using var data = new TempDir("data");
+        using var ws = new TempDir("ws");
+        ws.Write(Scaffolder.MarkerFile, "lua");
+        ws.Write("fixture.trx", "<TestRun xmlns=\"http://microsoft.com/schemas/VisualStudio/TeamTest/2010\"><ResultSummary><Counters total=\"2\" executed=\"1\" passed=\"1\" failed=\"0\" notExecuted=\"1\"/></ResultSummary></TestRun>");
+        root.Write("languages/lua/language.json", LuaDescriptor
+            .Replace("[ { \"args\": [\"busted\"] } ]", "[ { \"args\": [\"sh\", \"-c\", \"mkdir -p out && cp fixture.trx out/r.trx\"] } ]")
+            .Replace("\"r.xml\"", "\"out/*.trx\"").Replace("\"junit\"", "\"trx\""));
+        var paths = new DailyPaths(data.Path, root.Path);
+
+        var (exit, output, err) = RunWith(paths, "run-tests", ws.Path);
+
+        Assert.AreEqual(0, exit, err);
+        var json = JsonDocument.Parse(output).RootElement;
+        Assert.IsFalse(json.GetProperty("ok").GetBoolean(), output);
+        Assert.AreEqual(2, json.GetProperty("total").GetInt32());
+        Assert.AreEqual(1, json.GetProperty("failed").GetInt32());
+    }
+
+    [TestMethod]
     public void RunTests_MissingFolder_Exits1()
     {
         using var f = new Fixture();

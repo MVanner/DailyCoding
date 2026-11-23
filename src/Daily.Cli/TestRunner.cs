@@ -77,6 +77,12 @@ public static class TestRunner
 
         var files = FindResults(workDir, spec.Results);
         var result = spec.Format == "trx" ? TrxResults.Read(files) : JUnitResults.Read(files);
+        if (result is { Failed: 0 } && exit != 0)
+        {
+            // A non-zero exit with nothing failed means the run crashed after writing partial (all-passing) results.
+            return (null, output);
+        }
+
         return (result, output);
     }
 

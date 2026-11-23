@@ -118,5 +118,24 @@ public sealed class TestResultsTests
     }
 
     [TestMethod]
+    public void Trx_NotExecutedCountsAsNotPassed()
+    {
+        using var temp = new TempDir("trx");
+        var trx = temp.Write("a.trx", """
+            <?xml version="1.0" encoding="UTF-8"?>
+            <TestRun xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+              <ResultSummary outcome="Completed"><Counters total="3" executed="2" passed="2" failed="0" notExecuted="1" inconclusive="0"/></ResultSummary>
+            </TestRun>
+            """);
+
+        var result = TrxResults.Read([trx]);
+
+        Assert.IsNotNull(result);
+        Assert.AreEqual(2, result.Passed);
+        Assert.AreEqual(1, result.Failed);
+        Assert.AreEqual(3, result.Total);
+    }
+
+    [TestMethod]
     public void Trx_NoFiles_IsNull() => Assert.IsNull(TrxResults.Read([]));
 }
