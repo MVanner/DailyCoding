@@ -189,4 +189,183 @@ public sealed class LanguageIntegrationTests
         Assert.IsGreaterThan(0, result.Total);
         Assert.AreEqual(1, result.Failed);
     }
+
+    private const string KotlinStub = """
+        package challenge
+
+        fun sum(values: List<Int>): Int = TODO()
+        """;
+
+    private const string KotlinReference = """
+        package challenge
+
+        fun sum(values: List<Int>): Int = values.sum()
+        """;
+
+    private const string KotlinNaive = """
+        package challenge
+
+        fun sum(values: List<Int>): Int = 0
+        """;
+
+    private const string KotlinNaiveWithTodo = """
+        package challenge
+
+        fun sum(values: List<Int>): Int = TODO()
+        """;
+
+    private const string KotlinGoodTests = """
+        package challenge
+
+        import kotlin.test.Test
+        import kotlin.test.assertEquals
+
+        class SumTest {
+            @Test fun emptyIsZero() = assertEquals(0, sum(emptyList()))
+            @Test fun adds() = assertEquals(6, sum(listOf(1, 2, 3)))
+            @Test fun handlesNegatives() = assertEquals(4, sum(listOf(-1, 5)))
+            @Test fun singleValue() = assertEquals(10, sum(listOf(10)))
+        }
+        """;
+
+    private const string KotlinCoroutineTests = """
+        package challenge
+
+        import kotlin.test.Test
+        import kotlin.test.assertEquals
+        import kotlinx.coroutines.test.runTest
+
+        class SumTest {
+            @Test fun emptyIsZero() = assertEquals(0, sum(emptyList()))
+            @Test fun adds() = assertEquals(6, sum(listOf(1, 2, 3)))
+            @Test fun handlesNegatives() = assertEquals(4, sum(listOf(-1, 5)))
+            @Test fun singleValue() = assertEquals(10, sum(listOf(10)))
+            @Test fun worksInsideRunTest() = runTest { assertEquals(3, sum(listOf(1, 2))) }
+        }
+        """;
+
+    private const string KotlinBrokenStub = """
+        package challenge
+
+        fun sum(values: List<Int>): Int = this does not compile
+        """;
+
+    private static bool JavaAtLeast17()
+    {
+        try
+        {
+            var psi = new System.Diagnostics.ProcessStartInfo("java", "-version")
+            {
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+            };
+            using var p = System.Diagnostics.Process.Start(psi)!;
+            var output = p.StandardError.ReadToEnd() + p.StandardOutput.ReadToEnd();
+            p.WaitForExit();
+            var m = System.Text.RegularExpressions.Regex.Match(output, @"\d+(\.\d+)*");
+            if (!m.Success) return false;
+            var parts = m.Value.Split('.');
+            var major = parts[0] == "1" && parts.Length > 1 ? int.Parse(parts[1]) : int.Parse(parts[0]);
+            return major >= 17;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+    }
+
+    private static void RequireJava()
+    {
+        if (!JavaAtLeast17())
+        {
+            Assert.Inconclusive("No java >= 17 on PATH.");
+        }
+    }
+
+    private sealed class KotlinFixture : IDisposable
+    {
+        private readonly TempDir _data = new("data");
+        private readonly TempDir _ws = new("ws dir");
+
+        public KotlinFixture(string tests, string stub = KotlinStub, string? reference = KotlinReference, string? naive = KotlinNaive)
+        {
+            Paths = new DailyPaths(_data.Path, RepoPaths.PluginRoot);
+            var config = new DailyConfig([new("kotlin", Level.Beginner)], _ws.Path, 10, 1);
+            Language = LanguageLoader.Get(LanguageLoader.Load(Paths.LanguagesDir), "kotlin");
+            Folder = Scaffolder.Create(Paths, config, Language, Day, "sum", force: false);
+            Write("src/main/kotlin/Sum.kt", stub);
+            Write("src/test/kotlin/SumTest.kt", tests);
+            if (reference is not null) Write(".verify/reference/Sum.kt", reference);
+            if (naive is not null) Write(".verify/naive/Sum.kt", naive);
+        }
+
+        public DailyPaths Paths { get; }
+        public Language Language { get; }
+        public string Folder { get; }
+
+        public void Write(string relative, string content)
+        {
+            var file = Path.Combine(Folder, relative);
+            Directory.CreateDirectory(Path.GetDirectoryName(file)!);
+            File.WriteAllText(file, content);
+        }
+
+        public void Dispose()
+        {
+            _data.Dispose();
+            _ws.Dispose();
+        }
+    }
+
+    [TestMethod]
+    public void Kotlin_GoodChallenge_Verifies()
+    {
+        RequireJava();
+        using var f = new KotlinFixture(KotlinGoodTests);
+
+        var result = Verifier.Run(f.Paths, f.Language, f.Folder, Day);
+
+        Assert.IsTrue(result.Ok, string.Join(" | ", result.Problems));
+        Assert.IsTrue(result.StubBuilds);
+        Assert.AreEqual(4, result.ReferencePassed);
+        Assert.AreEqual(4, result.ReferenceTotal);
+        Assert.AreEqual(3, result.NaiveFailed);
+    }
+
+    [TestMethod]
+    public void Kotlin_NaiveWithTodo_Rejected()
+    {
+        RequireJava();
+        using var f = new KotlinFixture(KotlinGoodTests, naive: KotlinNaiveWithTodo);
+
+        var result = Verifier.Run(f.Paths, f.Language, f.Folder, Day);
+
+        Assert.IsFalse(result.Ok);
+        Assert.IsTrue(result.Problems.Any(p => p.Contains("naive", StringComparison.Ordinal) && p.Contains("TODO", StringComparison.Ordinal)), string.Join(" | ", result.Problems));
+    }
+
+    [TestMethod]
+    public void Kotlin_BrokenStub_DoesNotBuild()
+    {
+        RequireJava();
+        using var f = new KotlinFixture(KotlinGoodTests, stub: KotlinBrokenStub);
+
+        var result = Verifier.Run(f.Paths, f.Language, f.Folder, Day);
+
+        Assert.IsFalse(result.Ok);
+        Assert.IsFalse(result.StubBuilds);
+    }
+
+    [TestMethod]
+    public void Kotlin_CoroutineTest_Runs()
+    {
+        RequireJava();
+        using var f = new KotlinFixture(KotlinCoroutineTests);
+
+        var result = Verifier.Run(f.Paths, f.Language, f.Folder, Day);
+
+        Assert.IsTrue(result.Ok, string.Join(" | ", result.Problems));
+        Assert.AreEqual(5, result.ReferenceTotal);
+        Assert.AreEqual(5, result.ReferencePassed);
+    }
 }
