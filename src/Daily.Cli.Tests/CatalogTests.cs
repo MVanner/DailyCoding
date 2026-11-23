@@ -117,6 +117,31 @@ public sealed class CatalogTests
     }
 
     [TestMethod]
+    [DataRow("csharp", Level.Beginner)]
+    [DataRow("csharp", Level.Intermediate)]
+    [DataRow("csharp", Level.Advanced)]
+    [DataRow("csharp", Level.Expert)]
+    [DataRow("swift", Level.Beginner)]
+    [DataRow("swift", Level.Intermediate)]
+    [DataRow("swift", Level.Advanced)]
+    [DataRow("swift", Level.Expert)]
+    [DataRow("kotlin", Level.Beginner)]
+    [DataRow("kotlin", Level.Intermediate)]
+    [DataRow("kotlin", Level.Advanced)]
+    [DataRow("kotlin", Level.Expert)]
+    [DataRow("lua", Level.Beginner)]
+    [DataRow("lua", Level.Intermediate)]
+    [DataRow("lua", Level.Advanced)]
+    [DataRow("lua", Level.Expert)]
+    public void EveryLanguage_HasAtLeastThreeTopicsAtEveryLevel(string languageId, Level level)
+    {
+        var languages = LanguageLoader.Load(Path.Combine(RepoPaths.PluginRoot, "languages"));
+        var count = Catalogs.Load(languages)[languageId].Count(t => t.Seeds.ContainsKey(level));
+
+        Assert.IsGreaterThanOrEqualTo(3, count, $"{languageId}/{level}: {count} topics");
+    }
+
+    [TestMethod]
     public void RealCatalog_HasTheStarterTopics()
     {
         var ids = CatalogLoader.Load(Path.Combine(RepoPaths.PluginRoot, "catalog")).Select(t => t.Id).ToHashSet();

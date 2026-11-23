@@ -55,6 +55,24 @@
         "a Result-like Either type with Functor operations",
         "a lazy generic Paginated sequence"
       ]
+    },
+    "Expert": {
+      "learningGoal": "Design generic abstractions where dispatch, specialisation and conditional conformance interact, and prove which implementation runs.",
+      "gotchas": [
+        "A requirement implemented in a protocol extension is dispatched dynamically while a non-requirement is dispatched statically from a generic context, so the same call can run different code inside and outside a generic function",
+        "Overloads constrained differently are chosen at compile time, so a generic caller only sees the constraints it declared",
+        "Conditional conformances stack, so Array<Array<Int>> conforms only if the inner conformance holds and the observable result depends on which layer supplies it"
+      ],
+      "goodSolutionShows": [
+        "Tests that call one operation through a concrete type and through a generic function and assert which implementation ran",
+        "Minimal constraints declared once, with primary associated types on the protocol for the public API",
+        "Conditional conformance with a documented, tested fallback path"
+      ],
+      "shapeHints": [
+        "a Describable protocol with a default and specialised implementations for collections",
+        "a Pipeline<Input, Output> composing stages with different constraints",
+        "a Mergeable protocol with Array and Dictionary conformances and a generic merge-all"
+      ]
     }
   }
 }

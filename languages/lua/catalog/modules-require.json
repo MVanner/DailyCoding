@@ -43,12 +43,13 @@
       "gotchas": [
         "Lazy submodule via __index calls require once and caches on the table",
         "package.preload provides modules without files",
-        "Environments for sandboxing differ between 5.1 (setfenv) and 5.2+ so the guide forbids them"
+        "require caches in package.loaded, so a module re-required in a later test returns the same table unless package.loaded[name] is cleared first"
       ],
       "goodSolutionShows": [
         "__index-based lazy loader",
         "package.preload used to provide fake modules in tests",
-        "Stable public API surface"
+        "Stable public API surface",
+        "No environment sandboxing (setfenv/_ENV differ between Lua versions); isolation through package.loaded and package.preload"
       ],
       "shapeHints": [
         "a lazy-loading module table (M.ui, M.util)",

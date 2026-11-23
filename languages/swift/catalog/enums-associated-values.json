@@ -42,13 +42,14 @@
       "learningGoal": "Design recursive and indirect enums with pattern matching, and evolve enums safely.",
       "gotchas": [
         "indirect is required for recursive cases",
-        "@unknown default and frozen vs non-frozen enums",
+        "Input that matches no known case (an unrecognised raw value or tag) must map to a defined fallback such as an unknown case or nil, and tests need such an input",
         "Equatable and Hashable synthesis fails with non-Equatable associated values"
       ],
       "goodSolutionShows": [
         "indirect enum evaluating an expression tree",
         "Exhaustive switch with nested patterns",
-        "Small transformation function (simplify) via pattern matching"
+        "Small transformation function (simplify) via pattern matching",
+        "@unknown default instead of a plain default for enums that may gain cases"
       ],
       "shapeHints": [
         "an arithmetic expression evaluator and simplifier",

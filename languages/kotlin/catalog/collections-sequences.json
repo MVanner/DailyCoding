@@ -25,7 +25,7 @@
       "gotchas": [
         "sortedBy is stable but comparators must handle ties explicitly for deterministic output",
         "windowed drops partial windows unless partialWindows = true",
-        "maxBy throws on empty in older versions; maxByOrNull is safe"
+        "maxBy throws NoSuchElementException on an empty collection since Kotlin 1.7; maxByOrNull returns null instead"
       ],
       "goodSolutionShows": [
         "compareBy with thenBy for tie-breaking",

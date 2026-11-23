@@ -39,16 +39,17 @@
       ]
     },
     "Expert": {
-      "learningGoal": "Design actor-based pipelines with isolation boundaries, global actors and ordering guarantees.",
+      "learningGoal": "Design actor-based pipelines with isolation boundaries, global actors and reentrancy-safe ordering.",
       "gotchas": [
-        "Actor mailbox ordering is not FIFO for async continuations",
+        "Actor reentrancy: state can change across an await inside an actor method, so a check made before the suspension may no longer hold after it",
         "Passing non-Sendable values across actors",
         "Global actor annotations leak to closures"
       ],
       "goodSolutionShows": [
         "Clear isolation boundaries with Sendable messages",
         "Preserving order with an explicit sequence number",
-        "Avoiding deadlock-prone awaiting patterns"
+        "Avoiding deadlock-prone awaiting patterns",
+        "Deterministic tests that hold a method at its suspension point with a continuation to interleave a second call, instead of sleeping"
       ],
       "shapeHints": [
         "an ordered event processor",

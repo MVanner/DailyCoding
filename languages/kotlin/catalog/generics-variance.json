@@ -6,13 +6,14 @@
       "learningGoal": "Write generic functions with upper bounds and understand declaration-site variance.",
       "gotchas": [
         "List<out E> is covariant, MutableList<E> is invariant",
-        "Type erasure: is List<String> cannot be checked at runtime",
+        "Erasure: a List<String> and a List<Int> are indistinguishable at runtime, so a type-filtering helper must inspect the elements and be tested with mixed lists",
         "Comparing a T without a Comparable bound does not compile"
       ],
       "goodSolutionShows": [
         "Upper bounds (T : Comparable<T>) replacing casts",
         "out and in used where the type is only produced or consumed",
-        "where clause for multiple bounds"
+        "where clause for multiple bounds",
+        "filterIsInstance or an explicit KClass instead of an is-check on a parameterised type"
       ],
       "shapeHints": [
         "a generic maxOf over Comparable",
@@ -41,7 +42,7 @@
     "Expert": {
       "learningGoal": "Design variance-correct APIs and handle type-system corner cases.",
       "gotchas": [
-        "Variance conflicts when a covariant type appears in an input position",
+        "A covariant container's contains(element) can be called with a value that is not a T through a widened reference, so tests cover lookups of foreign values",
         "Platform types and generic arrays",
         "Nothing as a subtype enabling covariant empty values"
       ],

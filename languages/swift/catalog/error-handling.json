@@ -7,7 +7,7 @@
       "gotchas": [
         "try? discards the error and returns nil, losing information",
         "A catch-all must come last or earlier patterns are shadowed",
-        "Errors thrown from a stub placeholder crash nothing, but an uncaught throw in a test fails it"
+        "A function that throws needs a test for the thrown error (the specific case) and one for the success path; an uncaught throw in a test fails it with the error instead of an assertion"
       ],
       "goodSolutionShows": [
         "An Error enum with meaningful cases and associated values",

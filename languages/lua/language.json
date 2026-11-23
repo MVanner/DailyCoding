@@ -22,6 +22,6 @@
     "Beginner": "new to Lua: tables, strings, functions, modules.",
     "Intermediate": "comfortable day to day: closures, metatables, varargs, string patterns.",
     "Advanced": "design trade-offs: coroutines, OOP with metatables, Neovim plugin structure, game loops.",
-    "Expert": "deep language and runtime topics: performance in LuaJIT, environments, weak tables, ECS design."
+    "Expert": "deep language and runtime topics: coroutine schedulers, metatable-based OOP, ECS design, fixed-timestep loops."
   }
 }

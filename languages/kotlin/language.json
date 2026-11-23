@@ -29,6 +29,6 @@
     "Beginner": "new to Kotlin: null safety, data classes, collections.",
     "Intermediate": "comfortable day to day: sealed classes and `when`, extension and scope functions, lambdas.",
     "Advanced": "design trade-offs: coroutines, Flow, generics and variance, delegation.",
-    "Expert": "deep language and runtime topics: structured concurrency edge cases, inline and reified, DSL builders."
+    "Expert": "deep language and runtime topics: structured concurrency edge cases, Flow operators, variance-correct generics."
   }
 }

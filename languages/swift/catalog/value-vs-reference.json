@@ -55,6 +55,24 @@
         "an immutable-looking Matrix wrapping a class storage",
         "a history stack that shares storage until written"
       ]
+    },
+    "Expert": {
+      "learningGoal": "Build a copy-on-write value type over reference storage and prove its value semantics and copy avoidance with deterministic tests.",
+      "gotchas": [
+        "isKnownUniquelyReferenced is false whenever another strong reference exists, including a local copy of the storage reference taken before the check",
+        "Every mutating entry point (append, insert, subscript set, remove) needs the uniqueness check, not just one of them",
+        "Accidental copies stay invisible unless the storage counts its own copies, for example when a loop re-reads the storage before each mutation"
+      ],
+      "goodSolutionShows": [
+        "A storage class copied only inside one makeUnique() helper that every mutator calls",
+        "Tests that count storage copies through an injected counter instead of timing anything",
+        "Value semantics asserted after chains of copy, mutate the original, mutate the copy"
+      ],
+      "shapeHints": [
+        "a copy-on-write text buffer with append, insert and a copy counter",
+        "an array wrapper with an undo history that shares storage until written",
+        "a Matrix whose copies share storage until one is written"
+      ]
     }
   }
 }

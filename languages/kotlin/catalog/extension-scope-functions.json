@@ -7,12 +7,13 @@
       "gotchas": [
         "Extensions are resolved statically and cannot override members",
         "A member with the same signature always wins over the extension",
-        "Extensions cannot access private members"
+        "An extension on a nullable receiver (String?) still runs when the receiver is null, so null and empty inputs need their own tests"
       ],
       "goodSolutionShows": [
         "Extension functions with clear receivers",
         "Extension properties for derived values",
-        "Nullable receiver extensions (String?.orEmpty style)"
+        "Nullable receiver extensions (String?.orEmpty style)",
+        "Extensions written only against the receiver's public API"
       ],
       "shapeHints": [
         "String.toSlug and String.truncate",
@@ -41,14 +42,15 @@
     "Advanced": {
       "learningGoal": "Design small DSLs with lambdas with receivers and extension-based builders.",
       "gotchas": [
-        "Without @DslMarker inner lambdas can call outer receivers' functions",
-        "Lambda with receiver is T.() -> Unit vs (T) -> Unit",
+        "A nested block that calls the outer builder attaches its child to the wrong parent unless the scope is restricted, so tests assert which parent received each nested child",
+        "Calling build() twice, or keeping a reference to a builder, must not change a result that was already built",
         "Builders need to collect state and return an immutable result"
       ],
       "goodSolutionShows": [
         "Lambda-with-receiver builder creating an immutable result",
         "@DslMarker preventing scope leaks",
-        "Tests that assert the built structure"
+        "Tests that assert the built structure",
+        "Lambda-with-receiver (T.() -> Unit) so the block reads like the structure it builds"
       ],
       "shapeHints": [
         "an HTML-like builder with nested elements",

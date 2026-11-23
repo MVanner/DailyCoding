@@ -28,6 +28,6 @@
     "Beginner": "new to Swift: optionals, structs vs classes, collections.",
     "Intermediate": "comfortable day to day: protocols and extensions, enums with associated values, error handling, closures.",
     "Advanced": "design trade-offs: generics and associated types, async/await, actors, ARC and capture lists.",
-    "Expert": "deep language and runtime topics: Sendable and strict concurrency, copy-on-write types, result builders, performance."
+    "Expert": "deep language and runtime topics: Sendable and strict concurrency, copy-on-write storage, generic and protocol design, actor reentrancy."
   }
 }
