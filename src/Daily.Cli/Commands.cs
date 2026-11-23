@@ -221,6 +221,12 @@ public static class Commands
         }
 
         var folder = Path.GetFullPath(args[0]);
+        if (!Directory.Exists(folder))
+        {
+            stderr.WriteLine($"Folder not found: {folder}");
+            return ExitCodes.Error;
+        }
+
         var language = LanguageLoader.Get(LanguageLoader.Load(paths.LanguagesDir), Scaffolder.LanguageOf(folder) ?? "csharp");
         var (result, output) = TestRunner.Run(language, folder, TimeSpan.FromMinutes(5));
         stdout.WriteLine(Json.Serialize(new
@@ -233,6 +239,58 @@ public static class Commands
             output = output.Length > OutputLimit ? output[^OutputLimit..] : output,
         }));
         return ExitCodes.Ok;
+    }
+
+    /// <summary>
+    /// <c>warmup &lt;languageId&gt;</c> — runs the language's test command once on a temp copy of its bare template so the
+    /// first real run isn't slow (toolchain and dependency downloads). "No tests ran" is fine: <c>ok</c> only means a
+    /// command resolved and neither timed out nor failed to start.
+    /// </summary>
+    public static int WarmupCommand(string[] args, DailyPaths paths, TextWriter stdout, TextWriter stderr)
+    {
+        if (args.Length == 0)
+        {
+            stderr.WriteLine("Usage: warmup <languageId>");
+            return ExitCodes.Error;
+        }
+
+        Language language;
+        try
+        {
+            language = LanguageLoader.Get(LanguageLoader.Load(paths.LanguagesDir), args[0]);
+        }
+        catch (LanguageException ex)
+        {
+            stderr.WriteLine(ex.Message);
+            return ExitCodes.Error;
+        }
+
+        var temp = Path.Combine(Path.GetTempPath(), "daily-warmup-" + Guid.NewGuid().ToString("N")[..8]);
+        try
+        {
+            var sdkMajor = new StateStore(paths).LoadConfig()?.SdkMajor ?? Math.Max(10, Environment.Version.Major);
+            var config = new DailyConfig([], temp, sdkMajor, 0);
+            var folder = Scaffolder.Create(paths, config, language, CliHelpers.Today(), "warmup", force: true);
+            var watch = System.Diagnostics.Stopwatch.StartNew();
+            var (result, output) = TestRunner.Run(language, folder, TimeSpan.FromMinutes(5));
+            watch.Stop();
+            var resolved = TestRunner.ResolveCommand(language, folder, OperatingSystem.IsWindows(), ProcessRunner.IsOnPath) is not null;
+            var failed = result is null && (output.Contains(" timed out after ", StringComparison.Ordinal) || output.StartsWith("Could not start", StringComparison.Ordinal));
+            stdout.WriteLine(Json.Serialize(new
+            {
+                ok = resolved && !failed,
+                seconds = Math.Round(watch.Elapsed.TotalSeconds, 1),
+                output = output.Length > OutputLimit ? output[^OutputLimit..] : output,
+            }));
+            return ExitCodes.Ok;
+        }
+        finally
+        {
+            if (Directory.Exists(temp))
+            {
+                Directory.Delete(temp, recursive: true);
+            }
+        }
     }
 
     /// <summary><c>hint [--date d]</c> — counts a hint for the day's started challenge and returns the new total.</summary>

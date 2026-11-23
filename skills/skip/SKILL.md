@@ -1,6 +1,6 @@
 ---
 name: skip
-description: Skip today's C# challenge — ends today with no challenge; the topic can come up again later. Use when the developer runs /daily:skip or says they don't have time for the daily challenge today.
+description: Skip today's daily challenge — ends today with no challenge; the topic can come up again later. Use when the developer runs /daily:skip or says they don't have time for the daily challenge today.
 allowed-tools: Bash(dotnet *)
 ---
 

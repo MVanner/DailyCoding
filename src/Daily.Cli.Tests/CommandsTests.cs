@@ -556,4 +556,58 @@ public sealed class CommandsTests
         Assert.AreEqual(1, json.GetProperty("total").GetInt32());
         Assert.AreEqual(1, json.GetProperty("passed").GetInt32());
     }
+
+    [TestMethod]
+    public void Warmup_UnknownLanguage_Exits1()
+    {
+        using var f = new Fixture();
+
+        var (exit, _, err) = f.Run("warmup", "cobol");
+
+        Assert.AreEqual(1, exit);
+        StringAssert.Contains(err, "Unknown language");
+    }
+
+    [TestMethod]
+    [TestCategory("Integration")]
+    public void Warmup_Lua_Ok()
+    {
+        using var f = new Fixture();
+        var lua = LanguageLoader.Get(LanguageLoader.Load(f.Paths.LanguagesDir), "lua");
+        if (!ToolCheck.Check(lua).Available)
+        {
+            Assert.Inconclusive("No Lua runner (luajit, lua or nvim) on PATH.");
+        }
+
+        var (exit, output, err) = f.Run("warmup", "lua");
+
+        Assert.AreEqual(0, exit, err);
+        var json = JsonDocument.Parse(output).RootElement;
+        Assert.IsTrue(json.GetProperty("ok").GetBoolean(), output);
+        Assert.IsGreaterThanOrEqualTo(0.0, json.GetProperty("seconds").GetDouble());
+    }
+
+    [TestMethod]
+    public void RunTests_MissingFolder_Exits1()
+    {
+        using var f = new Fixture();
+        var missing = Path.Combine(f.Paths.DataDir, "nope");
+
+        var (exit, _, err) = f.Run("run-tests", missing);
+
+        Assert.AreEqual(1, exit);
+        StringAssert.Contains(err, $"Folder not found: {missing}");
+    }
+
+    [TestMethod]
+    public void Verify_MissingFolder_Exits1()
+    {
+        using var f = new Fixture();
+        var missing = Path.Combine(f.Paths.DataDir, "nope");
+
+        var (exit, _, err) = f.Run("verify", missing);
+
+        Assert.AreEqual(1, exit);
+        StringAssert.Contains(err, $"Folder not found: {missing}");
+    }
 }

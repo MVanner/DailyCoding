@@ -103,6 +103,12 @@ public static partial class Verifier
         }
 
         var folder = Path.GetFullPath(args[0]);
+        if (!Directory.Exists(folder))
+        {
+            stderr.WriteLine($"Folder not found: {folder}");
+            return ExitCodes.Error;
+        }
+
         var language = LanguageLoader.Get(LanguageLoader.Load(paths.LanguagesDir), Scaffolder.LanguageOf(folder) ?? "csharp");
         stdout.WriteLine(Json.Serialize(Run(paths, language, folder, CliHelpers.Date(args))));
         return ExitCodes.Ok;

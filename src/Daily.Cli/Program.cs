@@ -20,6 +20,7 @@ public static class Program
         ["repick"] = Commands.RepickCommand,
         ["languages"] = Commands.LanguagesCommand,
         ["run-tests"] = Commands.RunTestsCommand,
+        ["warmup"] = Commands.WarmupCommand,
     };
 
     /// <summary>Commands run by the SessionStart hook: they must never print errors or exit non-zero.</summary>
