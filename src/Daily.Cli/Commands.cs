@@ -242,9 +242,9 @@ public static class Commands
     }
 
     /// <summary>
-    /// <c>warmup &lt;languageId&gt;</c> — runs the language's test command once on a temp copy of its bare template so the
-    /// first real run isn't slow (toolchain and dependency downloads). "No tests ran" is fine: <c>ok</c> only means a
-    /// command resolved and neither timed out nor failed to start.
+    /// <c>warmup &lt;languageId&gt;</c> — copies the language's template, overlays its known-good <c>warmup/</c> sample and runs the
+    /// tests once, so the first real run isn't slow (toolchain and dependency downloads) and a broken toolchain shows up now.
+    /// <c>ok</c> means the sample built and all of its tests passed; a language without a sample has nothing to warm up.
     /// </summary>
     public static int WarmupCommand(string[] args, DailyPaths paths, TextWriter stdout, TextWriter stderr)
     {
@@ -265,21 +265,28 @@ public static class Commands
             return ExitCodes.Error;
         }
 
+        if (!Directory.Exists(language.WarmupDir))
+        {
+            stdout.WriteLine(Json.Serialize(new { ok = true, seconds = 0.0, problem = (string?)null, output = "No warm-up sample for this language; nothing to do." }));
+            return ExitCodes.Ok;
+        }
+
         var temp = Path.Combine(Path.GetTempPath(), "daily-warmup-" + Guid.NewGuid().ToString("N")[..8]);
         try
         {
             var sdkMajor = new StateStore(paths).LoadConfig()?.SdkMajor ?? Math.Max(10, Environment.Version.Major);
             var config = new DailyConfig([], temp, sdkMajor, 0);
             var folder = Scaffolder.Create(paths, config, language, CliHelpers.Today(), "warmup", force: true);
+            OverlayWarmup(language, folder);
             var watch = System.Diagnostics.Stopwatch.StartNew();
             var (result, output) = TestRunner.Run(language, folder, TimeSpan.FromMinutes(5));
             watch.Stop();
-            var resolved = TestRunner.ResolveCommand(language, folder, OperatingSystem.IsWindows(), ProcessRunner.IsOnPath) is not null;
-            var failed = result is null && (output.Contains(" timed out after ", StringComparison.Ordinal) || output.StartsWith("Could not start", StringComparison.Ordinal));
+            var ok = result is { Total: > 0, Failed: 0 };
             stdout.WriteLine(Json.Serialize(new
             {
-                ok = resolved && !failed,
+                ok,
                 seconds = Math.Round(watch.Elapsed.TotalSeconds, 1),
+                problem = ok ? null : WarmupProblem(result, output),
                 output = output.Length > OutputLimit ? output[^OutputLimit..] : output,
             }));
             return ExitCodes.Ok;
@@ -298,6 +305,41 @@ public static class Commands
                 // Best effort: a lingering daemon (e.g. Gradle) may still hold files; the temp dir is harmless.
             }
         }
+    }
+
+    private static void OverlayWarmup(Language language, string folder)
+    {
+        foreach (var source in Directory.EnumerateFiles(language.WarmupDir, "*", SearchOption.AllDirectories))
+        {
+            var target = Path.Combine(folder, Path.GetRelativePath(language.WarmupDir, source));
+            Directory.CreateDirectory(Path.GetDirectoryName(target)!);
+            File.Copy(source, target, overwrite: true);
+        }
+    }
+
+    private static string WarmupProblem(TestRunResult? result, string output)
+    {
+        if (result is { Failures.Length: > 0 })
+        {
+            var first = result.Failures[0];
+            return $"{first.Name}: {first.Message}";
+        }
+
+        if (result is { Total: > 0 })
+        {
+            return "tests did not pass";
+        }
+
+        var lines = System.Text.RegularExpressions.Regex.Replace(output, "\u001B\\[[0-9;]*m", "")
+            .Split('\n').Select(l => l.Trim()).Where(l => l.Length > 0).ToList();
+        var error = lines
+            .Where(l => l.Contains("error", StringComparison.OrdinalIgnoreCase) || l.StartsWith("e: ", StringComparison.Ordinal))
+            .Select(l => l.Length > 300 ? l[..300] + "..." : l)
+            .Take(3)
+            .ToList();
+        return error.Count > 0
+            ? string.Join(" | ", error)
+            : "no tests ran: " + (lines.LastOrDefault() ?? "no output");
     }
 
     /// <summary><c>hint [--date d]</c> — counts a hint for the day's started challenge and returns the new total.</summary>

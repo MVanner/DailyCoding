@@ -28,7 +28,7 @@ Then run `CLI stamp-write`. If the build fails, show the first compiler error an
 
 ## 3. Current settings
 
-Run `CLI config show`. Exit code 2 means first-time setup. Otherwise show the current languages with their levels and the workspace and ask whether they want to change any of them; if not, skip to step 8 (the `sdkMajor` refresh, which still applies if `csharp` is configured), skip step 9 and finish with step 10.
+Run `CLI config show`. Exit code 2 means first-time setup. Otherwise show the current languages with their levels and the workspace and ask whether they want to change any of them; if not, skip to step 8 (the `sdkMajor` refresh, which still applies if `csharp` is configured) and finish with step 9.
 
 ## 4. Languages
 
@@ -44,9 +44,13 @@ One AskUserQuestion call with one question per language that will be saved (at m
 
 Mention once: about one day in four is a stretch day (a level up, or a topic they haven't done yet). They can change levels any time by re-running `/daily:setup`.
 
-## 6. Save languages and levels
+## 6. Warm-up, then save languages and levels
 
-Run `CLI config set languages <id,id,...>` with the available picks, then `CLI config set level <id> <Level>` for each of them.
+For each picked language other than `csharp` that is `available`, run `CLI warmup <id>` before saving anything. It copies that language's template, adds a tiny known-good sample, runs the tests once (so the first real challenge isn't slow: Kotlin downloads Gradle and its dependencies, Swift builds its package) and prints `{ ok, seconds, problem, output }`. Tell the developer first that it may take a few minutes per language. `ok` is true only when the sample built and its tests passed.
+
+If `ok` is false, the toolchain is installed but doesn't work. Leave that language out, and tell the developer: `problem`, a short excerpt from the tail of `output`, and the language's install hint from `CLI languages`. Keep it anyway only if the developer explicitly says to. They can fix the toolchain and re-run `/daily:setup`. If every pick fails its warm-up, say so and go back to step 4 rather than saving an empty list.
+
+Then run `CLI config set languages <id,id,...>` with the languages that remain, and `CLI config set level <id> <Level>` for each of them.
 
 ## 7. Workspace
 
@@ -56,10 +60,6 @@ Ask where challenge folders should go. Offer the default — the `DailyCoding` f
 
 If `csharp` was saved (or, when nothing was changed in step 3, is already configured): run `CLI config set sdkMajor <major from step 1>` (C# projects target `net<major>.0`). Otherwise skip this step.
 
-## 9. Warm-up
-
-For each saved language other than `csharp`, run `CLI warmup <id>`. It runs that language's test command once on a copy of the bare template in a temp folder, so the first real challenge isn't slow (for example Kotlin downloads Gradle and its dependencies, Swift builds its package), and prints `{ ok, seconds, output }`. Tell the developer first that it may take a few minutes. Don't treat "no tests ran" as a problem. If `ok` is false, show the tail of `output` and say the first challenge may be slow or may need fixing; continue anyway.
-
-## 10. Done
+## 9. Done
 
 Confirm in two or three lines: languages with their levels, workspace, and that from tomorrow the first Claude Code session of the day shows a one-line nudge. They can run `/daily:start` right now if they have 15 minutes.

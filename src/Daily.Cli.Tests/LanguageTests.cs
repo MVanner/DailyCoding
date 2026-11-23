@@ -173,4 +173,24 @@ public sealed class LanguageTests
             Assert.IsGreaterThanOrEqualTo(10, Directory.GetFiles(language.CatalogDir, "*.json").Length, $"{language.Id} catalog size");
         }
     }
+
+    [TestMethod]
+    public void RealLanguages_NonCsharpHaveWarmupSampleMappingIntoStubAndTestDirs()
+    {
+        var languages = LanguageLoader.Load(Path.Combine(RepoPaths.PluginRoot, "languages")).Where(l => l.Id != "csharp").ToList();
+        Assert.IsNotEmpty(languages);
+
+        foreach (var language in languages)
+        {
+            var warmup = Path.Combine(language.Dir, "warmup");
+            Assert.IsTrue(Directory.Exists(warmup), $"{language.Id} needs a warmup/ folder");
+            var files = Directory.EnumerateFiles(warmup, "*", SearchOption.AllDirectories)
+                .Select(f => Path.GetRelativePath(warmup, f).Replace('\\', '/'))
+                .ToList();
+            Assert.IsTrue(files.Any(f => f.StartsWith(language.Descriptor.StubDir + "/", StringComparison.Ordinal)), $"{language.Id}: no warmup file under {language.Descriptor.StubDir}");
+            Assert.IsTrue(files.Any(f => f.StartsWith(language.Descriptor.TestDir + "/", StringComparison.Ordinal)), $"{language.Id}: no warmup file under {language.Descriptor.TestDir}");
+            Assert.IsTrue(files.All(f => f.StartsWith(language.Descriptor.StubDir + "/", StringComparison.Ordinal) || f.StartsWith(language.Descriptor.TestDir + "/", StringComparison.Ordinal)),
+                $"{language.Id}: warmup files must live under stubDir or testDir: {string.Join(", ", files)}");
+        }
+    }
 }

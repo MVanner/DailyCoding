@@ -37,6 +37,17 @@ public sealed class SkillTextTests
     }
 
     [TestMethod]
+    public void Setup_WarmsUpLanguagesBeforeSavingThem()
+    {
+        var setup = Skill("setup");
+
+        var warmup = setup.IndexOf("CLI warmup", StringComparison.Ordinal);
+        var save = setup.IndexOf("CLI config set languages", StringComparison.Ordinal);
+        Assert.IsGreaterThan(-1, warmup);
+        Assert.IsLessThan(save, warmup, "warm-up must run before the languages are saved");
+    }
+
+    [TestMethod]
     public void EveryGuideLayoutExplainsHowToRunTheTests()
     {
         foreach (var guide in Directory.GetFiles(Path.Combine(RepoPaths.PluginRoot, "languages"), "guide.md", SearchOption.AllDirectories))

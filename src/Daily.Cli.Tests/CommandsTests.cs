@@ -568,23 +568,73 @@ public sealed class CommandsTests
         StringAssert.Contains(err, "Unknown language");
     }
 
-    [TestMethod]
-    [TestCategory("Integration")]
-    public void Warmup_Lua_Ok()
+    private static void WarmupOk(string languageId)
     {
         using var f = new Fixture();
-        var lua = LanguageLoader.Get(LanguageLoader.Load(f.Paths.LanguagesDir), "lua");
-        if (!ToolCheck.Check(lua).Available)
+        var language = LanguageLoader.Get(LanguageLoader.Load(f.Paths.LanguagesDir), languageId);
+        if (!ToolCheck.Check(language).Available)
         {
-            Assert.Inconclusive("No Lua runner (luajit, lua or nvim) on PATH.");
+            Assert.Inconclusive($"{language.Name} toolchain not available.");
         }
 
-        var (exit, output, err) = f.Run("warmup", "lua");
+        var (exit, output, err) = f.Run("warmup", languageId);
 
         Assert.AreEqual(0, exit, err);
         var json = JsonDocument.Parse(output).RootElement;
         Assert.IsTrue(json.GetProperty("ok").GetBoolean(), output);
         Assert.IsGreaterThanOrEqualTo(0.0, json.GetProperty("seconds").GetDouble());
+    }
+
+    [TestMethod]
+    [TestCategory("Integration")]
+    public void Warmup_Lua_Ok() => WarmupOk("lua");
+
+    [TestMethod]
+    [TestCategory("Integration")]
+    public void Warmup_Kotlin_Ok() => WarmupOk("kotlin");
+
+    [TestMethod]
+    [TestCategory("Integration")]
+    public void Warmup_Swift_Ok() => WarmupOk("swift");
+
+    [TestMethod]
+    [TestCategory("Integration")]
+    public void Warmup_BrokenSample_IsNotOk()
+    {
+        using var root = new TempDir("root");
+        using var data = new TempDir("data");
+        var realLua = Path.Combine(RepoPaths.PluginRoot, "languages", "lua");
+        foreach (var file in Directory.EnumerateFiles(realLua, "*", SearchOption.AllDirectories))
+        {
+            root.Write(Path.Combine("languages", "lua", Path.GetRelativePath(realLua, file)), File.ReadAllText(file));
+        }
+
+        root.Write("languages/lua/warmup/src/warmup.lua", "local M = {}\nfunction M.add(a, b) return a - b end\nreturn M\n");
+        var paths = new DailyPaths(data.Path, root.Path);
+        if (!ToolCheck.Check(LanguageLoader.Get(LanguageLoader.Load(paths.LanguagesDir), "lua")).Available)
+        {
+            Assert.Inconclusive("No Lua runner (luajit, lua or nvim) on PATH.");
+        }
+
+        var (exit, output, err) = RunWith(paths, "warmup", "lua");
+
+        Assert.AreEqual(0, exit, err);
+        var json = JsonDocument.Parse(output).RootElement;
+        Assert.IsFalse(json.GetProperty("ok").GetBoolean(), output);
+        Assert.IsFalse(string.IsNullOrWhiteSpace(json.GetProperty("problem").GetString()), output);
+    }
+
+    [TestMethod]
+    public void Warmup_LanguageWithoutSample_IsOkAndNothingRuns()
+    {
+        using var f = new Fixture();
+
+        var (exit, output, err) = f.Run("warmup", "csharp");
+
+        Assert.AreEqual(0, exit, err);
+        var json = JsonDocument.Parse(output).RootElement;
+        Assert.IsTrue(json.GetProperty("ok").GetBoolean(), output);
+        Assert.AreEqual(0.0, json.GetProperty("seconds").GetDouble());
     }
 
     [TestMethod]

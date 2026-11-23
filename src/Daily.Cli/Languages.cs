@@ -36,6 +36,9 @@ public sealed record Language(LanguageDescriptor Descriptor, string Dir, string 
     public string Id => Descriptor.Id;
 
     public string Name => Descriptor.Name;
+
+    /// <summary>Optional known-good sample (laid out like a challenge) that <c>warmup</c> overlays on the template.</summary>
+    public string WarmupDir => Path.Combine(Dir, "warmup");
 }
 
 public sealed class LanguageException(string message) : Exception(message);
