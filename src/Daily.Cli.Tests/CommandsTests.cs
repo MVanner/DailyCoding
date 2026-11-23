@@ -268,6 +268,15 @@ public sealed class CommandsTests
     }
 
     [TestMethod]
+    public void ConfigSetLevel_InvalidLevel_IsRejected()
+    {
+        using var f = new Fixture();
+
+        Assert.AreEqual(1, f.Run("config", "set", "level", "csharp", "guru").Exit);
+        Assert.AreEqual(Level.Beginner, f.Store.LoadConfig()!.LevelFor("csharp"));
+    }
+
+    [TestMethod]
     public void ConfigSetLevel_ForUnselectedLanguage_IsRejected()
     {
         using var f = new Fixture();

@@ -47,8 +47,33 @@ public sealed class StateStoreTests
         store.SaveConfig(loaded);
         var text = File.ReadAllText(paths.ConfigFile);
         StringAssert.Contains(text, "\"languages\"");
-        Assert.IsFalse(text.Contains("\"level\": \"Advanced\",\n  \"workspace\"", StringComparison.Ordinal));
         Assert.IsNull(System.Text.Json.Nodes.JsonNode.Parse(text)!.AsObject()["level"]);
+    }
+
+    [TestMethod]
+    [DataRow("""{"level":"guru","workspace":"/w","sdkMajor":10,"salt":5}""")]
+    [DataRow("{}")]
+    public void LoadConfig_InvalidOldLevel_IsTreatedAsCorrupt(string json)
+    {
+        using var dir = new TempDir();
+        var paths = new DailyPaths(dir.Path, dir.Path);
+        dir.Write("config.json", json);
+
+        Assert.IsNull(new StateStore(paths).LoadConfig());
+        Assert.IsTrue(File.Exists(paths.ConfigFile + ".bad"));
+    }
+
+    [TestMethod]
+    [DataRow("""{"languages":null,"workspace":"/w","sdkMajor":10,"salt":5}""")]
+    [DataRow("""{"languages":[],"workspace":"/w","sdkMajor":10,"salt":5}""")]
+    public void LoadConfig_NullLanguages_IsTreatedAsCorrupt(string json)
+    {
+        using var dir = new TempDir();
+        var paths = new DailyPaths(dir.Path, dir.Path);
+        dir.Write("config.json", json);
+
+        Assert.IsNull(new StateStore(paths).LoadConfig());
+        Assert.IsTrue(File.Exists(paths.ConfigFile + ".bad"));
     }
 
     [TestMethod]

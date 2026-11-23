@@ -50,7 +50,7 @@ public sealed record DailyState(DateOnly? LastNudgeDate, List<HistoryEntry> Hist
 /// <summary>Reads and writes config.json and state.json. Writes are atomic; unreadable files are set aside as *.bad.</summary>
 public sealed class StateStore(DailyPaths paths)
 {
-    public DailyConfig? LoadConfig() => Read<DailyConfig>(paths.ConfigFile, MigrateConfig);
+    public DailyConfig? LoadConfig() => Read<DailyConfig>(paths.ConfigFile, MigrateConfig, c => c.Languages is { Count: > 0 });
 
     public void SaveConfig(DailyConfig config) => Write(paths.ConfigFile, config);
 
@@ -88,7 +88,7 @@ public sealed class StateStore(DailyPaths paths)
         return json;
     }
 
-    private static T? Read<T>(string file, Func<string, string>? migrate = null) where T : class
+    private static T? Read<T>(string file, Func<string, string>? migrate = null, Func<T, bool>? isValid = null) where T : class
     {
         if (!File.Exists(file))
         {
@@ -98,7 +98,8 @@ public sealed class StateStore(DailyPaths paths)
         try
         {
             var text = File.ReadAllText(file);
-            return Json.Deserialize<T>(migrate is null ? text : migrate(text));
+            var value = Json.Deserialize<T>(migrate is null ? text : migrate(text));
+            return value is not null && isValid?.Invoke(value) != false ? value : throw new JsonException("Invalid contents");
         }
         catch (JsonException)
         {
