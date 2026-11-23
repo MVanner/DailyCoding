@@ -10,7 +10,8 @@ public sealed record TestCommand(string[] Args, string? Os);
 /// <summary>How tests run and where their result files end up; <c>Format</c> is "junit" or "trx".</summary>
 public sealed record TestSpec(TestCommand[] Commands, string Results, string Format, Dictionary<string, string>? Env);
 
-public sealed record ToolRequirement(string Command, string[] Args, string? MinVersion, string InstallHint);
+/// <summary><c>VersionPattern</c> is an optional regex with one capture group that extracts the version from the command's output.</summary>
+public sealed record ToolRequirement(string Command, string[] Args, string? MinVersion, string InstallHint, string? VersionPattern = null);
 
 /// <summary>The contents of <c>languages/&lt;id&gt;/language.json</c>.</summary>
 public sealed record LanguageDescriptor(
@@ -131,6 +132,21 @@ public static class LanguageLoader
         if (d.Requires.Any(r => string.IsNullOrWhiteSpace(r.Command) || string.IsNullOrWhiteSpace(r.InstallHint)))
         {
             Fail("each 'requires' entry needs a 'command' and an 'installHint'");
+        }
+
+        foreach (var pattern in d.Requires.Select(r => r.VersionPattern).Where(p => p is not null))
+        {
+            try
+            {
+                if (new Regex(pattern!).GetGroupNumbers().Length < 2)
+                {
+                    Fail($"'versionPattern' needs one capture group: {pattern}");
+                }
+            }
+            catch (ArgumentException ex)
+            {
+                Fail($"'versionPattern' is not a valid regex ({ex.Message})");
+            }
         }
 
         if (d.Test.Commands.Any(c => c.Os is not (null or "windows" or "unix")))

@@ -253,29 +253,8 @@ public sealed class LanguageIntegrationTests
         fun sum(values: List<Int>): Int = this does not compile
         """;
 
-    private static bool JavaAtLeast17()
-    {
-        try
-        {
-            var psi = new System.Diagnostics.ProcessStartInfo("java", "-version")
-            {
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-            };
-            using var p = System.Diagnostics.Process.Start(psi)!;
-            var output = p.StandardError.ReadToEnd() + p.StandardOutput.ReadToEnd();
-            p.WaitForExit();
-            var m = System.Text.RegularExpressions.Regex.Match(output, @"\d+(\.\d+)*");
-            if (!m.Success) return false;
-            var parts = m.Value.Split('.');
-            var major = parts[0] == "1" && parts.Length > 1 ? int.Parse(parts[1]) : int.Parse(parts[0]);
-            return major >= 17;
-        }
-        catch (Exception)
-        {
-            return false;
-        }
-    }
+    private static bool JavaAtLeast17() =>
+        ToolCheck.Check(LanguageLoader.Get(LanguageLoader.Load(Path.Combine(RepoPaths.PluginRoot, "languages")), "kotlin")).Available;
 
     private static void RequireJava()
     {
@@ -388,26 +367,8 @@ public sealed class LanguageIntegrationTests
         }
         """;
 
-    private static bool SwiftAtLeast6()
-    {
-        try
-        {
-            var psi = new System.Diagnostics.ProcessStartInfo("swift", "--version")
-            {
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-            };
-            using var p = System.Diagnostics.Process.Start(psi)!;
-            var output = p.StandardOutput.ReadToEnd() + p.StandardError.ReadToEnd();
-            p.WaitForExit();
-            var m = System.Text.RegularExpressions.Regex.Match(output, @"Swift version (\d+)");
-            return m.Success && int.Parse(m.Groups[1].Value) >= 6;
-        }
-        catch (Exception)
-        {
-            return false;
-        }
-    }
+    private static bool SwiftAtLeast6() =>
+        ToolCheck.Check(LanguageLoader.Get(LanguageLoader.Load(Path.Combine(RepoPaths.PluginRoot, "languages")), "swift")).Available;
 
     private static void RequireSwift()
     {

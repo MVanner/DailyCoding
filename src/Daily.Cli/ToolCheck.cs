@@ -15,7 +15,7 @@ public static class ToolCheck
         foreach (var req in lang.Descriptor.Requires)
         {
             var (exit, output) = ProcessRunner.Run(req.Command, req.Args, lang.Dir, null, CheckTimeout);
-            if (exit == -1 || (req.MinVersion is not null && !VersionAtLeast(output, req.MinVersion)))
+            if (exit == -1 || (req.MinVersion is not null && !VersionAtLeast(output, req.MinVersion, req.VersionPattern)))
             {
                 missing.Add(req.InstallHint);
             }
@@ -29,21 +29,20 @@ public static class ToolCheck
         return new ToolStatus(missing.Count == 0, [.. missing]);
     }
 
-    /// <summary>Compares the first version number in <paramref name="output"/> with <paramref name="min"/>; Java's <c>1.x</c> means major x.</summary>
-    public static bool VersionAtLeast(string output, string min)
+    /// <summary>
+    /// Compares the version in <paramref name="output"/> with <paramref name="min"/>. <paramref name="pattern"/> is a regex whose
+    /// first capture group holds the version; without one the first <c>\d+(.\d+)*</c> is used.
+    /// </summary>
+    public static bool VersionAtLeast(string output, string min, string? pattern = null)
     {
-        var found = Regex.Match(output, @"\d+(\.\d+)*");
+        var found = Regex.Match(output, pattern ?? @"\d+(\.\d+)*");
         if (!found.Success)
         {
             return false;
         }
 
-        var actual = found.Value.Split('.').Select(int.Parse).ToList();
-        if (actual.Count > 1 && actual[0] == 1)
-        {
-            actual.RemoveAt(0);
-        }
-
+        var text = pattern is null ? found.Value : found.Groups[1].Value;
+        var actual = text.Split('.').Select(int.Parse).ToList();
         var required = min.Split('.').Select(int.Parse).ToList();
         for (var i = 0; i < Math.Max(actual.Count, required.Count); i++)
         {

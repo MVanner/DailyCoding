@@ -18,6 +18,7 @@
     {
       "command": "java",
       "args": ["-version"],
+      "versionPattern": "version \"(?:1\\.)?(\\d+(?:\\.\\d+)*)",
       "minVersion": "17",
       "installHint": "Install a JDK 17 or newer, e.g. Temurin from https://adoptium.net. Android Studio's bundled JDK works when JAVA_HOME points to it."
     }

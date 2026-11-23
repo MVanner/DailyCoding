@@ -17,6 +17,7 @@
     {
       "command": "swift",
       "args": ["--version"],
+      "versionPattern": "Swift version (\\d+(?:\\.\\d+)*)",
       "minVersion": "6.0",
       "installHint": "Install Xcode 16 or newer, or a Swift 6 toolchain from https://swift.org/install."
     }
