@@ -3,7 +3,7 @@ using System.Diagnostics;
 
 namespace Daily.Cli;
 
-internal static class ProcessRunner
+public static class ProcessRunner
 {
     private static readonly Dictionary<string, string> DotnetEnv = new()
     {
@@ -71,13 +71,16 @@ internal static class ProcessRunner
     }
 
     /// <summary>True when <paramref name="executable"/> resolves on PATH (trying PATHEXT extensions on Windows).</summary>
-    public static bool IsOnPath(string executable)
+    public static bool IsOnPath(string executable) => IsOnPath(executable, Environment.GetEnvironmentVariable("PATH"));
+
+    /// <summary>As <see cref="IsOnPath(string)"/>, searching the given PATH-style string.</summary>
+    public static bool IsOnPath(string executable, string? path)
     {
         var extensions = OperatingSystem.IsWindows()
             ? (Environment.GetEnvironmentVariable("PATHEXT") ?? ".EXE;.CMD;.BAT").Split(';', StringSplitOptions.RemoveEmptyEntries)
             : [];
 
-        foreach (var dir in (Environment.GetEnvironmentVariable("PATH") ?? "").Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries))
+        foreach (var dir in (path ?? "").Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries))
         {
             var candidate = Path.Combine(dir.Trim('"'), executable);
             if (File.Exists(candidate) || extensions.Any(ext => File.Exists(candidate + ext)))

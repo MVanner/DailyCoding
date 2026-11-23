@@ -118,9 +118,19 @@ public static class LanguageLoader
             Fail("'sourceExtensions', 'ignoreDirs', 'requires' and 'levelHints' are required");
         }
 
-        if (d.Test?.Commands is not { Length: > 0 } || d.Test.Commands.Any(c => c.Args is not { Length: > 0 }))
+        if (d.Test?.Commands is not { Length: > 0 } || d.Test.Commands.Any(c => c?.Args is not { Length: > 0 }))
         {
-            Fail("'test.commands' needs at least one command with args");
+            Fail("'test.commands' needs at least one command with args (and no null entries)");
+        }
+
+        if (d.Requires.Any(r => r is null))
+        {
+            Fail("'requires' must not contain null entries");
+        }
+
+        if (d.Requires.Any(r => string.IsNullOrWhiteSpace(r.Command) || string.IsNullOrWhiteSpace(r.InstallHint)))
+        {
+            Fail("each 'requires' entry needs a 'command' and an 'installHint'");
         }
 
         if (d.Test.Commands.Any(c => c.Os is not (null or "windows" or "unix")))

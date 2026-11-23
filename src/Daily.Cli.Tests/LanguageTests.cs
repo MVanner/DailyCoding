@@ -89,6 +89,51 @@ public sealed class LanguageTests
     }
 
     [TestMethod]
+    public void Load_RejectsNullCommandElement()
+    {
+        using var temp = new TempDir("lang");
+        temp.Write("languages/lua/language.json", Descriptor(replace: "[ { \"args\": [\"busted\"] } ]", with: "[ null ]"));
+
+        var ex = Assert.ThrowsExactly<LanguageException>(() => LanguageLoader.Load(Path.Combine(temp.Path, "languages")));
+        StringAssert.Contains(ex.Message, "language.json");
+        StringAssert.Contains(ex.Message, "test.commands");
+    }
+
+    [TestMethod]
+    public void Load_RejectsNullRequirement()
+    {
+        using var temp = new TempDir("lang");
+        temp.Write("languages/lua/language.json", Descriptor(replace: "\"requires\": []", with: "\"requires\": [ null ]"));
+
+        var ex = Assert.ThrowsExactly<LanguageException>(() => LanguageLoader.Load(Path.Combine(temp.Path, "languages")));
+        StringAssert.Contains(ex.Message, "language.json");
+        StringAssert.Contains(ex.Message, "requires");
+    }
+
+    [TestMethod]
+    public void Load_RejectsRequirementWithoutCommandOrHint()
+    {
+        using var temp = new TempDir("lang");
+        temp.Write("languages/lua/language.json", Descriptor(replace: "\"requires\": []", with: "\"requires\": [ { \"command\": \"lua\", \"args\": [], \"installHint\": \"\" } ]"));
+
+        var ex = Assert.ThrowsExactly<LanguageException>(() => LanguageLoader.Load(Path.Combine(temp.Path, "languages")));
+        StringAssert.Contains(ex.Message, "requires");
+        StringAssert.Contains(ex.Message, "installHint");
+    }
+
+    [TestMethod]
+    public void IsOnPath_FindsExecutableInPathString()
+    {
+        using var temp = new TempDir("path");
+        var name = OperatingSystem.IsWindows() ? "mytool.exe" : "mytool";
+        temp.Write(name, "");
+        var path = temp.Path + Path.PathSeparator + "/nonexistent-dir";
+
+        Assert.IsTrue(ProcessRunner.IsOnPath("mytool", path));
+        Assert.IsFalse(ProcessRunner.IsOnPath("no-such-tool-xyz", path));
+    }
+
+    [TestMethod]
     public void Get_ThrowsOnUnknownId()
     {
         using var temp = new TempDir("lang");
