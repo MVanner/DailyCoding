@@ -4,8 +4,9 @@ namespace Daily.Cli;
 public static class LanguagePicker
 {
     /// <summary>
-    /// Among the selected languages that have topics (and aren't excluded), picks the one whose latest Started/Completed
-    /// entry is oldest (never practised wins); ties go to the earlier language in <paramref name="selected"/>.
+    /// Among the selected languages that have topics (and aren't excluded), picks the one whose latest Started, Completed or
+    /// GenerationFailed entry is oldest (never practised wins). A failed day counts as a touch so a language that keeps failing
+    /// doesn't win every day; Skipped doesn't count. Ties go to the earlier language in <paramref name="selected"/>.
     /// </summary>
     public static LanguageSetting? Choose(
         IReadOnlyList<LanguageSetting> selected,
@@ -25,7 +26,7 @@ public static class LanguagePicker
 
     private static DateOnly LastPractised(string languageId, IReadOnlyList<HistoryEntry> history) =>
         history
-            .Where(e => e.Language == languageId && e.Status is ChallengeStatus.Started or ChallengeStatus.Completed)
+            .Where(e => e.Language == languageId && e.Status is ChallengeStatus.Started or ChallengeStatus.Completed or ChallengeStatus.GenerationFailed)
             .Select(e => e.Date)
             .DefaultIfEmpty(DateOnly.MinValue)
             .Max();

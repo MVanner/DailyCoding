@@ -39,17 +39,29 @@ public sealed class LanguagePickerTests
     }
 
     [TestMethod]
-    public void Choose_SkippedAndFailedDontCount()
+    public void Choose_SkippedDoesntCount()
     {
         var pick = LanguagePicker.Choose([S("csharp"), S("lua")], Cats("csharp", "lua"),
         [
             H("lua", 1, ChallengeStatus.Skipped),
-            H("lua", 2, ChallengeStatus.GenerationFailed),
             H("csharp", 5, ChallengeStatus.Completed),
             H("lua", 10, ChallengeStatus.Completed),
         ]);
 
         Assert.AreEqual("lua", pick?.Id);
+    }
+
+    [TestMethod]
+    public void Choose_GenerationFailedCountsAsTouch()
+    {
+        var pick = LanguagePicker.Choose([S("csharp"), S("lua")], Cats("csharp", "lua"),
+        [
+            H("lua", 1, ChallengeStatus.GenerationFailed),
+            H("csharp", 5, ChallengeStatus.Completed),
+            H("lua", 10, ChallengeStatus.Completed),
+        ]);
+
+        Assert.AreEqual("csharp", pick?.Id);
     }
 
     [TestMethod]

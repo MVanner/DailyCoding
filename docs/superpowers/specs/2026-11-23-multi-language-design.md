@@ -120,7 +120,7 @@ Generic runner: copy challenge to temp (skipping build output dirs, configurable
 
 ### Picking the day's language and topic
 
-1. **Language:** among selected languages, the one whose most recent *Started or Completed* entry is oldest (never practised = oldest). Skipped and generation-failed days don't count as practice. Ties: order in `config.languages`. Deterministic.
+1. **Language:** among selected languages, the one whose most recent *Started, Completed or GenerationFailed* entry is oldest (never practised = oldest). Skipped days don't count; a generation-failed day does, so a language that keeps failing doesn't win every day. Ties: order in `config.languages`. Deterministic.
 2. **Topic and stretch:** today's `Picker.Choose` logic, unchanged, with that language's level, that language's catalog, and history filtered to that language.
 
 Languages with an empty catalog are never picked. Tool checks are **not** run in the SessionStart hook (it has a 10-second timeout and `java -version`/`swift --version` are slow); setup already keeps languages with missing tools out of the config.
