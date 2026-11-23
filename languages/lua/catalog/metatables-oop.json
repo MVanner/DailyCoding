@@ -23,8 +23,8 @@
     "Advanced": {
       "learningGoal": "Use operator metamethods __eq, __lt, __le, __tostring, __add and __call correctly.",
       "gotchas": [
-        "__eq is only consulted when both operands are tables with the same __eq metamethod",
-        "In Lua 5.1 __le is not derived from __lt",
+        "__eq is only consulted for two distinct tables, and 5.1 requires both to share the same __eq function (use one metatable for all instances)",
+        "Define __le explicitly; relying on the 5.1 fallback to not (b < a) breaks on newer Lua",
         "__index with a function receives (table, key); rawget avoids recursion"
       ],
       "goodSolutionShows": [
@@ -42,8 +42,8 @@
       "learningGoal": "Control table access with __index and __newindex proxies, read-only tables and defaults.",
       "gotchas": [
         "__newindex only fires for absent keys",
-        "pairs does not see proxied contents unless __pairs exists (5.2+, not in 5.1)",
-        "Proxy tables break rawequal and #"
+        "pairs on a proxy walks the proxy's own (empty) keys; do not rely on __pairs, which not every runtime honours, and expose an explicit iterator method instead",
+        "# on an empty proxy is 0 and __len is not honoured for tables on 5.1, so expose an explicit size method"
       ],
       "goodSolutionShows": [
         "Read-only proxy raising an error on write",

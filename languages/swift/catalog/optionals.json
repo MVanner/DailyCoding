@@ -42,7 +42,7 @@
       "learningGoal": "Design APIs where optionality models real absence, using optional pattern matching, Optional extensions and throwing alternatives.",
       "gotchas": [
         "if case let x? = value and switch over optionals must be exhaustive about .none",
-        "Comparing optionals with == works for Equatable wrapped types, and nil < 1 is true for Comparable",
+        "Optionals compare with == and != when the wrapped type is Equatable (nil == nil, nil != 1), but < and > are not available on optionals and need unwrapping",
         "Optional<Bool> in conditions is tri-state and easy to misread"
       ],
       "goodSolutionShows": [

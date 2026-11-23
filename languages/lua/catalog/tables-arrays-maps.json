@@ -7,7 +7,7 @@
       "gotchas": [
         "# is only reliable on proper sequences without nil holes",
         "pairs order is unspecified, so tests must sort keys or avoid order dependence",
-        "table.insert(t, pos, v) with a bad pos errors, and table.remove on an empty table returns nil"
+        "table.insert(t, v) appends and table.remove(t) removes and returns the last element, or nil on an empty table; avoid out-of-range positions since runtimes differ"
       ],
       "goodSolutionShows": [
         "ipairs for arrays and pairs for maps",
@@ -25,7 +25,7 @@
       "gotchas": [
         "Assigning a table copies the reference, not the contents",
         "A shallow copy still shares nested tables",
-        "table.sort errors with 'invalid order function' for inconsistent comparators and is not stable"
+        "table.sort is not stable, so equal-key elements may come out in any order; the comparator must be a strict order (never return true for equal elements)"
       ],
       "goodSolutionShows": [
         "Explicit shallow and deep copy helpers",

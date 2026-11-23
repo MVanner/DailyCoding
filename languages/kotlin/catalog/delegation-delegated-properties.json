@@ -5,7 +5,7 @@
     "Beginner": {
       "learningGoal": "Use by lazy and lateinit appropriately.",
       "gotchas": [
-        "by lazy initialises once and caches, even when the initializer throws only the first time",
+        "by lazy caches only a successful result; if the initializer throws, nothing is cached and the next access runs it again",
         "lateinit access before initialisation throws",
         "lazy default is synchronized"
       ],
