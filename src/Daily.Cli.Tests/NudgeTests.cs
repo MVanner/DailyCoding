@@ -27,7 +27,7 @@ public sealed class NudgeTests
             Store = new StateStore(Paths);
             if (configured)
             {
-                Store.SaveConfig(new DailyConfig(Level.Intermediate, "/ws", 11, 7));
+                Store.SaveConfig(new DailyConfig([new("csharp", Level.Intermediate)], "/ws", 11, 7));
                 BuildStamp.Write(Paths);
             }
         }

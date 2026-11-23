@@ -154,18 +154,65 @@ public static class Commands
                 stdout.WriteLine(Json.Serialize(current));
                 return ExitCodes.Ok;
 
+            case ["set", "level", var languageId, var levelText]:
+                var levelConfig = store.LoadConfig() ?? Defaults();
+                if (!Enum.TryParse<Level>(levelText, ignoreCase: true, out var newLevel) || !Enum.IsDefined(newLevel)
+                    || !levelConfig.Languages.Any(l => l.Id == languageId))
+                {
+                    stderr.WriteLine($"Invalid setting: level {languageId} {levelText}. The language must be selected and the level one of Beginner|Intermediate|Advanced|Expert.");
+                    return ExitCodes.Error;
+                }
+
+                var levelChanged = levelConfig with
+                {
+                    Languages = levelConfig.Languages.Select(l => l.Id == languageId ? l with { Level = newLevel } : l).ToList(),
+                };
+                store.SaveConfig(levelChanged);
+                stdout.WriteLine(Json.Serialize(levelChanged));
+                return ExitCodes.Ok;
+
+            case ["set", "languages", var ids]:
+                var langConfig = store.LoadConfig() ?? Defaults();
+                var wanted = ids.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).Distinct().ToList();
+                try
+                {
+                    var all = LanguageLoader.Load(paths.LanguagesDir);
+                    foreach (var id in wanted)
+                    {
+                        LanguageLoader.Get(all, id);
+                    }
+                }
+                catch (LanguageException ex)
+                {
+                    stderr.WriteLine(ex.Message);
+                    return ExitCodes.Error;
+                }
+
+                if (wanted.Count == 0)
+                {
+                    stderr.WriteLine("Invalid setting: languages needs at least one id, e.g. csharp,lua.");
+                    return ExitCodes.Error;
+                }
+
+                var langChanged = langConfig with
+                {
+                    Languages = wanted.Select(id => langConfig.Languages.FirstOrDefault(l => l.Id == id) ?? new LanguageSetting(id, Level.Beginner)).ToList(),
+                };
+                store.SaveConfig(langChanged);
+                stdout.WriteLine(Json.Serialize(langChanged));
+                return ExitCodes.Ok;
+
             case ["set", var key, var value]:
                 var config = store.LoadConfig() ?? Defaults();
                 DailyConfig? changed = key switch
                 {
-                    "level" when Enum.TryParse<Level>(value, ignoreCase: true, out var level) && Enum.IsDefined(level) => config with { Level = level },
                     "workspace" when !string.IsNullOrWhiteSpace(value) => config with { Workspace = value },
                     "sdkMajor" when int.TryParse(value, out var major) && major >= 10 => config with { SdkMajor = major },
                     _ => null,
                 };
                 if (changed is null)
                 {
-                    stderr.WriteLine($"Invalid setting: {key} = {value}. Keys: level (Beginner|Intermediate|Advanced|Expert), workspace (path), sdkMajor (10+).");
+                    stderr.WriteLine($"Invalid setting: {key} = {value}. Keys: workspace (path), sdkMajor (10+); also: config set languages <id,id,...> and config set level <languageId> <Level>.");
                     return ExitCodes.Error;
                 }
 
@@ -174,13 +221,13 @@ public static class Commands
                 return ExitCodes.Ok;
 
             default:
-                stderr.WriteLine("Usage: config show | config set level|workspace|sdkMajor <value>");
+                stderr.WriteLine("Usage: config show | config set languages <id,id,...> | config set level <languageId> <Level> | config set workspace|sdkMajor <value>");
                 return ExitCodes.Error;
         }
     }
 
     private static DailyConfig Defaults() => new(
-        Level.Beginner,
+        [new LanguageSetting("csharp", Level.Beginner)],
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "DailyCoding"),
         Math.Max(10, Environment.Version.Major),
         Random.Shared.Next(1, int.MaxValue));

@@ -15,7 +15,7 @@ public sealed class CommandsTests
             Store = new StateStore(Paths);
             if (configured)
             {
-                Store.SaveConfig(new DailyConfig(Level.Beginner, "/ws", 11, 3));
+                Store.SaveConfig(new DailyConfig([new("csharp", Level.Beginner)], "/ws", 11, 3));
             }
         }
 
@@ -174,10 +174,10 @@ public sealed class CommandsTests
     {
         using var f = new Fixture(configured: false);
 
-        Assert.AreEqual(0, f.Run("config", "set", "level", "advanced").Exit);
+        Assert.AreEqual(0, f.Run("config", "set", "level", "csharp", "advanced").Exit);
 
         var config = f.Store.LoadConfig()!;
-        Assert.AreEqual(Level.Advanced, config.Level);
+        Assert.AreEqual(Level.Advanced, config.LevelFor("csharp"));
         Assert.AreEqual(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "DailyCoding"), config.Workspace);
         Assert.AreNotEqual(0, config.Salt);
         Assert.IsGreaterThanOrEqualTo(10, config.SdkMajor);
@@ -191,11 +191,10 @@ public sealed class CommandsTests
         f.Run("config", "set", "workspace", "/Users/jane doe/Daily");
         f.Run("config", "set", "sdkMajor", "10");
 
-        Assert.AreEqual(new DailyConfig(Level.Beginner, "/Users/jane doe/Daily", 10, 3), f.Store.LoadConfig());
+        Assert.AreEqual(new DailyConfig([new("csharp", Level.Beginner)], "/Users/jane doe/Daily", 10, 3), f.Store.LoadConfig());
     }
 
     [TestMethod]
-    [DataRow("level", "guru")]
     [DataRow("sdkMajor", "eleven")]
     [DataRow("colour", "blue")]
     public void ConfigSet_InvalidInput_Fails(string key, string value)
@@ -203,6 +202,77 @@ public sealed class CommandsTests
         using var f = new Fixture();
 
         Assert.AreEqual(1, f.Run("config", "set", key, value).Exit);
+    }
+
+    private static string PluginRootWithLua(TempDir root)
+    {
+        var json = File.ReadAllText(Path.Combine(RepoPaths.PluginRoot, "languages", "csharp", "language.json"))
+            .Replace("\"id\": \"csharp\"", "\"id\": \"lua\"")
+            .Replace("\"name\": \"C#\"", "\"name\": \"Lua\"")
+            .Replace("\"../../catalog\"", "\"" + Path.Combine(RepoPaths.PluginRoot, "catalog").Replace("\\", "/") + "\"")
+            .Replace("\"../../templates/challenge\"", "\"" + Path.Combine(RepoPaths.PluginRoot, "templates", "challenge").Replace("\\", "/") + "\"");
+        root.Write("languages/lua/language.json", json);
+        root.Write("languages/csharp/language.json", File.ReadAllText(Path.Combine(RepoPaths.PluginRoot, "languages", "csharp", "language.json")));
+        return root.Path;
+    }
+
+    private static (int Exit, DailyConfig? Config) RunConfigWithLua(DailyConfig initial, params string[] args)
+    {
+        using var data = new TempDir("data");
+        using var root = new TempDir("root");
+        var paths = new DailyPaths(data.Path, PluginRootWithLua(root));
+        var store = new StateStore(paths);
+        store.SaveConfig(initial);
+        var exit = Program.Run([.. args, "--data", paths.DataDir, "--plugin-root", paths.PluginRoot], new Dictionary<string, string?>(), new StringWriter(), new StringWriter());
+        return (exit, store.LoadConfig());
+    }
+
+    [TestMethod]
+    public void ConfigSetLanguages_KeepsExistingLevels()
+    {
+        var (exit, config) = RunConfigWithLua(new DailyConfig([new("csharp", Level.Expert)], "/ws", 11, 3), "config", "set", "languages", "csharp,lua");
+
+        Assert.AreEqual(0, exit);
+        CollectionAssert.AreEqual(new[] { new LanguageSetting("csharp", Level.Expert), new LanguageSetting("lua", Level.Beginner) }, config!.Languages);
+    }
+
+    [TestMethod]
+    public void ConfigSetLanguages_RejectsUnknownId()
+    {
+        var initial = new DailyConfig([new("csharp", Level.Expert)], "/ws", 11, 3);
+
+        var (exit, config) = RunConfigWithLua(initial, "config", "set", "languages", "csharp,cobol");
+
+        Assert.AreEqual(1, exit);
+        Assert.AreEqual(initial, config);
+    }
+
+    [TestMethod]
+    public void ConfigSetLevel_PerLanguage()
+    {
+        var initial = new DailyConfig([new("csharp", Level.Expert), new("lua", Level.Beginner)], "/ws", 11, 3);
+
+        var (exit, config) = RunConfigWithLua(initial, "config", "set", "level", "lua", "Intermediate");
+
+        Assert.AreEqual(0, exit);
+        CollectionAssert.AreEqual(new[] { new LanguageSetting("csharp", Level.Expert), new LanguageSetting("lua", Level.Intermediate) }, config!.Languages);
+    }
+
+    [TestMethod]
+    public void ConfigSetLevel_WithoutLanguage_IsRejected()
+    {
+        using var f = new Fixture();
+
+        Assert.AreEqual(1, f.Run("config", "set", "level", "Advanced").Exit);
+        Assert.AreEqual(Level.Beginner, f.Store.LoadConfig()!.LevelFor("csharp"));
+    }
+
+    [TestMethod]
+    public void ConfigSetLevel_ForUnselectedLanguage_IsRejected()
+    {
+        using var f = new Fixture();
+
+        Assert.AreEqual(1, f.Run("config", "set", "level", "lua", "Advanced").Exit);
     }
 
     [TestMethod]
@@ -220,14 +290,16 @@ public sealed class CommandsTests
 
         var json = JsonDocument.Parse(f.Run("config", "show").Out).RootElement;
 
-        Assert.AreEqual("Beginner", json.GetProperty("level").GetString());
+        var language = json.GetProperty("languages").EnumerateArray().Single();
+        Assert.AreEqual("csharp", language.GetProperty("id").GetString());
+        Assert.AreEqual("Beginner", language.GetProperty("level").GetString());
     }
 
     [TestMethod]
     public void Today_KeepsNonAsciiAndAngleBracketsReadable()
     {
         using var f = new Fixture();
-        f.Store.SaveConfig(new DailyConfig(Level.Expert, "/Users/søren/DailyCoding", 11, 3));
+        f.Store.SaveConfig(new DailyConfig([new("csharp", Level.Expert)], "/Users/søren/DailyCoding", 11, 3));
 
         var output = f.Run("today").Out;
 

@@ -10,7 +10,7 @@ public sealed class StateStoreTests
     {
         using var dir = new TempDir();
         var store = new StateStore(new DailyPaths(dir.Path, dir.Path));
-        var config = new DailyConfig(Level.Advanced, "/work space/DailyCoding", 11, 42);
+        var config = new DailyConfig([new("csharp", Level.Advanced), new("lua", Level.Beginner)], "/work space/DailyCoding", 11, 42);
         var entry = new HistoryEntry(Day, "linq", Level.Advanced, Stretch: true, ChallengeStatus.Completed)
         {
             Passed = true,
@@ -28,6 +28,37 @@ public sealed class StateStoreTests
         var state = store.LoadState();
         Assert.AreEqual(Day, state.LastNudgeDate);
         Assert.AreEqual(entry, state.History.Single());
+    }
+
+    [TestMethod]
+    public void LoadConfig_MigratesOldLevel()
+    {
+        using var dir = new TempDir();
+        var paths = new DailyPaths(dir.Path, dir.Path);
+        dir.Write("config.json", """{"level":"Advanced","workspace":"/w","sdkMajor":10,"salt":5}""");
+        var store = new StateStore(paths);
+
+        var loaded = store.LoadConfig()!;
+
+        CollectionAssert.AreEqual(new[] { new LanguageSetting("csharp", Level.Advanced) }, loaded.Languages);
+        Assert.AreEqual("/w", loaded.Workspace);
+        Assert.AreEqual(10, loaded.SdkMajor);
+        Assert.AreEqual(5, loaded.Salt);
+        store.SaveConfig(loaded);
+        var text = File.ReadAllText(paths.ConfigFile);
+        StringAssert.Contains(text, "\"languages\"");
+        Assert.IsFalse(text.Contains("\"level\": \"Advanced\",\n  \"workspace\"", StringComparison.Ordinal));
+        Assert.IsNull(System.Text.Json.Nodes.JsonNode.Parse(text)!.AsObject()["level"]);
+    }
+
+    [TestMethod]
+    public void LoadState_OldEntriesAreCsharp()
+    {
+        using var dir = new TempDir();
+        var paths = new DailyPaths(dir.Path, dir.Path);
+        dir.Write("state.json", """{"lastNudgeDate":null,"history":[{"date":"2026-11-16","topicId":"linq","level":"Beginner","stretch":false,"status":"Picked"}]}""");
+
+        Assert.AreEqual("csharp", new StateStore(paths).LoadState().History.Single().Language);
     }
 
     [TestMethod]

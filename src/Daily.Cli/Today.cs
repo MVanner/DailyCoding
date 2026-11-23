@@ -5,7 +5,7 @@ public static class Today
 {
     public static HistoryEntry CreatePickedEntry(DateOnly today, DailyConfig config, IReadOnlyList<Topic> catalog, IReadOnlyList<HistoryEntry> history)
     {
-        var pick = Picker.Choose(today, config.Level, config.Salt, catalog, history);
+        var pick = Picker.Choose(today, config.LevelFor("csharp"), config.Salt, catalog, history);
         return new HistoryEntry(today, pick.TopicId, pick.Level, pick.Stretch, ChallengeStatus.Picked);
     }
 }

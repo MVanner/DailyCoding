@@ -8,7 +8,7 @@ public sealed class ScaffolderTests
     private static readonly DateOnly Day = new(2026, 11, 16);
 
     private static (DailyPaths Paths, DailyConfig Config) Setup(TempDir data, string workspace, int sdkMajor = 11) =>
-        (new DailyPaths(data.Path, RepoPaths.PluginRoot), new DailyConfig(Level.Intermediate, workspace, sdkMajor, 1));
+        (new DailyPaths(data.Path, RepoPaths.PluginRoot), new DailyConfig([new("csharp", Level.Intermediate)], workspace, sdkMajor, 1));
 
     [TestMethod]
     public void Create_CopiesTemplateAndSubstitutesTfm()

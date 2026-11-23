@@ -52,7 +52,7 @@ public sealed class VerifierTests
         public Fixture(string tests, string? reference = Reference, string? naive = Naive, string stub = Stub)
         {
             Paths = new DailyPaths(_data.Path, RepoPaths.PluginRoot);
-            var config = new DailyConfig(Level.Beginner, _ws.Path, Dotnet.InstalledSdkMajor(), 1);
+            var config = new DailyConfig([new("csharp", Level.Beginner)], _ws.Path, Dotnet.InstalledSdkMajor(), 1);
             Folder = Scaffolder.Create(Paths, config, Day, "sum", force: false);
             File.WriteAllText(Path.Combine(Folder, "Challenge", "Calc.cs"), stub);
             File.WriteAllText(Path.Combine(Folder, "Challenge.Tests", "CalcTests.cs"), tests);
