@@ -6,19 +6,20 @@ Language-specific rules for the daily challenge. The skills reference these sect
 
 - `src/` holds the stub modules (`*.lua`), `spec/challenge_spec.lua` holds the tests, `spec/runner.lua` is the provided test runner (never edit it).
 - Run with `luajit spec/runner.lua` (fallbacks: `lua spec/runner.lua`, `nvim -l spec/runner.lua`) from the challenge folder; results go to `results.xml`.
-- The runner puts `./src/?.lua` and `./src/?/init.lua` on `package.path`, so tests use `require("calc")` for `src/calc.lua`.
-- Target Lua 5.1 / LuaJIT semantics: no `goto`, no `//`, no bitwise operators, no integer subtype (`math.floor` for integer division, `unpack` not `table.unpack`).
+- The runner puts `./src/?.lua` and `./src/?/init.lua` on `package.path`, so tests use `require("calc")` for `src/calc.lua`, and `require("pkg.mod")` maps to `src/pkg/mod.lua`.
+- Target Lua 5.1 / LuaJIT semantics: no `goto`, no `//`, no bitwise operators, no integer subtype (`math.floor` for integer division). When unpacking, write `local unpack = table.unpack or unpack` (the `lua` fallback may be 5.2+). Never use `loadstring`, `setfenv`/`getfenv` or `module`.
 
 ## Stub
 
 - Each module is `local M = {}` ... `return M`, with LuaDoc-style `---` comments giving signature, parameters and behaviour for every function.
 - Every function body to implement is `error("not implemented")`.
-- Neovim challenges take a fake `vim` table as a parameter (e.g. `M.setup(vim, opts)`); never call the real `vim` global. Game challenges are pure logic with `dt` passed in; no real clock, no rendering.
+- Neovim challenges take a fake `vim` table as a parameter (e.g. `M.setup(vim, opts)`); the fake is defined inside `spec/challenge_spec.lua` and passed into the module's functions; never call the real `vim` global. Game challenges are pure logic with `dt` passed in; no real clock, no rendering.
 - Supporting constants or helper tables the task doesn't ask them to write may be complete.
 
 ## Tests
 
 - `spec/challenge_spec.lua` only, using the provided runner API: `describe(name, fn)`, `it(name, fn)`, `assert.equals(expected, actual)`, `assert.same(expected, actual)` (deep table compare), `assert.is_true(v)`, `assert.is_false(v)`, `assert.is_nil(v)`, `assert.has_error(fn, [substring])`.
+- Every `it` must sit inside a `describe`.
 - At least 3 tests, ideally 5-8, with names that describe behaviour. Every test must assert something that the naive solution gets wrong.
 - Deterministic: no real time, network, file system or randomness; pass clocks, `dt`, random functions and a fake `vim` in as parameters.
 - A syntax or load error in the spec produces no `results.xml`, which counts as "does not build".
@@ -30,7 +31,7 @@ Language-specific rules for the daily challenge. The skills reference these sect
 
 ## Allowed libraries
 
-- The Lua 5.1 standard library only (`string`, `table`, `math`, `os.time`/`os.clock` not in tests). No LuaRocks packages, no `vim` API.
+- The Lua standard library only (`string`, `table`, `math`); never use `os.time`, `os.clock` or `math.random` in tests. No LuaRocks packages, no `vim` API.
 
 ## Review: idiomatic Lua
 

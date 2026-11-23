@@ -169,4 +169,24 @@ public sealed class LanguageIntegrationTests
         Assert.AreEqual(4, result.Failed);
         Assert.IsTrue(result.Failures.Any(x => x.Name.Contains("calc.sum", StringComparison.Ordinal) && x.Message.Contains("not implemented", StringComparison.Ordinal)));
     }
+
+    [TestMethod]
+    public void Lua_InvalidUtf8InFailureMessage_StillParsed()
+    {
+        RequireLua();
+        const string tests = """
+            local calc = require("calc")
+            describe("calc.sum", function()
+              it("fails with invalid utf8 in message", function() error("bad " .. string.sub("æøå", 1, 1)) end)
+              it("adds", function() assert.equals(6, calc.sum({1, 2, 3})) end)
+            end)
+            """;
+        using var f = new Fixture(tests, stub: LuaReference);
+
+        var (result, _) = TestRunner.Run(f.Language, f.Folder, TimeSpan.FromMinutes(1));
+
+        Assert.IsNotNull(result);
+        Assert.IsGreaterThan(0, result.Total);
+        Assert.AreEqual(1, result.Failed);
+    }
 }
