@@ -1,7 +1,7 @@
 {
   "name": "daily",
-  "version": "0.1.0",
-  "description": "Daily 10–20 minute C# coding challenge at your chosen level, generated from a curated topic catalog, verified before you see it, and reviewed when you're done.",
+  "version": "0.2.0",
+  "description": "Daily 10–20 minute coding challenge in C#, Swift, Kotlin or Lua at your chosen level, generated from a curated topic catalog, verified before you see it, and reviewed when you're done.",
   "author": {
     "name": "MVanner"
   }

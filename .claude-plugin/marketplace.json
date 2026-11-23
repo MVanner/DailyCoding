@@ -3,12 +3,12 @@
   "owner": {
     "name": "MVanner"
   },
-  "description": "Daily C# coding challenge plugin for Claude Code.",
+  "description": "Daily coding challenge plugin (C#, Swift, Kotlin, Lua) for Claude Code.",
   "plugins": [
     {
       "name": "daily",
       "source": "./",
-      "description": "Daily 10–20 min C# coding challenge at your level, with review. Run /daily:setup first."
+      "description": "Daily 10–20 min coding challenge (C#, Swift, Kotlin or Lua) at your level, with review. Run /daily:setup first."
     }
   ]
 }
