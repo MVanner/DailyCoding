@@ -498,6 +498,25 @@ public sealed class CommandsTests
     }
 
     [TestMethod]
+    public void Repick_ExcludesCommaSeparatedList()
+    {
+        using var root = new TempDir("root");
+        using var data = new TempDir("data");
+        var paths = TempPluginRoot(root, data);
+        root.Write("languages/kotlin/language.json", LuaDescriptor.Replace("\"lua\"", "\"kotlin\""));
+        root.Write("languages/kotlin/catalog/tables.json", LuaTopic);
+        var store = new StateStore(paths);
+        store.SaveConfig(new DailyConfig([new("csharp", Level.Beginner), new("lua", Level.Beginner), new("kotlin", Level.Beginner)], "/ws", 11, 3));
+        var today = CliHelpers.Today();
+        store.Upsert(new HistoryEntry(today, "tables", Level.Beginner, false, ChallengeStatus.Picked) { Language = "lua" });
+
+        var (exit, _, err) = RunWith(paths, "repick", "--exclude", "lua,csharp");
+
+        Assert.AreEqual(0, exit, err);
+        Assert.AreEqual("kotlin", store.LoadState().For(today)!.Language);
+    }
+
+    [TestMethod]
     public void Repick_StartedEntry_Fails()
     {
         using var root = new TempDir("root");

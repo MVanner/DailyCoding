@@ -156,7 +156,7 @@ public static class Commands
     }
 
     /// <summary>
-    /// <c>repick --exclude &lt;id&gt; [--date d]</c> — replaces a still-Picked entry with one from another language
+    /// <c>repick --exclude &lt;id[,id...]&gt; [--date d]</c> — replaces a still-Picked entry with one from another language
     /// (for when the day's language turns out to be unusable on this machine).
     /// </summary>
     public static int RepickCommand(string[] args, DailyPaths paths, TextWriter stdout, TextWriter stderr)
@@ -164,7 +164,7 @@ public static class Commands
         var excluded = Option(args, "--exclude");
         if (excluded is null)
         {
-            stderr.WriteLine("Usage: repick --exclude <languageId> [--date yyyy-MM-dd]");
+            stderr.WriteLine("Usage: repick --exclude <languageId[,languageId...]> [--date yyyy-MM-dd]");
             return ExitCodes.Error;
         }
 
@@ -187,7 +187,7 @@ public static class Commands
         }
 
         var catalogs = Catalogs.Load(LanguageLoader.Load(paths.LanguagesDir));
-        var replacement = Today.CreatePickedEntry(date, config, catalogs, state.History.Where(e => e.Date != date).ToList(), new HashSet<string> { excluded });
+        var replacement = Today.CreatePickedEntry(date, config, catalogs, state.History.Where(e => e.Date != date).ToList(), new HashSet<string>(excluded.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)));
         if (replacement is null)
         {
             stderr.WriteLine(NoUsableLanguage);

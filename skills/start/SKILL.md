@@ -25,7 +25,7 @@ If the output has no `language` field (the helper is from an older plugin versio
 - `Started` or `Completed` → read `<folder>/README.md` and re-show the summary and the folder path (and for Completed, that it's already done). Stop. Never generate a second challenge for the same day.
 - `Picked` → continue.
 
-If `language.available` is false (the tools for today's language aren't installed), tell the developer what's missing (`language.missing` are the install hints) and that you'll pick another language for today, run `CLI repick --exclude <language.id> --date <date>` (stop and say so if it fails), then run `CLI today --date <date>` again and continue with that new entry and its `language`.
+If `language.available` is false (the tools for today's language aren't installed), tell the developer what's missing (`language.missing` are the install hints) and that you'll pick another language for today, run `CLI repick --exclude <ids> --date <date>` where `<ids>` is a comma-separated list of every language id you have found unavailable in this run so far (stop and say so if it fails), then run `CLI today --date <date>` again and continue with that new entry and its `language`. If the new language is unavailable too, repeat with its id added to the list.
 
 Use that `date` for the rest of this run: pass `--date <date>` to every `scaffold`, `record`, `repick`, `verify` and `today` call below, so a run that crosses midnight stays on the same day.
 
