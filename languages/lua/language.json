@@ -1,0 +1,27 @@
+{
+  "id": "lua",
+  "name": "Lua",
+  "stubDir": "src",
+  "testDir": "spec",
+  "sourceExtensions": [".lua"],
+  "ignoreDirs": [],
+  "test": {
+    "commands": [
+      { "args": ["luajit", "spec/runner.lua"] },
+      { "args": ["lua", "spec/runner.lua"] },
+      { "args": ["nvim", "-l", "spec/runner.lua"] }
+    ],
+    "results": "results.xml",
+    "format": "junit"
+  },
+  "naiveForbidden": "\\b(error|assert)\\s*\\(",
+  "requires": [],
+  "ide": "Open the folder in Neovim.",
+  "runnerHint": "Install LuaJIT (brew install luajit), or Lua 5.1+, or Neovim 0.9+",
+  "levelHints": {
+    "Beginner": "new to Lua: tables, strings, functions, modules.",
+    "Intermediate": "comfortable day to day: closures, metatables, varargs, string patterns.",
+    "Advanced": "design trade-offs: coroutines, OOP with metatables, Neovim plugin structure, game loops.",
+    "Expert": "deep language and runtime topics: performance in LuaJIT, environments, weak tables, ECS design."
+  }
+}
