@@ -96,4 +96,47 @@ public sealed class TestRunnerTests
         Assert.IsNotNull(result);
         Assert.AreEqual(1, result.Total);
     }
+
+    [TestMethod]
+    public void Run_IgnoresStaleResultsWhenCommandWritesNone()
+    {
+        if (OperatingSystem.IsWindows()) { Assert.Inconclusive("unix shell required"); }
+        var lang = MakeLanguage("""[{"args":["sh","-c","exit 1"]}]""");
+        using var work = new TempDir("work");
+        work.Write("out/old.xml", "<testsuite><testcase name=\"a\" classname=\"C\"/></testsuite>");
+
+        var (result, _) = TestRunner.Run(lang, work.Path, TimeSpan.FromSeconds(30));
+
+        Assert.IsNull(result);
+        Assert.IsFalse(File.Exists(Path.Combine(work.Path, "out", "old.xml")));
+    }
+
+    [TestMethod]
+    public void Run_TimeoutIsNullEvenWithResultsWritten()
+    {
+        if (OperatingSystem.IsWindows()) { Assert.Inconclusive("unix shell required"); }
+        var lang = MakeLanguage("""[{"args":["sh","-c","mkdir -p out && echo '<testsuite><testcase name=\"a\" classname=\"C\"/></testsuite>' > out/r.xml; sleep 30"]}]""");
+        using var work = new TempDir("work");
+
+        var (result, output) = TestRunner.Run(lang, work.Path, TimeSpan.FromMilliseconds(500));
+
+        Assert.IsNull(result);
+        StringAssert.Contains(output, "timed out");
+    }
+
+    [TestMethod]
+    [System.Runtime.Versioning.UnsupportedOSPlatform("windows")]
+    public void Run_LaunchesRelativeExecutableFromWorkDir()
+    {
+        if (OperatingSystem.IsWindows()) { Assert.Inconclusive("unix shell required"); }
+        var lang = MakeLanguage("""[{"args":["./run.sh"]}]""");
+        using var work = new TempDir("work");
+        var script = work.Write("run.sh", "#!/bin/sh\nmkdir -p out\necho '<testsuite><testcase name=\"a\" classname=\"C\"/></testsuite>' > out/r.xml\n");
+        File.SetUnixFileMode(script, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
+
+        var (result, _) = TestRunner.Run(lang, work.Path, TimeSpan.FromSeconds(30));
+
+        Assert.IsNotNull(result);
+        Assert.AreEqual(1, result.Total);
+    }
 }

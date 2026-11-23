@@ -11,10 +11,7 @@ public static class TestRunner
         foreach (var command in lang.Descriptor.Test.Commands.Where(c => c.Os is null || c.Os == os))
         {
             var exe = command.Args[0];
-            var relative = exe.StartsWith("./", StringComparison.Ordinal)
-                || exe.EndsWith(".bat", StringComparison.OrdinalIgnoreCase)
-                || exe.EndsWith(".cmd", StringComparison.OrdinalIgnoreCase);
-            if (relative ? File.Exists(Path.Combine(workDir, exe)) : isOnPath(exe))
+            if (IsRelative(exe) ? File.Exists(Path.Combine(workDir, exe)) : isOnPath(exe))
             {
                 return command.Args;
             }
@@ -22,6 +19,11 @@ public static class TestRunner
 
         return null;
     }
+
+    private static bool IsRelative(string exe) =>
+        exe.StartsWith("./", StringComparison.Ordinal)
+        || exe.EndsWith(".bat", StringComparison.OrdinalIgnoreCase)
+        || exe.EndsWith(".cmd", StringComparison.OrdinalIgnoreCase);
 
     /// <summary>Files matching <c>dir/[**/]file-pattern</c> (or an exact path) under <paramref name="workDir"/>, sorted.</summary>
     public static IReadOnlyList<string> FindResults(string workDir, string pattern)
@@ -58,7 +60,20 @@ public static class TestRunner
 
         var spec = lang.Descriptor.Test;
         EnsureExecutable(workDir, command[0]);
-        var (_, output) = ProcessRunner.Run(command[0], command.Skip(1).ToList(), workDir, spec.Env, timeout);
+
+        // Results left by an earlier run must never be mistaken for this run's.
+        foreach (var stale in FindResults(workDir, spec.Results))
+        {
+            File.Delete(stale);
+        }
+
+        var executable = IsRelative(command[0]) ? Path.GetFullPath(Path.Combine(workDir, command[0])) : command[0];
+        var (exit, output) = ProcessRunner.Run(executable, command.Skip(1).ToList(), workDir, spec.Env, timeout);
+        if (exit == -1)
+        {
+            // Timed out or could not start: whatever results exist are partial at best.
+            return (null, output);
+        }
 
         var files = FindResults(workDir, spec.Results);
         var result = spec.Format == "trx" ? TrxResults.Read(files) : JUnitResults.Read(files);
