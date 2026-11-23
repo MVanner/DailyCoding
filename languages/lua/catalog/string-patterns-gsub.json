@@ -1,0 +1,60 @@
+{
+  "id": "string-patterns-gsub",
+  "name": "String patterns & gsub",
+  "seeds": {
+    "Beginner": {
+      "learningGoal": "Use find, match, gmatch and gsub with simple patterns and captures.",
+      "gotchas": [
+        "Lua patterns are not regex: no alternation and - is lazy repetition",
+        "Magic characters ^$()%.[]*+-? need % escaping",
+        "string.find returns indices, match returns captures"
+      ],
+      "goodSolutionShows": [
+        "gmatch for tokenising",
+        "gsub with a function or table replacement",
+        "Escaping magic characters with %"
+      ],
+      "shapeHints": [
+        "splitting a CSV line",
+        "trimming whitespace",
+        "extracting key=value pairs from a config line"
+      ]
+    },
+    "Intermediate": {
+      "learningGoal": "Apply captures, anchors, frontier patterns and replacement functions.",
+      "gotchas": [
+        "gsub returns two values (string, count), so wrapping in parentheses matters when passing on",
+        "%b and %f have specific semantics",
+        "An empty-match pattern in gmatch advances differently across versions"
+      ],
+      "goodSolutionShows": [
+        "gsub with function replacement",
+        "Anchors and position captures ()",
+        "Using only the first return value when needed"
+      ],
+      "shapeHints": [
+        "a template engine replacing {{name}}",
+        "parsing a log line into fields",
+        "converting snake_case to CamelCase"
+      ]
+    },
+    "Advanced": {
+      "learningGoal": "Write robust tokenisers and parsers using patterns and position tracking.",
+      "gotchas": [
+        "Patterns have no alternation, so alternatives need multiple passes",
+        "Backtracking can be exponential with nested repetition",
+        "Byte-based indexing breaks multibyte UTF-8"
+      ],
+      "goodSolutionShows": [
+        "Position-based scanning with string.find init",
+        "Table-driven tokeniser",
+        "Documented limits for UTF-8"
+      ],
+      "shapeHints": [
+        "a tiny expression tokeniser",
+        "a keymap string parser such as '<C-w>j' into parts",
+        "a markdown-ish inline parser"
+      ]
+    }
+  }
+}

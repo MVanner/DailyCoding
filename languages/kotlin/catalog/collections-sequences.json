@@ -1,0 +1,60 @@
+{
+  "id": "collections-sequences",
+  "name": "Collections & sequences",
+  "seeds": {
+    "Beginner": {
+      "learningGoal": "Transform lists and maps with map, filter, groupBy, associate and fold.",
+      "gotchas": [
+        "listOf is read-only, not immutable, and may be backed by a mutable list",
+        "associate keeps only the last value for duplicate keys",
+        "fold vs reduce on an empty list: reduce throws"
+      ],
+      "goodSolutionShows": [
+        "Standard library functions rather than manual loops",
+        "Correct behaviour on empty input",
+        "Choosing associateBy vs groupBy deliberately"
+      ],
+      "shapeHints": [
+        "grouping orders by customer and summing",
+        "building a lookup of users by id",
+        "computing word frequencies"
+      ]
+    },
+    "Intermediate": {
+      "learningGoal": "Use sortedWith, zip, windowed, chunked, partition and flatMap with explicit tie-breaking.",
+      "gotchas": [
+        "sortedBy is stable but comparators must handle ties explicitly for deterministic output",
+        "windowed drops partial windows unless partialWindows = true",
+        "maxBy throws on empty in older versions; maxByOrNull is safe"
+      ],
+      "goodSolutionShows": [
+        "compareBy with thenBy for tie-breaking",
+        "partition for a single pass split",
+        "windowed and chunked with the right flags"
+      ],
+      "shapeHints": [
+        "moving averages over readings",
+        "ranking players by score then name",
+        "splitting valid and invalid records"
+      ]
+    },
+    "Advanced": {
+      "learningGoal": "Understand eager vs lazy evaluation and write Sequence pipelines, including generateSequence and custom sequence builders.",
+      "gotchas": [
+        "Sequence operations are evaluated per element so side effects interleave unlike lists",
+        "A sequence can be consumed more than once only if the source allows it",
+        "Terminal operation needed; without it nothing runs"
+      ],
+      "goodSolutionShows": [
+        "asSequence for large pipelines with early termination (take, first)",
+        "sequence { yield } builder for stateful generation",
+        "A test with a side-effect counter proving laziness"
+      ],
+      "shapeHints": [
+        "finding the first N primes lazily",
+        "a paginated source exposed as a Sequence with an injected page loader",
+        "deduplicating consecutive items in a stream"
+      ]
+    }
+  }
+}

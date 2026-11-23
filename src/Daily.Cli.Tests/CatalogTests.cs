@@ -92,6 +92,31 @@ public sealed class CatalogTests
     }
 
     [TestMethod]
+    public void RealCatalogs_AreValid()
+    {
+        var languages = LanguageLoader.Load(Path.Combine(RepoPaths.PluginRoot, "languages"));
+        var catalogs = Catalogs.Load(languages);
+
+        foreach (var language in languages)
+        {
+            var topics = catalogs[language.Id];
+            Assert.IsGreaterThanOrEqualTo(10, topics.Count, $"{language.Id} needs at least 10 topics");
+            foreach (var topic in topics)
+            {
+                Assert.IsGreaterThanOrEqualTo(2, topic.Seeds.Count, $"{language.Id}/{topic.Id} should cover at least 2 levels");
+                foreach (var (level, seed) in topic.Seeds)
+                {
+                    var where = $"{language.Id}/{topic.Id}/{level}";
+                    Assert.IsFalse(string.IsNullOrWhiteSpace(seed.LearningGoal), where);
+                    Assert.IsNotEmpty(seed.Gotchas, where);
+                    Assert.IsNotEmpty(seed.GoodSolutionShows, where);
+                    Assert.IsNotEmpty(seed.ShapeHints, where);
+                }
+            }
+        }
+    }
+
+    [TestMethod]
     public void RealCatalog_HasTheStarterTopics()
     {
         var ids = CatalogLoader.Load(Path.Combine(RepoPaths.PluginRoot, "catalog")).Select(t => t.Id).ToHashSet();

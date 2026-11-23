@@ -1,0 +1,60 @@
+{
+  "id": "error-handling",
+  "name": "Error handling: throws & Result",
+  "seeds": {
+    "Beginner": {
+      "learningGoal": "Throw and catch typed errors with do/catch and try.",
+      "gotchas": [
+        "try? discards the error and returns nil, losing information",
+        "A catch-all must come last or earlier patterns are shadowed",
+        "Errors thrown from a stub placeholder crash nothing, but an uncaught throw in a test fails it"
+      ],
+      "goodSolutionShows": [
+        "An Error enum with meaningful cases and associated values",
+        "do/catch with specific cases before a general catch",
+        "throws signatures only on functions that can fail"
+      ],
+      "shapeHints": [
+        "validating a sign-up form with distinct errors",
+        "parsing a config line into key and value",
+        "withdrawing money with insufficient funds"
+      ]
+    },
+    "Intermediate": {
+      "learningGoal": "Convert between throws and Result, use rethrows and try? / try! deliberately.",
+      "gotchas": [
+        "Result(catching:) and get() bridge the two styles",
+        "rethrows only throws if the closure throws",
+        "map and flatMap on Result vs mapError"
+      ],
+      "goodSolutionShows": [
+        "Result for stored outcomes and throws for control flow",
+        "mapError to translate lower-level errors",
+        "Collecting multiple outcomes without losing failures"
+      ],
+      "shapeHints": [
+        "running a batch of parse operations and returning both successes and failures",
+        "wrapping a throwing loader in Result",
+        "translating a storage error into a domain error"
+      ]
+    },
+    "Advanced": {
+      "learningGoal": "Design error hierarchies, error wrapping and recovery with retries and typed throws awareness.",
+      "gotchas": [
+        "Errors captured in async closures cross suspension points",
+        "Retry logic must not retry non-transient errors",
+        "Swift 6 typed throws vs untyped throws in the signature"
+      ],
+      "goodSolutionShows": [
+        "Domain errors with underlying cause (LocalizedError conformance)",
+        "Retry helper with injected attempt count and no real delay",
+        "Preserving context when rethrowing"
+      ],
+      "shapeHints": [
+        "a retry wrapper with an injected sleeper",
+        "aggregating validation errors into one composite error",
+        "a fallible pipeline that reports which stage failed"
+      ]
+    }
+  }
+}

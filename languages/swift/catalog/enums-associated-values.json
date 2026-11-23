@@ -1,0 +1,60 @@
+{
+  "id": "enums-associated-values",
+  "name": "Enums with associated values & pattern matching",
+  "seeds": {
+    "Beginner": {
+      "learningGoal": "Model a closed set of cases with an enum and switch exhaustively.",
+      "gotchas": [
+        "default branches hide new cases when the enum grows",
+        "Associated values are bound by pattern, not accessed as properties",
+        "Raw values and associated values cannot be mixed in one enum"
+      ],
+      "goodSolutionShows": [
+        "Exhaustive switch without default",
+        "Enum modelling states that cannot be invalid",
+        "Methods and computed properties on the enum"
+      ],
+      "shapeHints": [
+        "payment methods with card, cash and voucher",
+        "a network response with success, empty and failure",
+        "a shape enum with area"
+      ]
+    },
+    "Intermediate": {
+      "learningGoal": "Use pattern matching with where clauses, tuple patterns and if case / guard case.",
+      "gotchas": [
+        "Binding with let inside a pattern vs outside produces different results with multiple cases",
+        "where applies to the pattern, not the whole switch",
+        "Pattern order matters; the first matching case wins"
+      ],
+      "goodSolutionShows": [
+        "case let with where for guarded patterns",
+        "if case and guard case for single-case checks",
+        "Tuple switch over two enums"
+      ],
+      "shapeHints": [
+        "pricing rules over order type and membership tier",
+        "a command parser returning an enum",
+        "state machine transitions from (state, event) tuples"
+      ]
+    },
+    "Advanced": {
+      "learningGoal": "Design recursive and indirect enums with pattern matching, and evolve enums safely.",
+      "gotchas": [
+        "indirect is required for recursive cases",
+        "@unknown default and frozen vs non-frozen enums",
+        "Equatable and Hashable synthesis fails with non-Equatable associated values"
+      ],
+      "goodSolutionShows": [
+        "indirect enum evaluating an expression tree",
+        "Exhaustive switch with nested patterns",
+        "Small transformation function (simplify) via pattern matching"
+      ],
+      "shapeHints": [
+        "an arithmetic expression evaluator and simplifier",
+        "a JSON-like value enum with a path lookup",
+        "a linked list or binary tree as indirect enum"
+      ]
+    }
+  }
+}

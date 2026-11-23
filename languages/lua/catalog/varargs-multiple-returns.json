@@ -1,0 +1,60 @@
+{
+  "id": "varargs-multiple-returns",
+  "name": "Varargs & multiple returns",
+  "seeds": {
+    "Beginner": {
+      "learningGoal": "Return and receive multiple values and accept variable arguments.",
+      "gotchas": [
+        "Extra values are discarded, missing ones are nil",
+        "A function call in the middle of an expression list is truncated to one value",
+        "# {...} fails when arguments include nil"
+      ],
+      "goodSolutionShows": [
+        "Multiple return values instead of a table where natural",
+        "select('#', ...) for the argument count",
+        "Correct handling of nil arguments"
+      ],
+      "shapeHints": [
+        "a divmod function",
+        "sum of any number of numbers",
+        "returning (value, err) pairs"
+      ]
+    },
+    "Intermediate": {
+      "learningGoal": "Pack, unpack and forward arguments faithfully.",
+      "gotchas": [
+        "table.unpack vs unpack differs between versions; the guide uses a local alias",
+        "Trailing nils are lost in {...} but kept by select('#')",
+        "A parenthesised call truncates to one value"
+      ],
+      "goodSolutionShows": [
+        "Packing with n field via select('#', ...)",
+        "Forwarding all arguments including nils",
+        "Wrapper preserving multiple returns"
+      ],
+      "shapeHints": [
+        "a wrapper that logs and forwards arguments",
+        "partial application of leading arguments",
+        "a safe-call wrapper returning ok plus all results"
+      ]
+    },
+    "Advanced": {
+      "learningGoal": "Build higher-order utilities that preserve arity and nils.",
+      "gotchas": [
+        "Returning f(...) in tail position preserves all results, while storing them does not",
+        "Appending to varargs needs repacking",
+        "Argument counts above stack limits fail for huge unpack"
+      ],
+      "goodSolutionShows": [
+        "Pack/unpack with explicit n",
+        "Tail-call forwarding",
+        "Tests with nil in the middle and the end"
+      ],
+      "shapeHints": [
+        "a memoise with multiple arguments",
+        "a pipe/compose accepting multiple values",
+        "a bind that preserves nil arguments"
+      ]
+    }
+  }
+}

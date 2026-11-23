@@ -1,0 +1,60 @@
+{
+  "id": "extension-scope-functions",
+  "name": "Extension & scope functions",
+  "seeds": {
+    "Beginner": {
+      "learningGoal": "Write extension functions and properties to add behaviour to existing types.",
+      "gotchas": [
+        "Extensions are resolved statically and cannot override members",
+        "A member with the same signature always wins over the extension",
+        "Extensions cannot access private members"
+      ],
+      "goodSolutionShows": [
+        "Extension functions with clear receivers",
+        "Extension properties for derived values",
+        "Nullable receiver extensions (String?.orEmpty style)"
+      ],
+      "shapeHints": [
+        "String.toSlug and String.truncate",
+        "Int.isEven or List<Int>.median",
+        "Money formatting extension"
+      ]
+    },
+    "Intermediate": {
+      "learningGoal": "Choose between let, run, with, apply and also appropriately.",
+      "gotchas": [
+        "apply and also return the receiver while let and run return the lambda result",
+        "it vs this: nested scopes shadow the receiver",
+        "Overusing scope functions hurts readability"
+      ],
+      "goodSolutionShows": [
+        "apply for object configuration, let for null handling, also for side effects",
+        "No deeply nested scope functions",
+        "Function chosen to match intent"
+      ],
+      "shapeHints": [
+        "building a request object with apply",
+        "transforming a nullable value with let",
+        "logging in a chain with also"
+      ]
+    },
+    "Advanced": {
+      "learningGoal": "Design small DSLs with lambdas with receivers and extension-based builders.",
+      "gotchas": [
+        "Without @DslMarker inner lambdas can call outer receivers' functions",
+        "Lambda with receiver is T.() -> Unit vs (T) -> Unit",
+        "Builders need to collect state and return an immutable result"
+      ],
+      "goodSolutionShows": [
+        "Lambda-with-receiver builder creating an immutable result",
+        "@DslMarker preventing scope leaks",
+        "Tests that assert the built structure"
+      ],
+      "shapeHints": [
+        "an HTML-like builder with nested elements",
+        "a request builder DSL",
+        "a test-fixture builder for a user with addresses"
+      ]
+    }
+  }
+}

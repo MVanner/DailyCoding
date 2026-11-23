@@ -1,0 +1,60 @@
+{
+  "id": "fixed-timestep-loop",
+  "name": "Fixed-timestep update loop",
+  "seeds": {
+    "Intermediate": {
+      "learningGoal": "Implement an accumulator-based fixed timestep driven by a passed-in frame dt.",
+      "gotchas": [
+        "Large frame dt causes the spiral of death unless clamped",
+        "The remainder must carry over to the next frame",
+        "Interpolation alpha is remainder / step"
+      ],
+      "goodSolutionShows": [
+        "Accumulator with while loop and clamp on max steps",
+        "Deterministic update count for given dts",
+        "No real clock; dt passed in"
+      ],
+      "shapeHints": [
+        "running physics at 60 Hz regardless of frame time",
+        "counting updates for a series of frame dts",
+        "computing the render interpolation alpha"
+      ]
+    },
+    "Advanced": {
+      "learningGoal": "Add interpolation, pausing and time scaling while keeping the simulation deterministic.",
+      "gotchas": [
+        "Floating point accumulation drift across many frames",
+        "Time scale applied to dt before accumulation, not to step size",
+        "Pausing must not accumulate time"
+      ],
+      "goodSolutionShows": [
+        "Interpolated state computed from previous and current",
+        "Slow-motion via scaled dt",
+        "Replay determinism proven by running the same dts twice"
+      ],
+      "shapeHints": [
+        "an interpolated position between two physics states",
+        "a loop supporting pause and slow-mo",
+        "a replay test feeding recorded frame dts"
+      ]
+    },
+    "Expert": {
+      "learningGoal": "Make simulation deterministic and rewindable: snapshots, seeded randomness and input recording.",
+      "gotchas": [
+        "Using math.random breaks determinism; pass a seeded generator function in",
+        "Table iteration order (pairs) is nondeterministic across runs",
+        "Snapshots must be deep copies"
+      ],
+      "goodSolutionShows": [
+        "Injected rng function and ordered iteration",
+        "Snapshot and restore",
+        "Equality of replayed state to original"
+      ],
+      "shapeHints": [
+        "a rewind buffer of snapshots",
+        "a simulation using an injected pseudo-random function",
+        "a recorded input replay matching the original"
+      ]
+    }
+  }
+}

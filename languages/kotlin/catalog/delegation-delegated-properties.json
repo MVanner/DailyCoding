@@ -1,0 +1,60 @@
+{
+  "id": "delegation-delegated-properties",
+  "name": "Delegation (by lazy, delegated properties)",
+  "seeds": {
+    "Beginner": {
+      "learningGoal": "Use by lazy and lateinit appropriately.",
+      "gotchas": [
+        "by lazy initialises once and caches, even when the initializer throws only the first time",
+        "lateinit access before initialisation throws",
+        "lazy default is synchronized"
+      ],
+      "goodSolutionShows": [
+        "by lazy for expensive read-only values with a counter proving single initialisation",
+        "No lateinit where lazy or constructor injection works",
+        "Clear test of laziness (not computed until first access)"
+      ],
+      "shapeHints": [
+        "a config loader computed on first use",
+        "an expensive parse cached",
+        "a derived property computed once"
+      ]
+    },
+    "Intermediate": {
+      "learningGoal": "Write class delegation with by and custom property delegates (ReadWriteProperty).",
+      "gotchas": [
+        "Delegated members are not overridden by the delegate if the class overrides them",
+        "getValue/setValue signatures must match exactly",
+        "Class delegation forwards only interface members"
+      ],
+      "goodSolutionShows": [
+        "Class delegation to compose behaviour without inheritance",
+        "A reusable delegate (observable, validated, clamped)",
+        "Observable.vetoable or custom equivalent"
+      ],
+      "shapeHints": [
+        "a validated-property delegate rejecting out-of-range values",
+        "a decorator delegating a repository interface and adding counting",
+        "an observable property delegate recording changes"
+      ]
+    },
+    "Advanced": {
+      "learningGoal": "Design delegate providers and map-backed or lifecycle-aware properties.",
+      "gotchas": [
+        "provideDelegate runs at property declaration time",
+        "Map delegates throw if the key is missing",
+        "Delegate instance is per property, not per class"
+      ],
+      "goodSolutionShows": [
+        "provideDelegate to validate at declaration",
+        "Map-backed properties for dynamic config",
+        "Thread-safety mode chosen explicitly"
+      ],
+      "shapeHints": [
+        "a delegate reading typed values from a map",
+        "a once-only property that throws on second set",
+        "a resettable lazy delegate"
+      ]
+    }
+  }
+}

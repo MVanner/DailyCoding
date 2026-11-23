@@ -1,0 +1,60 @@
+{
+  "id": "value-vs-reference",
+  "name": "Value vs reference types",
+  "seeds": {
+    "Beginner": {
+      "learningGoal": "Understand copy semantics of structs versus shared identity of classes.",
+      "gotchas": [
+        "Assigning a class instance shares it; mutating through one name is visible through the other",
+        "A let struct cannot be mutated, a let class reference can still mutate its properties",
+        "mutating methods are required on structs to change stored properties"
+      ],
+      "goodSolutionShows": [
+        "Struct for plain data and class only where identity matters",
+        "mutating funcs on a struct, with tests proving the original is unchanged after a copy",
+        "No unnecessary classes"
+      ],
+      "shapeHints": [
+        "a playlist model copied and edited independently",
+        "a shared counter class versus a value counter",
+        "a settings snapshot that must not change after being passed on"
+      ]
+    },
+    "Intermediate": {
+      "learningGoal": "Reason about aliasing and equality when value types contain reference types.",
+      "gotchas": [
+        "A struct containing a class property copies the reference, not the object",
+        "=== compares identity and only works on classes; == needs Equatable",
+        "Mutating a copy of an array of class instances still mutates the shared instances"
+      ],
+      "goodSolutionShows": [
+        "Deep-copy helper for a struct with a reference member",
+        "Identity checks with === only where they are meaningful",
+        "Tests that demonstrate which parts are shared after copying"
+      ],
+      "shapeHints": [
+        "a document struct holding a mutable style object",
+        "duplicating a shopping cart that holds item objects",
+        "detecting whether two views of a model share storage"
+      ]
+    },
+    "Advanced": {
+      "learningGoal": "Implement copy-on-write for a value type wrapping reference storage.",
+      "gotchas": [
+        "isKnownUniquelyReferenced must be called on an inout reference, and a stray extra reference makes it always false",
+        "Forgetting to copy before mutation makes copies share state",
+        "Copy-on-write must also apply to every mutating entry point, not just one"
+      ],
+      "goodSolutionShows": [
+        "Private storage class with isKnownUniquelyReferenced in each mutating method",
+        "Value semantics proven by mutating a copy and checking the original",
+        "Minimal copying when uniquely referenced, observable via a copy counter injected into the storage"
+      ],
+      "shapeHints": [
+        "a small buffer or text-rope type with append and subscript set",
+        "an immutable-looking Matrix wrapping a class storage",
+        "a history stack that shares storage until written"
+      ]
+    }
+  }
+}

@@ -154,4 +154,23 @@ public sealed class LanguageTests
         Assert.AreEqual("trx", csharp.Descriptor.Test.Format);
         Assert.HasCount(4, csharp.Descriptor.LevelHints);
     }
+
+    [TestMethod]
+    public void EveryLanguage_HasTemplateGuideAndCatalog()
+    {
+        var languages = LanguageLoader.Load(Path.Combine(RepoPaths.PluginRoot, "languages"));
+        CollectionAssert.IsSubsetOf(new[] { "csharp", "kotlin", "lua", "swift" }, languages.Select(l => l.Id).ToArray());
+
+        foreach (var language in languages)
+        {
+            Assert.IsTrue(Directory.Exists(language.TemplateDir), $"{language.Id} template");
+            Assert.IsTrue(File.Exists(language.GuidePath), $"{language.Id} guide");
+            var guide = File.ReadAllLines(language.GuidePath);
+            foreach (var heading in new[] { "## Layout", "## Stub", "## Tests", "## Reference and naive", "## Allowed libraries", "## Hint examples" })
+                Assert.IsTrue(guide.Contains(heading), $"{language.Id} guide lacks {heading}");
+            Assert.IsTrue(guide.Any(l => l.StartsWith("## Review: idiomatic ", StringComparison.Ordinal)), $"{language.Id} guide lacks review heading");
+            Assert.IsTrue(Directory.Exists(language.CatalogDir), $"{language.Id} catalog dir");
+            Assert.IsGreaterThanOrEqualTo(10, Directory.GetFiles(language.CatalogDir, "*.json").Length, $"{language.Id} catalog size");
+        }
+    }
 }

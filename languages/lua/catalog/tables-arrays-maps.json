@@ -1,0 +1,60 @@
+{
+  "id": "tables-arrays-maps",
+  "name": "Tables as arrays and maps",
+  "seeds": {
+    "Beginner": {
+      "learningGoal": "Use tables as arrays and maps, and iterate each correctly.",
+      "gotchas": [
+        "# is only reliable on proper sequences without nil holes",
+        "pairs order is unspecified, so tests must sort keys or avoid order dependence",
+        "table.insert(t, pos, v) with a bad pos errors, and table.remove on an empty table returns nil"
+      ],
+      "goodSolutionShows": [
+        "ipairs for arrays and pairs for maps",
+        "table.insert/remove used correctly",
+        "No reliance on pairs ordering"
+      ],
+      "shapeHints": [
+        "counting word frequencies into a map",
+        "removing duplicates while keeping order",
+        "inventory slots in a game as an array with holes handled"
+      ]
+    },
+    "Intermediate": {
+      "learningGoal": "Manipulate tables without aliasing bugs: copies, merges, sorting and sets.",
+      "gotchas": [
+        "Assigning a table copies the reference, not the contents",
+        "A shallow copy still shares nested tables",
+        "table.sort errors with 'invalid order function' for inconsistent comparators and is not stable"
+      ],
+      "goodSolutionShows": [
+        "Explicit shallow and deep copy helpers",
+        "table.sort with a comparator that breaks ties deterministically",
+        "Sets as tables of true values"
+      ],
+      "shapeHints": [
+        "merging default config into user config",
+        "sorting leaderboard entries by score then name",
+        "a set of entity ids with union and intersection"
+      ]
+    },
+    "Advanced": {
+      "learningGoal": "Implement deep operations on nested tables, including cycles and nil-safe lengths.",
+      "gotchas": [
+        "Cyclic references make naive deep copy loop forever",
+        "Tables containing nil values lose them in pairs and # becomes ambiguous",
+        "Using tables as keys compares by identity"
+      ],
+      "goodSolutionShows": [
+        "Deep copy with a seen-map handling cycles",
+        "Deep equality independent of key order",
+        "Explicit length tracking where nil holes exist"
+      ],
+      "shapeHints": [
+        "deep copy and deep equal of a scene or config tree",
+        "a sparse array with explicit n",
+        "a diff of two config tables"
+      ]
+    }
+  }
+}

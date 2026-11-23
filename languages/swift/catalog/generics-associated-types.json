@@ -1,0 +1,60 @@
+{
+  "id": "generics-associated-types",
+  "name": "Generics & associated types",
+  "seeds": {
+    "Beginner": {
+      "learningGoal": "Write generic functions and types with simple constraints.",
+      "gotchas": [
+        "T needs Equatable or Comparable before == or < compile",
+        "Generic type parameters are inferred, so a literal can pick an unexpected type",
+        "Generic functions are not the same as Any"
+      ],
+      "goodSolutionShows": [
+        "One generic function replacing several overloads",
+        "Constraints in a where clause",
+        "A small generic container (Stack or Queue) with value semantics"
+      ],
+      "shapeHints": [
+        "a generic Stack with push, pop and peek",
+        "a function that finds the maximum of any Comparable sequence",
+        "a generic Pair swap and map"
+      ]
+    },
+    "Intermediate": {
+      "learningGoal": "Use protocols with associated types and generic constraints between them.",
+      "gotchas": [
+        "Associated types must be pinned (where Item == Int) before they can be compared",
+        "A protocol with an associated type cannot be a plain existential without any",
+        "Type inference can fail where two sequences share an element type only by constraint"
+      ],
+      "goodSolutionShows": [
+        "Constraints with where Element == and associated type equality",
+        "A generic function over two Sequence types",
+        "Type-erased wrapper only if truly needed"
+      ],
+      "shapeHints": [
+        "a Repository protocol with an Entity associated type",
+        "merging two sequences of the same element type",
+        "a generic Cache keyed by Hashable"
+      ]
+    },
+    "Advanced": {
+      "learningGoal": "Build generic abstractions with primary associated types, conditional conformances and overload resolution.",
+      "gotchas": [
+        "Specialisation vs dynamic dispatch of generic requirement implementations",
+        "Overloads that differ only by constraint and the most specific one chosen",
+        "Associated type defaulting and inference from implementations"
+      ],
+      "goodSolutionShows": [
+        "A protocol with primary associated types used as some Collection<Int> or any Collection<Int>",
+        "Conditional conformance and clear constraints",
+        "Minimal API surface with documented constraints"
+      ],
+      "shapeHints": [
+        "a generic Pipeline with chained stages",
+        "a Result-like Either type with Functor operations",
+        "a lazy generic Paginated sequence"
+      ]
+    }
+  }
+}

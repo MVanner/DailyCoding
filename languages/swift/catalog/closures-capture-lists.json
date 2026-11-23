@@ -1,0 +1,60 @@
+{
+  "id": "closures-capture-lists",
+  "name": "Closures & capture lists",
+  "seeds": {
+    "Beginner": {
+      "learningGoal": "Write and pass closures, including trailing-closure syntax and returning closures.",
+      "gotchas": [
+        "A closure captures variables by reference, so later changes are visible",
+        "Escaping closures must be marked @escaping when stored",
+        "Shorthand $0 in nested closures is ambiguous"
+      ],
+      "goodSolutionShows": [
+        "Trailing closure syntax and concise bodies",
+        "A function returning a closure (makeCounter)",
+        "Closures as parameters rather than protocols for one method"
+      ],
+      "shapeHints": [
+        "makeCounter and makeMultiplier factories",
+        "a sort with a custom comparator",
+        "a function that applies a transformation N times"
+      ]
+    },
+    "Intermediate": {
+      "learningGoal": "Understand capture semantics and capture lists, and avoid retain cycles with weak and unowned.",
+      "gotchas": [
+        "Capture list [x] captures the value at creation time; no list captures the variable",
+        "weak self becomes optional and may be nil when the closure runs",
+        "unowned crashes if the instance has gone away"
+      ],
+      "goodSolutionShows": [
+        "[weak self] with guard let self",
+        "Capture lists to snapshot values",
+        "Test using a deinit counter or weak reference to prove the cycle is broken"
+      ],
+      "shapeHints": [
+        "a button handler that must not retain its owner",
+        "a debouncer storing a callback",
+        "an observable property with subscriber closures"
+      ]
+    },
+    "Advanced": {
+      "learningGoal": "Reason about ARC, escaping closure lifetimes and cycles through collections of closures.",
+      "gotchas": [
+        "A cycle through an array of closures stored on self",
+        "Lazy var closures capturing self",
+        "Capture of inout parameters is not allowed in escaping closures"
+      ],
+      "goodSolutionShows": [
+        "Break cycles with weak or unowned and prove deallocation",
+        "Unsubscribe tokens that release closures",
+        "Minimal closure storage with clear ownership"
+      ],
+      "shapeHints": [
+        "an event bus with subscription tokens",
+        "a task scheduler that holds completion handlers",
+        "a cache with eviction callbacks and weak owners"
+      ]
+    }
+  }
+}

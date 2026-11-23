@@ -1,0 +1,60 @@
+{
+  "id": "entity-component-system",
+  "name": "Entity component system",
+  "seeds": {
+    "Intermediate": {
+      "learningGoal": "Implement a minimal ECS: entities, component tables and systems querying them.",
+      "gotchas": [
+        "Deleting entities while iterating invalidates iteration",
+        "Entity ids should not be reused without a generation or handled explicitly",
+        "Component presence checks need nil, not truthiness, if false is a valid value"
+      ],
+      "goodSolutionShows": [
+        "Components stored per type keyed by entity id",
+        "Query function for entities having several components",
+        "Systems as plain functions taking world and dt"
+      ],
+      "shapeHints": [
+        "a movement system updating position from velocity with dt",
+        "a health system removing dead entities safely",
+        "querying entities with position and sprite"
+      ]
+    },
+    "Advanced": {
+      "learningGoal": "Add deferred entity destruction, component events and system ordering.",
+      "gotchas": [
+        "Destruction deferred to the end of the update",
+        "System order changes results; make it explicit",
+        "Components added during iteration may or may not be visited; define it"
+      ],
+      "goodSolutionShows": [
+        "Command buffer for create/destroy applied after systems",
+        "Explicit ordered system list",
+        "Deterministic iteration order via sorted ids"
+      ],
+      "shapeHints": [
+        "a damage system and a death system with ordered execution",
+        "a spawner creating entities mid-update",
+        "a world with add/remove component events"
+      ]
+    },
+    "Expert": {
+      "learningGoal": "Optimise and generalise an ECS: archetype-style grouping, sparse sets and cache-friendly iteration in LuaJIT.",
+      "gotchas": [
+        "Removing from an array by swapping with the last element changes order and indices",
+        "Hash-part tables are slower to iterate than arrays",
+        "Index maps must be updated on swap-remove"
+      ],
+      "goodSolutionShows": [
+        "Sparse set with dense arrays and swap-remove",
+        "Index maps kept consistent",
+        "Tests proving contents after many adds and removes"
+      ],
+      "shapeHints": [
+        "a sparse-set component store",
+        "archetype grouping by component signature",
+        "benchmark-free test that proves dense iteration yields all live entities"
+      ]
+    }
+  }
+}

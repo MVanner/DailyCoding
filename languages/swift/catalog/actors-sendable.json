@@ -1,0 +1,60 @@
+{
+  "id": "actors-sendable",
+  "name": "Actors & Sendable",
+  "seeds": {
+    "Intermediate": {
+      "learningGoal": "Protect shared mutable state with an actor and understand isolation.",
+      "gotchas": [
+        "Actor methods are async from outside and may interleave at every await (reentrancy)",
+        "nonisolated members cannot touch isolated state",
+        "State read before an await may be stale after it"
+      ],
+      "goodSolutionShows": [
+        "Actor owning its state with no locks",
+        "Check-then-act done without an intervening await",
+        "Tests that hammer the actor from many tasks and assert exact totals"
+      ],
+      "shapeHints": [
+        "a bank account actor with transfer",
+        "a request deduplicator or in-flight cache",
+        "a counter or rate limiter with an injected clock"
+      ]
+    },
+    "Advanced": {
+      "learningGoal": "Handle actor reentrancy and design Sendable value types.",
+      "gotchas": [
+        "Reentrancy: two callers can both pass a cache-miss check before either stores the result",
+        "Sendable classes need immutability or internal synchronisation",
+        "@unchecked Sendable disables the compiler check, so correctness is on you"
+      ],
+      "goodSolutionShows": [
+        "Storing an in-flight Task in the actor to dedupe concurrent loads",
+        "Immutable structs conforming to Sendable",
+        "Test with an injected loader counting invocations"
+      ],
+      "shapeHints": [
+        "an image or data cache deduplicating concurrent loads",
+        "a Sendable configuration snapshot",
+        "a job queue actor with bounded concurrency"
+      ]
+    },
+    "Expert": {
+      "learningGoal": "Design actor-based pipelines with isolation boundaries, global actors and ordering guarantees.",
+      "gotchas": [
+        "Actor mailbox ordering is not FIFO for async continuations",
+        "Passing non-Sendable values across actors",
+        "Global actor annotations leak to closures"
+      ],
+      "goodSolutionShows": [
+        "Clear isolation boundaries with Sendable messages",
+        "Preserving order with an explicit sequence number",
+        "Avoiding deadlock-prone awaiting patterns"
+      ],
+      "shapeHints": [
+        "an ordered event processor",
+        "a worker pool that returns results in submission order",
+        "an isolated registry with a snapshot API"
+      ]
+    }
+  }
+}
