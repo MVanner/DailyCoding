@@ -1,0 +1,41 @@
+{
+  "id": "csharp",
+  "name": "C#",
+  "stubDir": "Challenge",
+  "testDir": "Challenge.Tests",
+  "sourceExtensions": [".cs", ".csproj", ".slnx"],
+  "ignoreDirs": ["bin", "obj", "TestResults"],
+  "test": {
+    "commands": [
+      { "args": ["dotnet", "test", "--logger", "trx;LogFileName=result.trx", "--results-directory", "TestResults"] }
+    ],
+    "results": "TestResults/**/*.trx",
+    "format": "trx",
+    "env": {
+      "MSBUILDDISABLENODEREUSE": "1",
+      "DOTNET_CLI_USE_MSBUILD_SERVER": "0",
+      "UseSharedCompilation": "false",
+      "DOTNET_CLI_TELEMETRY_OPTOUT": "1",
+      "DOTNET_NOLOGO": "1"
+    }
+  },
+  "naiveForbidden": "\\bthrow\\b",
+  "requires": [
+    {
+      "command": "dotnet",
+      "args": ["--version"],
+      "minVersion": "10",
+      "installHint": "Install the .NET 10 SDK or newer from https://dotnet.microsoft.com/download"
+    }
+  ],
+  "ide": "Open Challenge.slnx in Rider.",
+  "runnerHint": "Install the .NET 10 SDK or newer from https://dotnet.microsoft.com/download",
+  "levelHints": {
+    "Beginner": "new to C# or to professional development: core syntax, collections, LINQ basics, async basics.",
+    "Intermediate": "comfortable day to day: sharper idioms, concurrency with async, generics, pattern matching.",
+    "Advanced": "design trade-offs, performance, concurrency control, API design.",
+    "Expert": "deep language and runtime topics: `Span<T>`, `ValueTask`, source generators, allocation-free code."
+  },
+  "catalogDir": "../../catalog",
+  "templateDir": "../../templates/challenge"
+}
